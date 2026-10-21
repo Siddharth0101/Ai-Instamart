@@ -1,0 +1,27 @@
+# Local credentials and environment configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.aws/
+
+# Dependencies and generated application output
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Local logs, data, and temporary recordings
+*.log
+*.db
+*.db-journal
+.local-data/
+.recordings/
+.oauth/
+
+# Editor/OS files
+.DS_Store
+.idea/

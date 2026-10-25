@@ -1,6 +1,6 @@
 # Product requirements
 
-Status: proposed MVP. This repository currently contains planning documentation, not an implemented ordering application.
+Status: implemented local pilot with remaining product targets. The runnable app includes conversation planning, party intake, Swiggy Food discovery, and guarded Instamart commerce. See [current implementation and boundaries](ASSISTANT.md); requirements below describe targets and do not by themselves establish shipped provider support.
 
 ## Product goal
 

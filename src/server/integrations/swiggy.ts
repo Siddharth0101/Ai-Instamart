@@ -8,6 +8,8 @@ import { CallToolResultSchema, ToolListChangedNotificationSchema, type Tool } fr
 import { z } from "zod";
 import { normalizeSwiggyCart, swiggyPaymentSelection } from "./swiggy-mapping";
 import { normalizeSwiggyCheckoutResult, SwiggyCheckoutInputSchema, type SwiggyCheckoutInput, type SwiggyCheckoutResult } from "./swiggy-checkout";
+import { FoodReadArguments, FoodReadResponseSchemas, type FoodReadTool } from "./food-schemas";
+import { FoodOrderingArguments, FoodOrderingResponses, type FoodOrderingTool } from "./food-ordering-schemas";
 import {
   SwiggyAddressesSchema, SwiggyCartSchema, SwiggySearchSchema, SwiggyPaymentOptionsSchema,
   SwiggyReadArguments, parseSwiggyToolResult, type SwiggyReadTool, type SwiggyCart
@@ -43,7 +45,7 @@ export class SwiggyGatewayError extends Error {
 export class CheckoutReviewRequiredError extends SwiggyGatewayError {
   constructor(){super("CHECKOUT_REVIEW_REQUIRED","Checkout requires a fresh confirmed order review.");}
 }
-type Options={ownerId:string;callbackUrl:string;storage:SwiggyOAuthStorage;baseUrl?:string;fetch?:typeof fetch;now?:()=>number};
+export type SwiggyGatewayOptions={ownerId:string;callbackUrl:string;storage:SwiggyOAuthStorage;baseUrl?:string;fetch?:typeof fetch;now?:()=>number;service?:"instamart"|"food"};
 type ConnectionGuard={epoch:string|undefined;accessToken:string;refreshToken:string|undefined;leaseId:string};
 type ConnectedClient={client:Client;identity:string;tools?:{value:Tool[];expiresAt:number};idleTimer?:ReturnType<typeof setTimeout>};
 const variantIdentifiers=z.tuple([z.string().min(1).max(300),z.string().min(1).max(300)]);
@@ -137,10 +139,11 @@ export class SwiggyGateway {
   // There is no global user-data/token cache. Reuse is bounded by an idle timeout.
   private connection?:ConnectedClient;
   private operations:Promise<void>=Promise.resolve();
-  constructor(private readonly options:Options){
-    this.endpoint=new URL(options.baseUrl??"https://mcp.swiggy.com/im");
-    if(this.endpoint.protocol!=="https:"||!["mcp.swiggy.com","mcp-staging.swiggy.com"].includes(this.endpoint.hostname)||this.endpoint.port||this.endpoint.pathname!=="/im"||this.endpoint.search||this.endpoint.hash||this.endpoint.username||this.endpoint.password){
-      throw new SwiggyGatewayError("INVALID_PROVIDER_URL","Use the assigned official Swiggy Instamart MCP endpoint.");
+  constructor(private readonly options:SwiggyGatewayOptions){
+    const path=options.service==="food"?"/food":"/im";
+    this.endpoint=new URL(options.baseUrl??`https://mcp.swiggy.com${path}`);
+    if(this.endpoint.protocol!=="https:"||!["mcp.swiggy.com","mcp-staging.swiggy.com"].includes(this.endpoint.hostname)||this.endpoint.port||this.endpoint.pathname!==path||this.endpoint.search||this.endpoint.hash||this.endpoint.username||this.endpoint.password){
+      throw new SwiggyGatewayError("INVALID_PROVIDER_URL",`Use the assigned official Swiggy ${options.service==="food"?"Food":"Instamart"} MCP endpoint.`);
     }
     this.callback=new URL(options.callbackUrl);
     if((this.callback.protocol!=="https:"&&!(this.callback.protocol==="http:"&&["localhost","127.0.0.1","[::1]"].includes(this.callback.hostname)))||this.callback.username||this.callback.password||this.callback.search||this.callback.hash){
@@ -257,7 +260,7 @@ export class SwiggyGateway {
   async readiness():Promise<{connected:boolean;mappingVerified:boolean;reason:string}>{
     const state=await this.read();
     const connected=Boolean(state.tokens?.access_token&&(!state.refreshLease||state.refreshLease.expiresAt>this.now())&&(!state.tokensExpiresAt||state.tokensExpiresAt>this.now()||state.tokens.refresh_token));
-    return {connected,mappingVerified:true,reason:connected?"Swiggy is connected. Product variants and complete cart bills are validated before shopping and checkout.":"Connect your own Swiggy account to discover available tools."};
+    return {connected,mappingVerified:true,reason:connected?(this.options.service==="food"?"Swiggy Food is connected for restaurant discovery, cart review and confirmed checkout.":"Swiggy is connected. Product variants and complete cart bills are validated before shopping and checkout."):"Connect your own Swiggy account to discover available tools."};
   }
   private async connectedState():Promise<OAuthState>{
     // Persisted ownership serializes rotating refresh tokens across gateway objects
@@ -316,7 +319,7 @@ export class SwiggyGateway {
       if(!this.connection){
         // No authProvider here: a 401 must never transparently replay a mutation.
         const transport=new StreamableHTTPClientTransport(this.endpoint,{fetch:this.request,requestInit:{headers:{Authorization:`Bearer ${state.tokens!.access_token}`}},reconnectionOptions:{maxRetries:0,initialReconnectionDelay:1000,maxReconnectionDelay:1000,reconnectionDelayGrowFactor:1}});
-        const client=new Client({name:"saycart-instamart",version:"0.1.0"});
+        const client=new Client({name:this.options.service==="food"?"saycart-food":"saycart-instamart",version:"0.1.0"});
         const connection:ConnectedClient={client,identity};this.connection=connection;
         client.setNotificationHandler(ToolListChangedNotificationSchema,()=>{connection.tools=undefined;});
         await client.connect(transport);
@@ -341,9 +344,12 @@ export class SwiggyGateway {
         };
         if(this.options.storage.update)await this.options.storage.update(invalidate);
         else await this.options.storage.write(invalidate(await this.options.storage.read()));
-        throw new SwiggyGatewayError("SWIGGY_RECONNECT_REQUIRED","Reconnect your Swiggy account. A submitted edit may already have reached Swiggy; refresh your bag before another edit.");
+        throw new SwiggyGatewayError("SWIGGY_RECONNECT_REQUIRED",this.options.service==="food"?"Reconnect your Swiggy Food account to continue discovery.":"Reconnect your Swiggy account. A submitted edit may already have reached Swiggy; refresh your bag before another edit.");
       }
-      throw new SwiggyGatewayError("SWIGGY_REQUEST_FAILED","Swiggy did not return a verified response. Refresh the cart before another edit; a submitted edit may already have reached Swiggy.");
+      // The customer sees a short message; the server log keeps what actually failed (an unexpected reply shape, a rejected argument, a network error).
+      const issues=(error as {schemaIssues?:unknown})?.schemaIssues;
+      console.error(`[swiggy:${this.options.service}] request failed: ${error instanceof Error?`${error.name}: ${error.message}`:String(error)}${issues?` ${JSON.stringify(issues)}`:""}`.slice(0,2000));
+      throw new SwiggyGatewayError("SWIGGY_REQUEST_FAILED",this.options.service==="food"?"Swiggy Food could not complete discovery. Try searching again.":"Swiggy did not return a verified response. Refresh the cart before another edit; a submitted edit may already have reached Swiggy.");
     }finally{
       const connection=this.connection;
       if(connection){connection.idleTimer=setTimeout(()=>{if(this.connection===connection)void this.close();},20_000);connection.idleTimer.unref();}
@@ -363,10 +369,11 @@ export class SwiggyGateway {
     throw new SwiggyGatewayError("SWIGGY_SCHEMA_LIMIT","Swiggy tool discovery exceeded its page limit.");
   }
   async discoverTools():Promise<Array<{name:string;inputSchema:Tool["inputSchema"];outputSchema?:Tool["outputSchema"]}>>{
-    return this.withClient(async client=>structuredClone((await this.tools(client)).filter(tool=>Object.hasOwn(SwiggyReadArguments,tool.name)||tool.name==="update_cart"||tool.name==="clear_cart").map(({name,inputSchema,outputSchema})=>({name,inputSchema,outputSchema}))));
+    return this.withClient(async client=>structuredClone((await this.tools(client)).filter(tool=>this.options.service==="food"?Object.hasOwn(FoodReadArguments,tool.name):Object.hasOwn(SwiggyReadArguments,tool.name)||tool.name==="update_cart"||tool.name==="clear_cart").map(({name,inputSchema,outputSchema})=>({name,inputSchema,outputSchema}))));
   }
   /** Owner-protected troubleshooting only. Makes one read, returning shapes, never PII. */
   async diagnoseConnection(){
+    this.requireService("instamart");
     return this.withClient(async client=>{
       const discovered=await this.tools(client);
       const tools=discovered.map(tool=>({name:tool.name,input:diagnosticInput(tool.inputSchema),hasOutputSchema:Boolean(tool.outputSchema)}));
@@ -375,6 +382,7 @@ export class SwiggyGateway {
   }
   /** A closed read allowlist, never an arbitrary MCP tool proxy or cart writer. */
   async diagnoseRead(input:SwiggyDiagnosticRead){
+    this.requireService("instamart");
     const parsed=diagnosticReadInput.parse(input);
     return this.withClient(async client=>this.diagnosticProbe(client,await this.tools(client),parsed.name,parsed.args));
   }
@@ -402,6 +410,7 @@ export class SwiggyGateway {
     catch{throw new SwiggyGatewayError("SWIGGY_INPUT_SCHEMA_MISMATCH","The current Swiggy tool schema differs from this adapter. Update the verified mapping before calling it.");}
   }
   private async call<T>(name:SwiggyReadTool,args:unknown,schema:z.ZodType<T>):Promise<T>{
+    this.requireService("instamart");
     const parsed=SwiggyReadArguments[name].parse(args) as Record<string,unknown>;
     return this.withClient(async client=>{
       const tools=await this.tools(client);this.validateLiveArguments(tools.find(tool=>tool.name===name),parsed);
@@ -411,8 +420,51 @@ export class SwiggyGateway {
   }
   getAddresses(args:z.infer<typeof SwiggyReadArguments.get_addresses>={}){return this.call("get_addresses",args,SwiggyAddressesSchema);}
   searchProducts(args:z.infer<typeof SwiggyReadArguments.search_products>){return this.call("search_products",args,SwiggySearchSchema);}
+  private requireService(service:"instamart"|"food"):void{
+    if((this.options.service??"instamart")!==service)throw new SwiggyGatewayError("SWIGGY_CAPABILITY_UNAVAILABLE","This operation is not available on the connected Swiggy service.");
+  }
+  /** Closed Food discovery allowlist. No cart/payment/order tool can enter here. */
+  private async callFood<T>(name:FoodReadTool,args:unknown,schema:z.ZodType<T>,signal?:AbortSignal):Promise<T>{
+    this.requireService("food");
+    signal?.throwIfAborted();
+    const parsed=FoodReadArguments[name].parse(args) as Record<string,unknown>;
+    return this.withClient(async client=>{
+      signal?.throwIfAborted();
+      const tools=await this.tools(client);this.validateLiveArguments(tools.find(tool=>tool.name===name),parsed);
+      signal?.throwIfAborted();
+      try{return parseSwiggyToolResult(await client.callTool({name,arguments:parsed},undefined,{timeout:25_000,signal}),schema);}
+      catch(error){
+        if(error instanceof Error&&error.message.startsWith("SWIGGY_"))throw new SwiggyGatewayError(error.message,"Swiggy Food returned an unsuccessful or unrecognized response. Try again; no sample dishes were substituted.");
+        throw error;
+      }
+    });
+  }
+  getFoodAddresses(args:z.infer<typeof FoodReadArguments.get_addresses>={},signal?:AbortSignal){return this.callFood("get_addresses",args,FoodReadResponseSchemas.get_addresses,signal);}
+  searchFoodMenu(args:z.infer<typeof FoodReadArguments.search_menu>,signal?:AbortSignal){return this.callFood("search_menu",args,FoodReadResponseSchemas.search_menu,signal);}
+  searchFoodRestaurants(args:z.infer<typeof FoodReadArguments.search_restaurants>,signal?:AbortSignal){return this.callFood("search_restaurants",args,FoodReadResponseSchemas.search_restaurants,signal);}
+  getFoodRestaurantMenu(args:z.infer<typeof FoodReadArguments.get_restaurant_menu>,signal?:AbortSignal){return this.callFood("get_restaurant_menu",args,FoodReadResponseSchemas.get_restaurant_menu,signal);}
+  /** Closed ordering allowlist. There is no automatic retry, including after a 401. */
+  async foodOrdering<T extends FoodOrderingTool>(name:T,args:z.input<(typeof FoodOrderingArguments)[T]>,signal?:AbortSignal):Promise<z.output<(typeof FoodOrderingResponses)[T]>>{
+    this.requireService("food");signal?.throwIfAborted();
+    const parsed=FoodOrderingArguments[name].parse(args) as Record<string,unknown>;
+    let dispatched=false;
+    try{return await this.withClient(async client=>{
+      signal?.throwIfAborted();
+      this.validateLiveArguments((await this.tools(client)).find(tool=>tool.name===name),parsed);
+      signal?.throwIfAborted();dispatched=true;
+      const raw=await client.callTool({name,arguments:parsed},undefined,{timeout:25_000,signal});
+      return parseSwiggyToolResult(raw,FoodOrderingResponses[name] as unknown as z.ZodType<z.output<(typeof FoodOrderingResponses)[T]>>);
+    });}catch(error){
+      // Lost responses and malformed success payloads after dispatch cannot be
+      // retried as a new order. The application persists this unresolved gate.
+      if(name==="place_food_order"&&dispatched)throw new SwiggyGatewayError("FOOD_ORDER_OUTCOME_UNKNOWN","Swiggy did not return a verified order result. Check order status before trying another order.");
+      console.error(`[swiggy:food] ${name} failed`);
+      throw error;
+    }
+  }
   /** Read-only developer evidence: catalog prices only, never saved addresses/tokens. */
   async inspectProductPrices(args:z.infer<typeof SwiggyReadArguments.search_products>){
+    this.requireService("instamart");
     const parsed=SwiggyReadArguments.search_products.parse(args);
     return this.withClient(async client=>{
       const tools=await this.tools(client);this.validateLiveArguments(tools.find(tool=>tool.name==="search_products"),parsed);
@@ -426,6 +478,7 @@ export class SwiggyGateway {
 
   /** Root must serialize owner edits. The compare cannot lock Swiggy's external app. */
   async setCartQuantity(input:{addressId:string;skuId:string;spinId:string;quantity:number;expectedFingerprint:string}):Promise<SwiggyCart>{
+    this.requireService("instamart");
     const args=quantityInput.parse(input);
     return this.withClient(async client=>{
       const tools=await this.tools(client);
@@ -459,6 +512,7 @@ export class SwiggyGateway {
 
   /** Called only after the application durably claims an explicitly confirmed quote. */
   async checkout(input?:SwiggyCheckoutInput):Promise<SwiggyCheckoutResult>{
+    this.requireService("instamart");
     if(!input)throw new CheckoutReviewRequiredError();
     let submitted=false;
     try{

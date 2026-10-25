@@ -67,3 +67,21 @@ test("catalog mapping preserves image and MRP while respecting each pack's quant
   variant.maxQuantity=200;variant.imageUrl="https://untrusted.example/image.jpg";[product]=normalizeSwiggyProducts(raw);assert.equal(product.maxQuantity,99);assert.equal(product.available,true);assert.equal(product.imageUrl,undefined);
   delete variant.maxQuantity;[product]=normalizeSwiggyProducts(raw);assert.equal(product.maxQuantity,undefined);
 });
+
+test("Instamart offers cash and Swiggy Money but not UPI apps, which SayCart cannot complete for Instamart yet",()=>{
+  const options={allMethods:[{id:"Cash",displayName:"Pay on delivery",enabled:true},{id:"SWIGGY_MONEY",displayName:"Swiggy Money",enabled:true},{id:"phonepe",displayName:"PhonePe UPI",enabled:true,groupName:"UPI",kind:"intent"},{id:"gpay",displayName:"Google Pay",enabled:true,groupName:"UPI",kind:"intent"}],cod:{id:"Cash",displayName:"Pay on delivery",available:true},swiggyMoney:{id:"SWIGGY_MONEY",displayName:"Swiggy Money",available:true},placeOrderToolName:"checkout"} as Parameters<typeof normalizeSwiggyPayments>[0];
+  assert.deepEqual(normalizeSwiggyPayments(options).map(payment=>payment.label),["Pay on delivery","Swiggy Money"]);
+  assert.throws(()=>swiggyPaymentSelection(options,"phonepe"));
+});
+
+test("an Instamart bill rounded to the rupee is accepted with the rounding in the fees; a larger gap is still refused",()=>{
+  const fixture=fixtureService();fixture.account("test").quantities.set("milk",1);const raw=fixture.cart("test");
+  const items=raw.billBreakdown.lineItems.find(line=>/item/i.test(line.label))!.value,itemsMinor=swiggyRupeesToMinor(items);
+  // Swiggy's real shape: ₹47.40 of charges with no round-off line, and the amount to pay rounded down to the rupee.
+  raw.billBreakdown.lineItems=[{label:"Item Total",value:items},{label:"Handling Fee",value:"₹12.00"},{label:"Delivery Partner Fee",value:"FREE"},{label:"High Demand Surge Fee",value:"₹35.40"}];
+  raw.billBreakdown.toPay.value=raw.cartTotalAmount=`₹${(itemsMinor+4700)/100}`;
+  const totals=normalizeSwiggyCart(raw,1).totals;
+  assert.deepEqual({fees:totals.feesMinor,total:totals.totalMinor},{fees:4700,total:itemsMinor+4700});
+  raw.billBreakdown.toPay.value=raw.cartTotalAmount=`₹${(itemsMinor+4500)/100}`;
+  assert.throws(()=>normalizeSwiggyCart(raw,1),/does not reconcile/);
+});

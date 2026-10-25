@@ -1,5 +1,6 @@
 import { createShoppingService, type ShoppingProvider } from "../../src/server/shopping";
-import { runTurn } from "../../src/server/agent";
+import type { SessionView } from "../../src/lib/contracts";
+import { normalizeSwiggyProducts } from "../../src/server/integrations/swiggy-mapping";
 import { swiggyCartFingerprint, swiggyVariantId } from "../../src/server/integrations/swiggy";
 import type { SwiggyCart } from "../../src/server/integrations/swiggy-schemas";
 
@@ -22,6 +23,18 @@ export function fixtureService(){
     setCartQuantity:async input=>{const current=account(owner);if(swiggyCartFingerprint(cart(owner))!==input.expectedFingerprint)throw new Error("CART_CHANGED");current.writes++;const key=input.skuId.replace(/^sku-/,"");if(input.quantity)current.quantities.set(key,input.quantity);else current.quantities.delete(key);current.addressId=input.addressId;return cart(owner);},
     checkout:async()=>{account(owner).checkouts++;return {state:"complete",message:"Fixture order accepted",results:[{orderId:"fixture-order",state:"complete",message:"Test transport"}]};},
   });
-  const service=createShoppingService({provider,runTurn:(input,deps)=>runTurn({...input,mode:"demo"},deps)});
+  const service=createShoppingService({provider});
   return {service,account,cart,provider};
 }
+
+/** The assistant owns discovery; the commerce service only remembers its validated results. */
+export async function rememberSearch(service:ReturnType<typeof createShoppingService>, provider:(owner:string)=>ShoppingProvider, owner:string, view:SessionView, query:string) {
+  assertAddress(view.addressId);
+  const connection=provider(owner);
+  try {
+    const products=normalizeSwiggyProducts(await connection.searchProducts({addressId:view.addressId,query}));
+    await service.rememberProducts(owner,view.sessionId,view.addressId,products);
+    return service.getView(owner,view.sessionId);
+  } finally { await connection.close(); }
+}
+function assertAddress(address:string|null):asserts address is string {if(!address)throw new Error("Fixture search requires an explicitly selected address");}

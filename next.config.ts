@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 import { localPageRedirects } from "./src/server/origin";
 const config: NextConfig = {
+  // A second local server (for example the voice fixture) needs its own build directory.
+  ...(process.env.SAYCART_DIST_DIR ? { distDir: process.env.SAYCART_DIST_DIR } : {}),
   serverExternalPackages: ["@electric-sql/pglite"],
   // Config redirects preserve the absolute loopback destination. Proxy redirects
   // normalize both hosts to localhost and can become a relative redirect loop.

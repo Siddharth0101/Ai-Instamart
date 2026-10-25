@@ -3,10 +3,10 @@
 ## Implementation decisions · 20 October 2026
 
 - **Zod 4** owns structured input/output, TypeScript types, and Groq JSON Schema. Schema validity is followed by server semantic checks.
-- **One orchestration runtime:** LangGraph state nodes, LangChain tool wrappers, official Groq SDK, and official MCP SDK. Google ADK is deferred to avoid overlapping workflow ownership. Development shell/glob/grep/read/write tools are not shopping-agent permissions.
+- **One orchestration runtime (24 October 2026):** the voice agent uses the Vercel AI SDK `ToolLoopAgent` with Groq models and the official MCP SDK for Swiggy. It replaced the earlier LangGraph workflow, regex command grammars, planner and reply composer, so new phrasings need no new grammar. Development shell/glob/grep/read/write tools are not shopping-agent permissions.
 - **Local PGlite persistence:** embedded PostgreSQL makes the pilot runnable without a daemon. It replaces the earlier Prisma proposal for this build. Shared PostgreSQL, production authentication and migrations remain a release gate.
 - **Live-only commerce:** the UI and API use connected Swiggy data. Synthetic providers are confined to tests. Direct catalog search and deterministic cart/review controls do not use LLM tokens; the assistant uses configured Groq reasoning.
-- **Checkout human confirmation:** this implementation uses explicit UI review/confirm, immutable quotes and durable business-state gates. Voice confirmation and persistent LangGraph interrupts/checkpoint resume are not shipped.
+- **Checkout human confirmation:** immutable two-minute quotes and durable business-state gates. A spoken order needs a reviewed total that the customer heard in an earlier reply plus their own confirming words, checked in code; tapping **Place order** on the reviewed total is the other path. The model alone can never place an order.
 - **Observed boundary:** official OAuth, live catalog/cart/bill/payment mapping and explicit review are implemented. Earlier account checks reached review without placing an order. Purchase completion, recovery and final edits remain unverified; testing stopped at the user’s request.
 
 

@@ -4,7 +4,9 @@ import { AppError } from "./errors";
 import { read, transaction, write } from "./store";
 import { SwiggyGateway, swiggyCartAddressMatches, type OAuthState } from "./integrations/swiggy";
 import { appOrigin } from "./origin";
-import { createShoppingService, type ShoppingRuntime } from "./shopping";
+import { createShoppingService, type ShoppingProvider, type ShoppingRuntime } from "./shopping";
+import { fixtureEnabled } from "./integrations/food-fixture";
+import { instamartFixture } from "./integrations/instamart-fixture";
 import { normalizeSwiggyCart } from "./integrations/swiggy-mapping";
 export { createShoppingService, type Owner, type CheckoutDispatcher } from "./shopping";
 
@@ -18,9 +20,11 @@ export function gateway(ownerId:string) {
 // PGlite runs in one process. Retain owner ordering and cancellation across Next
 // module reloads so a refreshed module cannot mistake running work for an orphan.
 const globals=globalThis as typeof globalThis & {saycartShoppingRuntime?:ShoppingRuntime};
-const runtime=globals.saycartShoppingRuntime??={controllers:new Map(),ownerQueues:new Map()};
-const shopping=createShoppingService({provider:gateway,runtime});
-export const {createOwner,getOwner,getView,bootstrap,startSession,updateCart,selectAddress,selectPayment,searchCatalog,conversation,stopTurn,createQuote,confirmQuote,getAttempt,getCurrentAttempt,speechText}=shopping;
+const runtime=globals.saycartShoppingRuntime??={ownerQueues:new Map()};
+/** Instamart for one owner: the live account, or the development store. */
+export const instamartProvider=(ownerId:string):ShoppingProvider=>fixtureEnabled()?instamartFixture(ownerId):gateway(ownerId);
+const shopping=createShoppingService({provider:instamartProvider,runtime});
+export const {createOwner,getOwner,getView,bootstrap,startSession,updateCart,selectAddress,selectPayment,createQuote,confirmQuote,getAttempt,getCurrentAttempt,rememberProducts}=shopping;
 async function session(ownerId:string,sessionId:string){const s=await read<SessionView>(ownerId,"session",sessionId);if(!s)throw new AppError("NOT_FOUND","This session could not be found.",404);return s;}
 /** Live, read-only acceptance check. Never calls a cart/order mutation. */
 export async function verifySwiggyConnection(ownerId:string) {

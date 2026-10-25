@@ -42,24 +42,18 @@ export const QuoteSchema = z.strictObject({
 export const AttemptSchema = z.strictObject({
   id:z.string(),state:z.enum(["submitted","payment_pending","outcome_unknown","failed","complete"]),message:z.string(),
   results:z.array(z.strictObject({orderId:z.string(),state:z.string(),message:z.string()})),
-  paymentUrl:z.string().url().optional()
+  paymentUrl:z.string().url().optional(),
+  // A UPI order waiting for payment: the upi:// link (shown as a QR, or opened on a phone) and when the payment window closes.
+  upiUrl:z.string().max(4000).optional(),payBy:z.string().optional()
 });
 export const BootstrapSchema = z.object({sessionId:z.string().nullable(),mode:ModeSchema.nullable(),connected:z.boolean(),csrfToken:z.string(),capabilities:z.object({groq:z.boolean(),realtimeStt:z.boolean().default(false),tts:z.boolean()})});
-export const RealtimeTokenRequestSchema = z.strictObject({sessionId:z.string().min(1).max(200)});
 export const RealtimeTokenSchema = z.object({token:z.string().min(1).max(8192)});
 export const SessionRequestSchema = z.strictObject({mode:ModeSchema});
-export const TurnRequestSchema = z.strictObject({sessionId:z.string().min(1),text:z.string().trim().min(1).max(2000),expectedTurnVersion:z.number().int().nonnegative(),expectedCartRevision:z.number().int().nonnegative(),displayedProductIds:z.array(z.string().min(1).max(300)).max(20).optional()});
-export const SearchRequestSchema = z.strictObject({sessionId:z.string().min(1),query:z.string().trim().min(1).max(200),expectedTurnVersion:z.number().int().nonnegative(),expectedCartRevision:z.number().int().nonnegative(),loadMore:z.boolean().optional()});
-export const CartRequestSchema = z.strictObject({sessionId:z.string().min(1),productId:z.string().min(1).max(300),quantity:z.number().int().min(0).max(99),expectedCartRevision:z.number().int().nonnegative()});
 export const AddressRequestSchema = z.strictObject({sessionId:z.string().min(1),addressId:z.string().min(1)});
 export const PaymentRequestSchema = z.strictObject({sessionId:z.string().min(1),paymentMethodId:z.string().min(1)});
 export const QuoteRequestSchema = z.strictObject({sessionId:z.string().min(1),expectedCartRevision:z.number().int().nonnegative()});
 export const ConfirmRequestSchema = z.strictObject({quoteId:z.string().min(1),challenge:z.string().min(1)});
-export const SpeechRequestSchema = z.strictObject({sessionId:z.string().min(1),assistantMessageId:z.string().min(1),expectedTurnVersion:z.number().int().nonnegative()});
-export const StopRequestSchema = z.strictObject({sessionId:z.string().min(1),expectedTurnVersion:z.number().int().nonnegative()});
 export type Mode=z.infer<typeof ModeSchema>;
-export type TurnRequest=z.infer<typeof TurnRequestSchema>;
-export type SearchRequest=z.infer<typeof SearchRequestSchema>;
 export type Product=z.infer<typeof ProductSchema>;
 export type Cart=z.infer<typeof CartSchema>;
 export type Address=z.infer<typeof AddressSchema>;

@@ -1,5 +1,7 @@
 # Source review · 21 October 2026
 
+> Historical: this review predates the 24 October 2026 move to a voice-only app with an AI SDK agent. The storefront, inline dictation and LangGraph code it describes have since been removed; see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 This review covered the storefront and inline dictation lifecycle, shared contracts, Groq/LangGraph intent handling, application routes, shopping persistence and the Swiggy MCP adapter. It used source inspection only. No tests, typechecks, builds, benchmarks, app-browser checks or live speech/shopping calls were run, as requested.
 
 ## Changes from the review

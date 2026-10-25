@@ -2,7 +2,7 @@
 
 ## Current implementation status · 20 October 2026
 
-**Implemented:** pinned Next.js/TypeScript scaffold; shared Zod contracts; Groq structured intent; LangGraph/LangChain workflow with hooks; live all-category search with pagination, product cards, guarded cart and full bill review/confirmation; embedded PostgreSQL state/idempotency/attempt gates; inline ElevenLabs dictation with single-use tokens and partial/final text, plus optional Kokoro spoken replies; official MCP SDK OAuth/discovery and published read schemas; automated tests and local HTTP smoke scripts.
+**Implemented:** pinned Next.js/TypeScript scaffold; shared Zod contracts; a voice-only interface with an AI SDK agent on Groq that acts through tools; Swiggy Food addresses, restaurants, menus, cart sync, payment, reviewed-total ordering and tracking (exercised with the development fixture); Instamart search and bag preparation; embedded PostgreSQL state/idempotency/attempt gates; ElevenLabs realtime recognition and spoken replies; official MCP SDK OAuth/discovery; automated tests, live agent evals and local HTTP smoke scripts.
 
 **Outstanding release work:** live purchase/payment completion and partial-order recovery, production sign-in/shared database/retention, comparative speech evaluation and browser microphone/audio acceptance. Earlier real account checks covered search, cart, full bill, payment selection and review without a purchase. Final improvements remain unverified after testing stopped at the user’s request. Voice confirmation and continuous conversation remain later work.
 

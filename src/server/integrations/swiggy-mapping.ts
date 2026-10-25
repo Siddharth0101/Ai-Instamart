@@ -99,8 +99,16 @@ export function normalizeSwiggyCart(raw:SwiggyCart,revision:number):Cart {
     }
   }
   if(lines.length&&!sawItems)return mappingError("SWIGGY_BILL_UNVERIFIED","Swiggy did not return a verifiable item subtotal. Refresh the cart before reviewing it.");
-  const feesMinor=checkedSum(fees),discountMinor=checkedSum(discounts);
-  if(checkedSum([itemsMinor,feesMinor,-discountMinor])!==totalMinor)return mappingError("SWIGGY_BILL_UNVERIFIED","Swiggy's bill does not reconcile with its payable total. Refresh the cart before reviewing it.");
+  let feesMinor=checkedSum(fees),discountMinor=checkedSum(discounts);
+  // Swiggy rounds the amount to pay to the rupee without a round-off line (₹242.40 of charges, ₹242 to pay). A whole-rupee
+  // total less than ₹1 from the bill is that rounding, folded into the fees so the totals shown add up; anything else is refused.
+  const rounding=totalMinor-checkedSum([itemsMinor,feesMinor,-discountMinor]);
+  if(rounding!==0&&!(Math.abs(rounding)<100&&totalMinor%100===0)){
+    // The bill's own labels and amounts (no personal data), so a mismatch with Swiggy's real bill can be diagnosed.
+    console.error(`[swiggy:instamart] bill does not add up: items ${itemsMinor}, fees ${feesMinor}, discounts ${discountMinor}, to pay ${totalMinor}; lines ${JSON.stringify(raw.billBreakdown.lineItems.map(line=>[line.label,line.value]))}`);
+    return mappingError("SWIGGY_BILL_UNVERIFIED","Swiggy's bill does not reconcile with its payable total. Refresh the cart before reviewing it.");
+  }
+  if(rounding>0||feesMinor+rounding>=0)feesMinor+=rounding;else discountMinor-=rounding;
   return CartSchema.parse({revision,lines,totals:{itemsMinor,feesMinor,discountMinor,totalMinor,currency:"INR"},bill:structuredClone(raw.billBreakdown)});
 }
 
@@ -118,14 +126,10 @@ function paymentSelections(options:SwiggyPaymentOptions):Map<string,{label:strin
       if(!options.swiggyMoney.available)continue;
       selection={paymentMethod:"SwiggyPay"};
     }else{
-      const mobile=options.platforms?.mobile?.methods.find(choice=>choice.id===method.id&&choice.enabled!==false);
-      const desktop=options.platforms?.desktop?.methods.find(choice=>choice.id===method.id&&choice.enabled!==false);
-      const group=method.groupName??(mobile?options.platforms?.mobile?.groupName:desktop?options.platforms?.desktop?.groupName:undefined);
-      const kind=method.kind??mobile?.kind??desktop?.kind;
-      if(group!=="UPI")continue;
-      if(kind==="qr")continue; // Requires an explicit runtime QR instruction.
-      else if(kind==="intent"||mobile&&!desktop)selection={paymentMethod:group,intentApp:method.id};
-      else if(desktop&&!mobile)continue;
+      // UPI (and anything else) is not offered for Instamart yet: SayCart cannot show its QR or app link, keep its
+      // payment reference or settle it, so a UPI checkout waited as "payment pending" with nothing to approve (seen
+      // 18 October). Cash and Swiggy Money complete in one step. Restaurant orders handle UPI fully.
+      continue;
     }
     if(!selection)continue;
     const label=method.displayName?.trim()||options.cod?.id===method.id&&options.cod.displayName.trim()||options.swiggyMoney?.id===method.id&&options.swiggyMoney.displayName.trim()||method.id;

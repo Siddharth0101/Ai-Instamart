@@ -9,7 +9,7 @@
 | Interface and business backend | Next.js, React and TypeScript | One local Node process |
 | Inline speech-to-text | `scribe_v2_realtime`, official `@elevenlabs/client` 1.28.0 | Browser streams to ElevenLabs with a server-minted single-use token |
 | Shopping intent | `openai/gpt-oss-20b`, strict JSON Schema | Groq API |
-| Contracts and workflow | Zod, LangGraph, LangChain tool wrappers | Application server |
+| Contracts and agent | Zod, Vercel AI SDK (`ai`, `@ai-sdk/groq`) | Application server |
 | Optional spoken replies | Kokoro-82M / `af_heart` through Kokoro-FastAPI | Private service selected by `KOKORO_URL` |
 | Commerce | Official MCP TypeScript SDK and Swiggy Instamart | Application server calls Swiggy |
 | Persistence | PGlite, embedded PostgreSQL | Private local directory; one process |
@@ -38,7 +38,7 @@ Inline dictation requires `ELEVENLABS_API_KEY`; optional local services do not e
 
 Groq serves **`openai/gpt-oss-20b`** for bounded structured intent. The model name does not require an OpenAI key. Zod defines the intent schema, produces JSON Schema for the request, and validates the response. Server policy then checks current products, quantities, ambiguity, ownership and permission. [Groq model](https://console.groq.com/docs/model/openai/gpt-oss-20b), [structured outputs](https://console.groq.com/docs/structured-outputs), [Zod JSON Schema](https://zod.dev/json-schema).
 
-One LangGraph workflow owns orchestration. LangChain wraps allowed commerce operations with pre/post traces. The structured-output request has no attached MCP executor; the server chooses and executes validated actions. Google ADK and a second agent runtime are not needed for this flow. Shell, glob, grep, read and write remain development tools.
+The Vercel AI SDK `ToolLoopAgent` owns the agent loop; its tools call the application's own validated actions, never the MCP servers directly, and the server re-checks every reference and every order consent. A second agent runtime is not needed. Shell, glob, grep, read and write remain development tools.
 
 The model receives bounded text and normalized shopping context. It receives no OAuth tokens or payment secrets, and it has no checkout tool. Fresh full provider bills, address/payment selection, immutable two-minute quotes and explicit UI confirmation control purchases independently of model prose.
 

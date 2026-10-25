@@ -33,11 +33,11 @@ Copy `.env.example` to `.env.local` only when adding services; restart after cha
 | --- | --- |
 | `APP_ORIGIN` | Canonical browser origin and OAuth callback base; default `http://127.0.0.1:3000`. Its port must match the server CLI port. |
 | `TOKEN_ENCRYPTION_KEY` | Base64 encoding of 32 random bytes, required before OAuth; keep stable for stored tokens |
-| `ELEVENLABS_API_KEY` | Server-only key used to mint single-use tokens for inline Scribe v2 Realtime dictation; never expose it as `NEXT_PUBLIC_` |
-| `GROQ_API_KEY` | Server-only key for assistant reasoning; direct catalog search does not need an LLM |
-| `GROQ_MODEL` | Default `openai/gpt-oss-20b`; requires strict structured-output support |
-| `KOKORO_URL` | Optional private Kokoro-FastAPI base URL, e.g. `http://127.0.0.1:8880`; leave empty unless that service is running |
-| `KOKORO_VOICE` / `KOKORO_MODEL` | Defaults `af_heart` / `kokoro` |
+| `ELEVENLABS_API_KEY` | Server-only key for realtime speech recognition tokens and spoken replies; never expose it as `NEXT_PUBLIC_` |
+| `GROQ_API_KEY` | Server-only key for the voice agent |
+| `GROQ_AGENT_MODEL` | Optional; default `openai/gpt-oss-120b`, with `openai/gpt-oss-20b` and `qwen/qwen3.8-27b` as automatic fallbacks |
+| `SAYCART_AGENT_TIMEOUT_MS` | Optional; longest wait for one spoken turn, default 25000 |
+| `SAYCART_FIXTURE` | Development and tests only: `1` replaces Swiggy Food and Instamart with synthetic stores, addresses and orders. It also uses its own session cookie (`saycart_fixture_owner`), because browsers share cookies across ports: a test store on 3001 no longer signs the real app on 3000 out of its session |
 | `DATA_DIR` | Private PGlite data directory, default `.local-data/postgres` |
 
 Generate the OAuth storage key locally:
@@ -60,13 +60,7 @@ node scripts/smoke.mjs
 TEST_DEV_REDIRECT=1 node scripts/smoke.mjs
 ```
 
-To verify configured Groq credentials independently of Swiggy or speech, run:
-
-```bash
-node --env-file=.env.local --import tsx scripts/check-groq.mjs
-```
-
-This sends one synthetic grocery request through the real Groq SDK, Zod validation, LangGraph and the read-only fixture search tool. It consumes the account's normal model allowance, prints only safe verification/usage metadata, and cannot change a cart or place an order. A real `openai/gpt-oss-20b` check passed on 18 October 2026; account access and limits can change.
+To check the voice agent against the live Groq model without Swiggy or speech, run `npm run evals:agent` ([EVALS.md](EVALS.md)). It uses the development fixture and an in-memory store, consumes normal model allowance, and cannot change a real cart or place a real order.
 
 Tests use synthetic data and mocked external transports, including genuine MCP SDK OAuth/JSON-RPC calls against mocks. The HTTP smoke uses a separate unconnected owner to cover cookies, CSRF, strict input, rejected demo mode, idempotency, connection prerequisites and owner isolation. Commerce, quote/confirmation and ambiguous outcomes are exercised with injected fixture transports in unit tests. These checks never connect to real commerce.
 
@@ -77,9 +71,11 @@ A model/unit test does not prove real provider connectivity, microphone permissi
 ```text
 src/app/                         Next.js UI and API route
 src/lib/contracts.ts             Shared Zod input/output schemas and inferred types
-src/server/agent.ts              Groq, LangGraph, LangChain tools, validation/hooks
-src/lib/use-inline-dictation.ts  ElevenLabs SDK, active field, partial/final text, microphone lifecycle
-src/server/voice.ts              Single-use ElevenLabs speech tokens and optional Kokoro output
+src/server/voice-agent.ts        Voice agent: AI SDK ToolLoopAgent, Groq model chain, tools, consent checks
+src/server/assistant.ts          Versioned conversation state, restaurant browser, cart lines
+src/server/food-flow.ts          Food checkout, reviewed totals, order placement and tracking
+src/lib/use-conversation-voice.ts Listen → think → speak loop, barge-in, pause and resume
+src/server/voice.ts              Single-use ElevenLabs speech tokens and spoken replies
 src/server/integrations/         Official MCP OAuth, transport and provider schemas
 src/server/service.ts            OAuth persistence and default live service exports
 src/server/shopping.ts           Owned live sessions, cart, quotes, confirmation and attempts
@@ -87,6 +83,7 @@ src/server/store.ts              Transactional embedded PostgreSQL documents
 src/server/crypto.ts             Owner-bound authenticated token encryption
 src/server/catalog.ts            Synthetic data for tests and offline benchmarks only
 scripts/smoke.mjs                Local HTTP acceptance check
+scripts/evaluate-agent.ts        Live agent scenarios against the development fixture
 tests/                          Schema/workflow/checkout/MCP tests
 ```
 

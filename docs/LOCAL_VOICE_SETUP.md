@@ -1,99 +1,72 @@
-# Voice setup
+# ElevenLabs voice setup
 
-Updated **20 October 2026**. The app’s microphone controls use **ElevenLabs Scribe v2 Realtime** to transcribe directly into the product search, category search or assistant field. There is no separate recorder step. Optional Kokoro spoken replies are independent of dictation.
+Updated **24 October 2026**. SayCart uses **ElevenLabs Scribe v2 Realtime** for speech recognition and **ElevenLabs Flash v2.5** text-to-speech for spoken replies. A Groq-hosted agent (Vercel AI SDK) understands each sentence, acts with tools and writes the reply; see [ASSISTANT.md](ASSISTANT.md). No separate local speech service is required.
 
-## Inline dictation configuration
+## Server settings
 
-Set the server-only value in `.env.local`, then restart Next.js:
-
-```dotenv
-ELEVENLABS_API_KEY=your-server-side-key
-```
-
-The browser never receives this API key. It requests a single-use speech token from the owner/CSRF-protected `POST /api/transcribe/token` route with its session ID. The server uses the account key only to mint that token; it does not log or persist tokens. The browser then streams microphone audio directly to ElevenLabs over its SDK connection. [Client streaming guide](https://elevenlabs.io/docs/eleven-api/guides/how-to/speech-to-text/realtime/client-side-streaming), [token API](https://elevenlabs.io/docs/api-reference/tokens/create).
-
-The installed official `@elevenlabs/client` **1.28.0** SDK is loaded only when dictation starts. Its audio worklet is served from the app’s own `/vendor/elevenlabs/` path, with the upstream MIT notice retained. The model is `scribe_v2_realtime`; the hosted model/service is not an open-source local inference runtime. Usage and access depend on the ElevenLabs account, independently of Groq reasoning usage. [SDK source](https://github.com/elevenlabs/packages/tree/main/packages/client).
-
-In Brave, tap the mic beside the field you want to fill and allow microphone access. Partial and committed words appear in that same field, at the selection/cursor captured when dictation starts. Stop sends a manual commit and briefly waits for final words; review any remaining partial text before submitting. **Discard** restores the draft from before dictation. One session runs at a time, with a 60-second capture limit; closing the page, hiding it or pressing Escape stops capture and keeps the current text. Dictation never automatically searches, sends a shopping request, changes the cart or confirms an order.
-
-Use localhost or HTTPS for microphone access. Permission, account, allowance or connection errors leave typing available and preserve recognized text. Recognition can mishear brands, numbers, accents and mixed-language speech; edit the field before submitting. The configured key and the new browser speech path have **not** been live-validated: no tests, builds, typechecks or provider calls were run for this change, following the request to skip testing. See [verification](VERIFICATION.md).
-
-ElevenLabs is the only transcription provider. The unused batch upload route and local Whisper/ffmpeg adapters have been removed. No local speech model or audio decoder is required for microphone dictation.
-
-The app advertises dictation as configured only when its server key is present. This is not an account health check. The mic controls stay disabled until voice is configured and a connected shopping session has an address. `GROQ_API_KEY` is used separately for shopping intent.
-
-## Optional spoken replies
-
-Leave `KOKORO_URL` blank to use text replies. This does not disable ElevenLabs dictation. If you want spoken replies, install Git, uv and a compatible Python environment before following the optional upstream setup below. These installation commands have not been executed as part of the cleanup.
-
-## Kokoro speech output
-
-The reviewed version is [Kokoro-FastAPI at ebd4ec9](https://github.com/remsky/Kokoro-FastAPI/tree/ebd4ec9cc97b258b25afc39444a5e1701055db50). These commands follow its [native launchers](https://github.com/remsky/Kokoro-FastAPI/blob/ebd4ec9cc97b258b25afc39444a5e1701055db50/start-gpu_mac.sh), [configuration](https://github.com/remsky/Kokoro-FastAPI/blob/ebd4ec9cc97b258b25afc39444a5e1701055db50/docs/configuration.md), and [model download helper](https://github.com/remsky/Kokoro-FastAPI/blob/ebd4ec9cc97b258b25afc39444a5e1701055db50/docker/scripts/download_model.py). The helper checks the model and config SHA-256 values declared in that pinned source. We call its model-only function to avoid downloading the unrelated voice tuner.
-
-From this project root:
-
-```bash
-git clone https://github.com/remsky/Kokoro-FastAPI.git .local-data/voice-services/Kokoro-FastAPI
-cd .local-data/voice-services/Kokoro-FastAPI
-git checkout --detach ebd4ec9cc97b258b25afc39444a5e1701055db50
-uv venv --python 3.11
-uv pip install -e .
-uv run --no-sync python - <<'PY'
-import runpy
-download = runpy.run_path("docker/scripts/download_model.py")
-download["download_model"]("api/src/models/v1_0")
-PY
-```
-
-For Apple Silicon MPS, set the device and run the already installed service:
-
-```bash
-export USE_GPU=true
-export DEVICE_TYPE=mps
-export PYTORCH_ENABLE_MPS_FALLBACK=1
-export PYTHONPATH="$PWD:$PWD/api"
-export MODEL_DIR="$PWD/api/src/models"
-export VOICES_DIR="$PWD/api/src/voices/v1_0"
-export DEFAULT_VOICE=af_heart
-export API_LOG_LEVEL=WARNING
-export ENABLE_WEB_PLAYER=false
-export CORS_ENABLED=false
-export ENABLE_DEBUG_ENDPOINTS=false
-export ALLOW_DEV_UNLOAD=false
-export ENABLE_INNO_TUNER=false
-export ALLOW_LOCAL_VOICE_SAVING=false
-export ENABLE_VOICE_TAGS=false
-export ENABLE_SSML=false
-export MAX_INPUT_LENGTH=1800
-export MAX_TOTAL_PAUSE_S=0
-uv run --no-sync uvicorn api.src.main:app --host 127.0.0.1 --port 8880 --workers 1 --no-access-log
-```
-
-For native CPU, install the upstream CPU extra with `uv pip install -e '.[cpu]'`, set `USE_GPU=false` and `DEVICE_TYPE=cpu`, and use the same uvicorn command and private configuration. Docker on Apple Silicon uses CPU; native MPS is a separate deployment. Source pinning does not pin every transitive Python package resolved by `uv pip install`; capture and review the working environment before production deployment.
-
-The service warms its model during startup. Test speech generation, rather than treating `/health` alone as proof of readiness:
-
-```bash
-curl --fail http://127.0.0.1:8880/v1/audio/speech \
-  -H 'Content-Type: application/json' \
-  --data '{"model":"kokoro","voice":"af_heart","input":"Your grocery cart is ready to review.","response_format":"wav","stream":false}' \
-  --output /tmp/saycart-voice-check.wav
-```
-
-Listen to the generated WAV, then delete it. Our adapter requests complete WAV output, validates its type/header, and limits the response to 8 MB. This MVP waits for the complete response before playback; it does not claim end-to-end audio streaming. Two synthesis jobs per app process may run concurrently.
-
-## Connect optional speech output
-
-After starting Kokoro, set these server-only values and restart Next.js:
+Set these values in `.env.local`, then restart Next.js:
 
 ```dotenv
-KOKORO_URL=http://127.0.0.1:8880
-KOKORO_MODEL=kokoro
-KOKORO_VOICE=af_heart
+ELEVENLABS_API_KEY=your-secret-api-key
+# Optional; these are the built-in defaults:
+ELEVENLABS_VOICE_ID=JBFqnCBsd6RMkjVDRZzb
+ELEVENLABS_TTS_MODEL=eleven_flash_v2_5
+ELEVENLABS_STT_LANGUAGE=en
+ELEVENLABS_STT_SECONDARY_LANGUAGES=hi
+# The voice agent; optional model override (openai/gpt-oss-20b takes over when it is rate limited):
+GROQ_API_KEY=your-groq-key
+GROQ_AGENT_MODEL=openai/gpt-oss-120b
 ```
 
-Keep this service private on loopback. The app sends only approved stored assistant replies to it. It checks the WAV response and bounds its size and duration of the request. An unconfigured service is rejected before making a request.
+Use the **secret API key**, with **Speech to Text** and **Text to Speech** access. The dashboard's **Copy Key ID** value cannot authenticate API calls. Never use `NEXT_PUBLIC_` for the secret. Configuration presence enables the controls; it does not prove that permissions or allowance are valid. A live check on 24 October 2026 created a Scribe realtime token and generated a short MP3 with the earlier `eleven_multilingual_v2` default. The Flash v2.5 default, language hints and keyterms have not had a live provider check yet; set `ELEVENLABS_TTS_MODEL=eleven_multilingual_v2` to return to the previous voice model.
 
-Microphone audio goes directly to ElevenLabs with a single-use token. Explicitly submitted assistant text and bounded shopping context go to Groq. Direct catalog searches do not call the reasoning model. Groq's token counters do not report ElevenLabs speech usage.
+## Recognition
 
-Review [VERIFICATION.md](VERIFICATION.md) for the limits of the current setup. Key permissions, speech allowance, microphone capture and recognition accuracy remain unvalidated because testing was skipped.
+The server mints single-use transcription tokens through the owner/CSRF-protected `/api/assistant/voice/token` endpoint (30 per minute per owner, because the browser reconnects when the on-screen vocabulary changes). The response is `{token, languageCode, secondaryLanguages}`. Language codes are 2–3 lowercase letters; invalid entries are dropped, at most four secondary codes are sent, and the primary is never repeated. Leaving the variables unset gives English with Hindi; setting `ELEVENLABS_STT_SECONDARY_LANGUAGES=` (empty) pins recognition to the primary language. Without these hints Scribe guesses among about 90 languages and often hears Hinglish as Urdu or Punjabi.
+
+The browser uses the installed official `@elevenlabs/client` SDK and the same-origin audio worklet at `/vendor/elevenlabs/scribe-audio-processor.js`. Microphone audio streams directly to ElevenLabs. Each session also sends:
+
+- **Language hints** from the token response.
+- **Keyterms**: up to 50 visible restaurant, dish, option and selected-item names (each at most 20 characters) plus a short food vocabulary, so names on screen are spelled correctly.
+- **Context**: the latest assistant reply as `previousText`.
+- **No-verbatim mode**, which drops fillers and false starts.
+
+If ElevenLabs rejects these settings, the browser reconnects without keyterms and context, then without language hints. [Client streaming guide](https://elevenlabs.io/docs/eleven-api/guides/how-to/speech-to-text/realtime/client-side-streaming), [token API](https://elevenlabs.io/docs/api-reference/tokens/create).
+
+## Replies and speech
+
+The agent's reply is cleaned for speech on the server: markdown, emoji, list numbering and runaway punctuation are removed and at most three short sentences are kept. A separate `speech` rendering turns symbols into words (₹ and Rs become "rupees", "2 × Biryani" becomes "2 Biryani"; quotes and links are removed).
+
+The `/api/assistant/speech` route accepts a saved assistant message ID and the current conversation version and checks ownership and staleness before and after synthesis. It returns bounded MP3 audio using `mp3_44100_128`, with a 25-second provider timeout, at most two simultaneous speech jobs and an 8 MB response limit. Usually ElevenLabs answers in about half a second; when one request stalls, a single backup request after 2.5 seconds usually answers first and the slow one is cancelled. The secret stays on the server. Each response is downloaded before playback; speech output is not streamed. [TTS API](https://elevenlabs.io/docs/api-reference/text-to-speech/convert).
+
+## Conversation experience
+
+- Tap **Talk to order**. The header button becomes **Stop listening** (or **Resume** while paused) and a single small orb appears at the bottom; nothing else is added to the screen. A browser microphone permission is needed, on localhost or HTTPS.
+- The orb shows the state with one word and its animation: listening (reacts to your voice level), thinking, speaking, paused. Tap it to pause, resume or interrupt; **×** closes voice. There is no transcript, caption box, typing field or settings row: the screen stays for restaurants and dishes. Voice mode also hides the hero, search box, filter toolbar and progress banners, since all of these can be spoken.
+- After Scribe commits a phrase, the app waits briefly for more speech, so a mid-sentence pause doesn't split one request in two.
+- **Barge-in**: while a reply plays, the microphone stays open with browser echo cancellation. Speaking over the reply stops playback and captures the new request; text that matches the reply being played is ignored as echo.
+- A reply is shown on screen only when it could not be spoken (TTS unavailable or failed), briefly, above the orb.
+- Escape and **×** release the microphone. Hiding the tab pauses it; coming back resumes it, unless you paused it yourself. A quiet minute also pauses it, with a note; **Resume** continues.
+- "Scroll down", "scroll up" and "stop" (also नीचे स्क्रॉल करो / रुको) control the page without blocking on TTS.
+- A request that fails (for example a stale screen) is explained in one line above the orb and the microphone **keeps listening**, so you can simply rephrase. Microphone or account failures pause it with the reason. Conversation voice never silently switches to another transcription or browser speech.
+
+### What you can say
+
+Anything a customer would say about the order, in English, Hinglish or Hindi: choosing the address, finding and opening restaurants, adding or changing dishes, sorting and filtering, opening the cart, checkout, payment, confirming, tracking and goodbye. The full table is in [ASSISTANT.md](ASSISTANT.md#what-a-customer-can-say). Without `GROQ_API_KEY` only local scrolling works.
+
+### Testing the voice flow without a microphone
+
+For development only (never in a production build):
+
+1. Start a second dev server with fixture restaurants and in-memory data, so your real server and database are untouched:
+   `SAYCART_FIXTURE=1 SAYCART_DIST_DIR=.next-fixture DATA_DIR=memory:// APP_ORIGIN=http://127.0.0.1:3001 npx next dev --hostname 127.0.0.1 --port 3001`
+2. Open `http://127.0.0.1:3001/?fakeMic=1` and tap **Talk to order**. `?fakeMic=1` replaces only the speech-to-text connection.
+3. In the browser console, run `await saycartVoice.say("दूसरा रेस्टोरेंट खोलो")`. The words arrive as live partials and then a committed transcript, exactly as from ElevenLabs. The agent, its replies and the spoken audio are real.
+
+`next dev` may add the fixture build folder to `tsconfig.json`; revert that change before committing.
+
+The fixture's restaurants, addresses and orders are synthetic; nothing reaches Swiggy. `npm run evals:agent` runs the same agent through scripted conversations without a browser ([EVALS.md](EVALS.md)).
+
+## Verification boundaries
+
+Automated tests mock SDK events, model responses and provider responses. They cover partial/final text, retries, duplicate suppression, lifecycle cleanup, server error mapping, language-hint validation, the agent's tools and consent rules, reply cleanup and TTS text cleanup. They do not prove actual microphone permission, audio quality, recognition of names or Hinglish, echo-free barge-in on real speakers, reply quality from a live model, provider allowance or speaker playback. On 24 October 2026 the full spoken flow was exercised in a browser with the fixture server and `?fakeMic=1`, using the live Groq agent and ElevenLabs speech output: address, browsing, opening by name and number, adding, changing and removing dishes in Hindi, Hinglish and English, sorting and filtering, panels, checkout, cash and UPI payment, placing and tracking a fixture order, and goodbye. The real speech path was then exercised in headless Chrome: spoken Hindi commands generated with ElevenLabs were played into the page as its microphone stream, through the unmodified ElevenLabs SDK, realtime `scribe_v2_realtime` transcription and the app ("मुझे खाना order करना है…", "तीसरा रेस्टोरेंट खोलो", "दो Peri Peri Fries और एक Chocolate Shake डाल दो" all completed). A physical microphone, real room acoustics and speaker echo were not tested; neither were Safari or iOS. See [VERIFICATION.md](VERIFICATION.md).

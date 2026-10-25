@@ -25,3 +25,7 @@ coverage/
 # Editor/OS files
 .DS_Store
 .idea/
+
+# Generated evaluation reports (scenario sources live in evals/)
+output/evals/
+.next-fixture*/

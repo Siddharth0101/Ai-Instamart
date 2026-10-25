@@ -1,39 +1,28 @@
-import { AttemptSchema, QuoteSchema, SessionViewSchema, type Address, type Attempt, type Cart, type Mode, type Quote, type SessionView, type TraceEvent, type SearchRequest, type TurnRequest } from "../lib/contracts";
-import { runTurn as interpretTurn } from "./agent";
+import { AttemptSchema, QuoteSchema, SessionViewSchema, ProductSchema, type Product, type Address, type Attempt, type Cart, type Mode, type Quote, type SessionView } from "../lib/contracts";
 import { equalSecret, fingerprint, opaqueId } from "./crypto";
 import { AppError } from "./errors";
 import { read, transaction, write, type StoreTx } from "./store";
 import { decodeSwiggyVariantId, swiggyCartFingerprint, swiggyCartAddressMatches, type SwiggyGateway } from "./integrations/swiggy";
-import { normalizeSwiggyCart, normalizeSwiggyPayments, normalizeSwiggyProducts } from "./integrations/swiggy-mapping";
-import type { SwiggyCart, SwiggySearch } from "./integrations/swiggy-schemas";
+import { normalizeSwiggyCart, normalizeSwiggyPayments } from "./integrations/swiggy-mapping";
+import type { SwiggyCart } from "./integrations/swiggy-schemas";
 import type { SwiggyCheckoutInput, SwiggyCheckoutResult } from "./integrations/swiggy-checkout";
 
 export type Owner = { csrfToken: string; sessionId: string | null; latestAttemptId?: string };
+/** How long an unpaid UPI checkout can hold the order gate; Swiggy's own payment window is a few minutes. */
+export const UPI_WINDOW_MS = 30 * 60_000;
+export const UPI_LAPSED = "This UPI payment was never completed and its time ran out, so Swiggy did not place the order.";
 type StoredSession = Omit<SessionView, "csrfToken" | "connected"> & { active?: { id: string; baseVersion: number }; addressSyncAt?: number; remoteFingerprint?: string; searchOffset?: number };
 type StoredQuote = { quote: Quote; fingerprint: string; remoteFingerprint: string; consumed: boolean };
 type StoredAttempt = { attempt: Attempt; quoteId: string; createdAt: string };
 export type ShoppingProvider = Pick<SwiggyGateway, "readiness" | "getAddresses" | "searchProducts" | "getCart" | "getPaymentOptions" | "setCartQuantity" | "close"> & { checkout(input: SwiggyCheckoutInput): Promise<SwiggyCheckoutResult> };
 export type CheckoutDispatcher = (quote: Quote, attemptId: string) => Promise<Attempt>;
-export type ShoppingRuntime = { controllers: Map<string, AbortController>; ownerQueues: Map<string, Promise<unknown>> };
+export type ShoppingRuntime = { ownerQueues: Map<string, Promise<unknown>> };
 const welcome = "Your Instamart account is ready. Choose your saved delivery address, then tell me what you need. Review your complete bill before confirming an order.";
 const emptyCart = (): Cart => ({ revision: 0, lines: [], totals: { itemsMinor: 0, feesMinor: 0, discountMinor: 0, totalMinor: 0, currency: "INR" } });
 
-function catalogPage(raw: SwiggySearch, previous: SessionView["products"] = [], offset = 0) {
-  const incoming = normalizeSwiggyProducts(raw);
-  const known = new Set(previous.map(product => product.id));
-  const products = [...new Map([...previous, ...incoming].map(product => [product.id, product])).values()];
-  const cursor = /^\d+$/.test(raw.nextOffset) ? Number(raw.nextOffset) : undefined;
-  const progressed = incoming.some(product => !known.has(product.id));
-  // A cursor must advance numerically and add variants. Stop at the storage cap
-  // or a repeating page rather than presenting a Load more button forever.
-  const nextOffset = cursor !== undefined && Number.isSafeInteger(cursor) && cursor > offset && progressed && products.length < 500 ? cursor : undefined;
-  return { products: products.slice(0, 500), nextOffset };
-}
-
 /** Provider injection is for isolated tests; HTTP requests cannot choose a provider. */
-export function createShoppingService(options: { provider: (ownerId: string) => ShoppingProvider; runTurn?: typeof interpretTurn; runtime?: ShoppingRuntime }) {
-  const { controllers, ownerQueues } = options.runtime ?? { controllers: new Map<string, AbortController>(), ownerQueues: new Map<string, Promise<unknown>>() };
-  const runTurn = options.runTurn || interpretTurn;
+export function createShoppingService(options: { provider: (ownerId: string) => ShoppingProvider; runtime?: ShoppingRuntime }) {
+  const { ownerQueues } = options.runtime ?? { ownerQueues: new Map<string, Promise<unknown>>() };
   async function serial<T>(ownerId: string, work: () => Promise<T>): Promise<T> {
     const previous = ownerQueues.get(ownerId) || Promise.resolve();
     const current = previous.catch(() => {}).then(work);
@@ -149,7 +138,7 @@ export function createShoppingService(options: { provider: (ownerId: string) => 
     if (s && s.mode !== "live") { s = await startSession(ownerId, "live"); owner = await getOwner(ownerId); }
     const provider = options.provider(ownerId); let isConnected = false;
     try { isConnected = (await provider.readiness()).connected; } catch { /* Unconfigured OAuth storage is an unconnected state. */ } finally { await provider.close(); }
-    return { sessionId: s?.sessionId || null, mode: s ? "live" as const : null, csrfToken: owner?.csrfToken || "", connected: isConnected, capabilities: { groq: !!process.env.GROQ_API_KEY, realtimeStt: !!process.env.ELEVENLABS_API_KEY?.trim(), tts: !!process.env.KOKORO_URL?.trim() } };
+    return { sessionId: s?.sessionId || null, mode: s ? "live" as const : null, csrfToken: owner?.csrfToken || "", connected: isConnected, capabilities: { groq: !!process.env.GROQ_API_KEY, realtimeStt: !!process.env.ELEVENLABS_API_KEY?.trim(), tts: !!process.env.ELEVENLABS_API_KEY?.trim() } };
   }
   async function changeQuantity(ownerId: string, s: StoredSession, provider: ShoppingProvider, productId: string, quantity: number, expectedRevision?: number, turnVersion?: number) {
     await connected(provider); const addressId = address(s);
@@ -204,94 +193,6 @@ export function createShoppingService(options: { provider: (ownerId: string) => 
       return view(ownerId, await session(ownerId, sessionId), provider);
     } finally { await provider.close(); } });
   }
-  // Direct browsing is read-only and bypasses model interpretation entirely.
-  // The cursor belongs to the saved query/address; callers cannot invent offsets.
-  async function searchCatalog(ownerId: string, input: SearchRequest) {
-    return serial(ownerId, async () => {
-      const provider = options.provider(ownerId), turnId = opaqueId("search");
-      let version: number | undefined;
-      try {
-        await connected(provider);
-        const initial = await session(ownerId, input.sessionId); idle(initial); address(initial); revision(initial, input.expectedCartRevision);
-        if (initial.turnVersion !== input.expectedTurnVersion) throw new AppError("STALE_TURN", "Your search changed. Try again with the latest results.", 409);
-        const query = input.query.trim();
-        if (!query || query.length > 200) throw new AppError("INVALID_QUERY", "Search using a product name, brand or category up to 200 characters.", 400);
-        if (input.loadMore && (initial.search?.query !== query || !initial.search.hasMore || initial.searchOffset === undefined)) throw new AppError("SEARCH_CHANGED", "Search again before loading more results.", 409);
-        const offset = input.loadMore ? initial.searchOffset! : 0;
-        const active = await transaction(async tx => {
-          const current = await owned(tx, ownerId, input.sessionId); idle(current);
-          current.active = {id:turnId,baseVersion:current.turnVersion}; current.turnVersion++;
-          await tx.put(ownerId, "session", current.sessionId, current); return current;
-        });
-        version = active.turnVersion;
-        const started = Date.now();
-        const raw = await provider.searchProducts({addressId:address(active),query,...(offset ? {offset} : {})});
-        const page = catalogPage(raw, input.loadMore ? active.products : [], offset);
-        await transaction(async tx => {
-          const current = await owned(tx, ownerId, input.sessionId);
-          if (current.turnVersion !== version || current.active?.id !== turnId) return;
-          current.products = page.products; current.search = {query,hasMore:page.nextOffset !== undefined}; current.searchOffset = page.nextOffset;
-          current.trace = [...current.trace,{id:opaqueId("event"),stage:"post_tool",tool:"search_products",status:"ok" as const,durationMs:Date.now()-started,timestamp:new Date().toISOString()}].slice(-80);
-          delete current.active;
-          await tx.put(ownerId, "session", current.sessionId, current);
-        });
-        return view(ownerId, await session(ownerId,input.sessionId), provider);
-      } catch(error) {
-        if (version !== undefined) await transaction(async tx => { const current = await owned(tx,ownerId,input.sessionId); if(current.active?.id===turnId){delete current.active; await tx.put(ownerId,"session",current.sessionId,current);} });
-        throw error;
-      } finally { await provider.close(); }
-    });
-  }
-  async function conversation(ownerId: string, input: TurnRequest) {
-    return serial(ownerId, async () => {
-      const provider = options.provider(ownerId), controller = new AbortController(), turnId = opaqueId("turn");
-      try {
-        await connected(provider); const initial = await session(ownerId, input.sessionId); idle(initial); revision(initial, input.expectedCartRevision); address(initial);
-        if (initial.turnVersion !== input.expectedTurnVersion) throw new AppError("STALE_TURN", "This conversation changed. Refresh before sending again.", 409);
-        const synced = await refresh(ownerId, input.sessionId, provider); revision(synced, input.expectedCartRevision);
-        const { session: s, visibleProducts } = await transaction(async tx => {
-          const current = await owned(tx, ownerId, input.sessionId); idle(current); revision(current, input.expectedCartRevision);
-          if (current.turnVersion !== input.expectedTurnVersion) throw new AppError("STALE_TURN", "This conversation changed. Refresh before sending again.", 409);
-          const ids = input.displayedProductIds, productsById = new Map(current.products.map(product => [product.id, product]));
-          if (ids && (ids.length > 20 || new Set(ids).size !== ids.length || ids.some(id => !productsById.has(id)))) throw new AppError("STALE_DISPLAY", "Your displayed products changed. Refresh before choosing one by position.", 409);
-          // Display order is request context only. Keep the complete catalog and
-          // its pagination intact, using trusted stored products for every ID.
-          const visibleProducts = ids?.map(id => productsById.get(id)!);
-          current.active = { id: turnId, baseVersion: current.turnVersion }; current.turnVersion++;
-          current.messages = [...current.messages, { id: opaqueId("msg"), role: "user" as const, text: input.text }].slice(-60);
-          await tx.put(ownerId, "session", current.sessionId, current); return { session: current, visibleProducts };
-        });
-        controllers.set(turnId, controller);
-        try {
-          let searchedPage: { query: string; nextOffset?: number } | undefined;
-          const result = await runTurn({ text: input.text, mode: "live", history: s.messages.slice(-10), products: s.products, visibleProducts, cart: s.cart, signal: controller.signal }, {
-            search: async query => {
-              const latest = await session(ownerId, s.sessionId);
-              if (latest.turnVersion !== s.turnVersion || controller.signal.aborted) throw new AppError("TURN_SUPERSEDED", "This request was stopped.", 409);
-              const page = catalogPage(await provider.searchProducts({ addressId: address(latest), query }));
-              searchedPage = { query, nextOffset: page.nextOffset };
-              return page.products;
-            },
-            setQuantity: (productId, quantity) => changeQuantity(ownerId, s, provider, productId, quantity, undefined, s.turnVersion),
-            recordUsage: async usage => transaction(async tx => { const current = await owned(tx, ownerId, s.sessionId); current.usage = { inputTokens: current.usage.inputTokens + usage.inputTokens, outputTokens: current.usage.outputTokens + usage.outputTokens, totalTokens: current.usage.totalTokens + usage.totalTokens, model: usage.model || current.usage.model }; await tx.put(ownerId, "session", s.sessionId, current); }),
-            record: async (event: TraceEvent) => transaction(async tx => { const current = await owned(tx, ownerId, s.sessionId); current.trace = [...current.trace, event].slice(-80); await tx.put(ownerId, "session", s.sessionId, current); }),
-          });
-          await transaction(async tx => { const current = await owned(tx, ownerId, s.sessionId); if (current.turnVersion !== s.turnVersion || current.active?.id !== turnId) return; current.products = result.products; if (result.intent.action === "search" && searchedPage) { current.search = {query:searchedPage.query,hasMore:searchedPage.nextOffset !== undefined}; current.searchOffset = searchedPage.nextOffset; } current.messages.push({ id: opaqueId("msg"), role: "assistant", text: result.message }); delete current.active; await tx.put(ownerId, "session", s.sessionId, current); });
-        } catch (error) {
-          await transaction(async tx => { const current = await owned(tx, ownerId, s.sessionId); if (current.active?.id === turnId) { delete current.active; current.messages.push({ id: opaqueId("msg"), role: "assistant", text: "That request could not finish. Refresh your Instamart bag to check its current contents." }); await tx.put(ownerId, "session", s.sessionId, current); } });
-          if (!controller.signal.aborted) throw error;
-        } finally { controllers.delete(turnId); }
-        return view(ownerId, await refresh(ownerId, s.sessionId, provider), provider);
-      } finally { await provider.close(); }
-    });
-  }
-  async function stopTurn(ownerId: string, sessionId: string, expected: number) {
-    let turnId: string | undefined;
-    await transaction(async tx => { const s = await owned(tx, ownerId, sessionId); if (s.turnVersion !== expected && s.active?.baseVersion !== expected) throw new AppError("STALE_TURN", "A newer request is active. Refresh the conversation.", 409); turnId = s.active?.id; s.turnVersion++; delete s.active; await tx.put(ownerId, "session", sessionId, s); });
-    if (turnId) controllers.get(turnId)?.abort();
-    // Do not queue behind the request being stopped just to return its status.
-    const provider = options.provider(ownerId); try { return view(ownerId, await session(ownerId, sessionId), provider); } finally { await provider.close(); }
-  }
   function snapshot(s: StoredSession) { return { cart: s.cart, address: s.addresses.find(a => a.id === s.addressId), payment: s.payments.find(p => p.id === s.paymentMethodId) }; }
   async function createQuote(ownerId: string, sessionId: string, expectedCartRevision: number) {
     return serial(ownerId, async () => { const provider = options.provider(ownerId); try {
@@ -317,7 +218,15 @@ export function createShoppingService(options: { provider: (ownerId: string) => 
         if (Date.parse(stored.quote.expiresAt) <= Date.now()) throw new AppError("QUOTE_EXPIRED", "This review expired. Review a fresh one.", 409);
         const s = await owned(tx, ownerId, stored.quote.sessionId); idle(s);
         if (fingerprint(snapshot(s)) !== stored.fingerprint) throw new AppError("QUOTE_CHANGED", "Your bag or choices changed. Review a fresh summary.", 409);
-        if (await tx.get(ownerId, "checkout_gate", "swiggy")) throw new AppError("CHECKOUT_UNRESOLVED", "A previous checkout is unresolved. Check it in Swiggy before placing another order.", 409);
+        const gate = await tx.get<{ attemptId: string }>(ownerId, "checkout_gate", "swiggy");
+        if (gate) {
+          // A UPI payment never made lapses on Swiggy's side within minutes; one older than the window no longer blocks new orders.
+          const held = await tx.get<StoredAttempt & { createdAt?: string }>(ownerId, "attempt", gate.attemptId);
+          if (held?.attempt.state === "payment_pending" && held.createdAt && Date.now() - Date.parse(held.createdAt) > UPI_WINDOW_MS) {
+            await tx.put(ownerId, "attempt", gate.attemptId, { ...held, attempt: { ...held.attempt, state: "failed", message: UPI_LAPSED } });
+            await tx.remove(ownerId, "checkout_gate", "swiggy");
+          } else throw new AppError("CHECKOUT_UNRESOLVED", "A previous checkout is unresolved. Check it in Swiggy before placing another order.", 409);
+        }
         const attempt: Attempt = { id: opaqueId("attempt"), state: "submitted", message: "Submitting your reviewed Instamart order.", results: [] };
         const record = { attempt, quoteId, createdAt: new Date().toISOString() };
         const owner = await tx.get<Owner>(ownerId, "owner", ownerId); if (!owner) throw new AppError("UNAUTHORIZED", "Refresh to continue.", 401);
@@ -340,6 +249,19 @@ export function createShoppingService(options: { provider: (ownerId: string) => 
   async function getCurrentAttempt(ownerId: string): Promise<Attempt | null> {
     return transaction(async tx => { const gate = await tx.get<{ attemptId: string }>(ownerId, "checkout_gate", "swiggy"); const id = gate?.attemptId || (await tx.get<Owner>(ownerId, "owner", ownerId))?.latestAttemptId; if (!id) return null; const record = await tx.get<StoredAttempt>(ownerId, "attempt", id); if (!record && gate) throw new AppError("CHECKOUT_UNRESOLVED", "The stored checkout needs reconciliation. New orders remain blocked.", 409); return record?.attempt || null; });
   }
-  async function speechText(ownerId: string, sessionId: string, messageId: string, expectedTurnVersion: number) { const s = await session(ownerId, sessionId), message = s.messages.find(m => m.id === messageId); if (s.turnVersion !== expectedTurnVersion || !message || message.role !== "assistant" || s.messages.at(-1)?.id !== messageId) throw new AppError("STALE_SPEECH", "Only the current assistant reply can be played.", 409); return message.text; }
-  return { createOwner, getOwner, getView, bootstrap, startSession, updateCart, selectAddress, selectPayment, searchCatalog, conversation, stopTurn, createQuote, confirmQuote, getAttempt, getCurrentAttempt, speechText };
+  // Server-only entry point: all products come from validated, address-bound MCP
+  // searches. Keep every list item's variants available for later exact selection.
+  async function rememberProducts(ownerId:string,sessionId:string,addressId:string,products:Product[]) {
+    const trusted=ProductSchema.array().max(500).parse(products);
+    return serial(ownerId,()=>transaction(async tx=>{
+      const current=await owned(tx,ownerId,sessionId);idle(current);
+      if(current.addressId!==addressId)throw new AppError("ADDRESS_CHANGED","Your delivery address changed. Search again for the new address.",409);
+      const freshIds=new Set(trusted.map(product=>product.id));
+      current.products=[...new Map(trusted.map(product=>[product.id,product])).values(),...current.products.filter(product=>!freshIds.has(product.id))].slice(0,500);
+      // An assistant list is not the previous single-query catalog page.
+      delete current.search;delete current.searchOffset;
+      await tx.put(ownerId,"session",sessionId,current);
+    }));
+  }
+  return { createOwner, getOwner, getView, bootstrap, startSession, updateCart, selectAddress, selectPayment, createQuote, confirmQuote, getAttempt, getCurrentAttempt, rememberProducts };
 }

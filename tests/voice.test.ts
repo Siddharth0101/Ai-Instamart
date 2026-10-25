@@ -1,32 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createRealtimeTranscriptionToken, synthesizeSpeech, VoiceError } from "../src/server/voice";
+import { createRealtimeTranscriptionToken, speechToTextSettings, synthesizeSpeech, VoiceError } from "../src/server/voice";
 
-function wav(seconds = 1) {
-  const samples = 16_000 * seconds;
-  const bytes = Buffer.alloc(44 + samples * 2);
-  bytes.write("RIFF", 0); bytes.writeUInt32LE(bytes.length - 8, 4); bytes.write("WAVE", 8);
-  bytes.write("fmt ", 12); bytes.writeUInt32LE(16, 16); bytes.writeUInt16LE(1, 20);
-  bytes.writeUInt16LE(1, 22); bytes.writeUInt32LE(16_000, 24); bytes.writeUInt32LE(32_000, 28);
-  bytes.writeUInt16LE(2, 32); bytes.writeUInt16LE(16, 34);
-  bytes.write("data", 36); bytes.writeUInt32LE(samples * 2, 40);
-  return bytes;
-}
+// A provider response fixture, not synthesized speech or an audio quality test.
+const mp3 = () => Buffer.concat([Buffer.from("ID3"), Buffer.alloc(61)]);
 const isVoiceError = (code: string, status?: number) => (error: unknown) => error instanceof VoiceError && error.code === code && (status === undefined || error.status === status);
-let previousSpeechURL: string | undefined;
 let previousSpeechKey: string | undefined;
 test.beforeEach(() => {
-  previousSpeechURL = process.env.KOKORO_URL;
   previousSpeechKey = process.env.ELEVENLABS_API_KEY;
-  process.env.KOKORO_URL = "http://127.0.0.1:8880";
   process.env.ELEVENLABS_API_KEY = "test-key-not-a-credential";
 });
 test.afterEach(() => {
-  if (previousSpeechURL === undefined) delete process.env.KOKORO_URL; else process.env.KOKORO_URL = previousSpeechURL;
   if (previousSpeechKey === undefined) delete process.env.ELEVENLABS_API_KEY; else process.env.ELEVENLABS_API_KEY = previousSpeechKey;
 });
 
-const audioResponse = () => new Response(wav(), { headers: { "content-type": "audio/wav" } });
+const audioResponse = () => new Response(mp3(), { headers: { "content-type": "audio/mpeg" } });
 
 test("cancelled voice work and invalid inputs never contact speech services", async t => {
   let calls = 0;
@@ -47,7 +35,7 @@ test("rejected TTS responses cancel their body, including header and streamed si
     });
     t.mock.method(globalThis, "fetch", async () => new Response(stream, {
       status: variant === "status" ? 503 : 200,
-      headers: { "content-type": variant === "type" ? "application/json" : "audio/wav", ...(variant === "length" ? { "content-length": String(8 * 1024 * 1024 + 1) } : {}) },
+      headers: { "content-type": variant === "type" ? "application/json" : "audio/mpeg", ...(variant === "length" ? { "content-length": String(8 * 1024 * 1024 + 1) } : {}) },
     }));
     const code = variant === "status" ? "TTS_UNAVAILABLE" : variant === "type" ? "TTS_RESPONSE_INVALID" : "VOICE_RESPONSE_TOO_LARGE";
     await assert.rejects(synthesizeSpeech("A test reply."), isVoiceError(code));
@@ -73,9 +61,23 @@ test("speech jobs are bounded and aborted work releases capacity", async t => {
   assert.equal(pending.length, 3);
   pending[1](audioResponse()); pending[2](audioResponse());
   for (const result of await Promise.all([second, replacement])) {
-    assert.equal(result.contentType, "audio/wav");
-    assert.deepEqual(Buffer.from(result.audio), wav());
+    assert.equal(result.contentType, "audio/mpeg");
+    assert.deepEqual(Buffer.from(result.audio), mp3());
   }
+});
+
+test("a stalled speech request is overtaken by one backup request, and the slow one is cancelled", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let calls = 0, stalledAborted = false;
+  t.mock.method(globalThis, "fetch", async (_input: unknown, init?: RequestInit) => {
+    if (++calls === 1) return new Promise<Response>((_resolve, reject) => init?.signal?.addEventListener("abort", () => { stalledAborted = true; reject(new DOMException("Stopped", "AbortError")); }, { once: true }));
+    return audioResponse();
+  });
+  const speaking = synthesizeSpeech("Slow reply");
+  await Promise.resolve(); t.mock.timers.tick(2500);
+  const result = await speaking;
+  assert.deepEqual(Buffer.from(result.audio), mp3());
+  assert.equal(calls, 2); assert.equal(stalledAborted, true);
 });
 
 test("realtime dictation requests a one-use token without exposing the server key", async t => {
@@ -149,3 +151,65 @@ test("realtime token requests are bounded and cancellation releases capacity", a
   assert.deepEqual(await Promise.all([second, replacement]), [{ token: "second" }, { token: "replacement" }]);
 });
 
+
+test("ElevenLabs TTS sends only stored reply text and a server credential to the fixed endpoint", async t => {
+  t.mock.method(globalThis, "fetch", async (url: unknown, init?: RequestInit) => {
+    assert.match(String(url), /^https:\/\/api\.elevenlabs\.io\/v1\/text-to-speech\/[\w-]+\?output_format=mp3_44100_128$/);
+    assert.equal(new Headers(init?.headers).get("xi-api-key"), "test-key-not-a-credential");
+    assert.equal(init?.redirect, "error"); assert.equal(init?.cache, "no-store");
+    assert.deepEqual(JSON.parse(String(init?.body)), {text: "Biryani options are ready.", model_id: "eleven_flash_v2_5"});
+    return audioResponse();
+  });
+  assert.equal((await synthesizeSpeech("Biryani options are ready.")).contentType, "audio/mpeg");
+});
+
+test("a configured TTS model overrides the low-latency default", async t => {
+  const previous = process.env.ELEVENLABS_TTS_MODEL;
+  t.after(() => { if (previous === undefined) delete process.env.ELEVENLABS_TTS_MODEL; else process.env.ELEVENLABS_TTS_MODEL = previous; });
+  process.env.ELEVENLABS_TTS_MODEL = " eleven_multilingual_v2 ";
+  t.mock.method(globalThis, "fetch", async (_url: unknown, init?: RequestInit) => {
+    assert.equal(JSON.parse(String(init?.body)).model_id, "eleven_multilingual_v2");
+    return audioResponse();
+  });
+  assert.equal((await synthesizeSpeech("Hello")).contentType, "audio/mpeg");
+});
+
+test("speech-to-text language hints default to English with Hindi and drop invalid codes", t => {
+  const previous = { primary: process.env.ELEVENLABS_STT_LANGUAGE, secondary: process.env.ELEVENLABS_STT_SECONDARY_LANGUAGES };
+  t.after(() => {
+    if (previous.primary === undefined) delete process.env.ELEVENLABS_STT_LANGUAGE; else process.env.ELEVENLABS_STT_LANGUAGE = previous.primary;
+    if (previous.secondary === undefined) delete process.env.ELEVENLABS_STT_SECONDARY_LANGUAGES; else process.env.ELEVENLABS_STT_SECONDARY_LANGUAGES = previous.secondary;
+  });
+  const settings = (primary?: string, secondary?: string) => {
+    if (primary === undefined) delete process.env.ELEVENLABS_STT_LANGUAGE; else process.env.ELEVENLABS_STT_LANGUAGE = primary;
+    if (secondary === undefined) delete process.env.ELEVENLABS_STT_SECONDARY_LANGUAGES; else process.env.ELEVENLABS_STT_SECONDARY_LANGUAGES = secondary;
+    return speechToTextSettings();
+  };
+  assert.deepEqual(settings(), { languageCode: "en", secondaryLanguages: ["hi"] });
+  assert.deepEqual(settings(" HI ", "en, ta, hi, bad-code, x1, mr, en, gu, kn"), { languageCode: "hi", secondaryLanguages: ["en", "ta", "mr", "gu"] });
+  assert.deepEqual(settings("english", "hin"), { languageCode: "en", secondaryLanguages: ["hin"] }, "an invalid primary falls back to English");
+  assert.deepEqual(settings("", "en"), { languageCode: "en", secondaryLanguages: [] }, "the primary is never repeated as a secondary language");
+  assert.deepEqual(settings("en", ""), { languageCode: "en", secondaryLanguages: [] }, "an explicitly empty list pins recognition to the primary language");
+  assert.deepEqual(settings("en", "<script>,../hi,h1"), { languageCode: "en", secondaryLanguages: [] });
+});
+
+test("key IDs and permission errors are actionable without revealing provider payloads", async t => {
+  for (const call of [() => createRealtimeTranscriptionToken(), () => synthesizeSpeech("Hello")]) {
+    t.mock.method(globalThis, "fetch", async () => Response.json({detail:{status:"api_key_id_used_as_api_key",message:"secret-provider-debug"}}, {status:401}));
+    await assert.rejects(call(), error => isVoiceError("ELEVENLABS_KEY_ID_CONFIGURED",503)(error) && !String(error).includes("secret-provider-debug"));
+    t.mock.restoreAll();
+  }
+  t.mock.method(globalThis, "fetch", async () => Response.json({detail:{status:"missing_permissions"}}, {status:403}));
+  await assert.rejects(synthesizeSpeech("Hello"), error => isVoiceError("ELEVENLABS_AUTH_INVALID",503)(error) && String(error).includes("text-to-speech"));
+});
+
+test("missing ElevenLabs key and malformed audio cannot silently use another TTS provider", async t => {
+  let calls = 0;
+  t.mock.method(globalThis, "fetch", async () => { calls++; return new Response("not an mp3 stream", {headers:{"content-type":"audio/mpeg"}}); });
+  process.env.ELEVENLABS_API_KEY = "";
+  await assert.rejects(synthesizeSpeech("Hello"), isVoiceError("ELEVENLABS_NOT_CONFIGURED",503));
+  assert.equal(calls,0);
+  process.env.ELEVENLABS_API_KEY = "test-key-not-a-credential";
+  await assert.rejects(synthesizeSpeech("Hello"), isVoiceError("TTS_RESPONSE_INVALID",502));
+  assert.equal(calls,1);
+});

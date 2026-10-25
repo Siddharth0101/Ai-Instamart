@@ -1,0 +1,2009 @@
+<!doctype html>
+<html lang="en" data-visualize-standalone>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src 'unsafe-inline' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>SayCart — Snacks, Party &amp; Edge Cases</title>
+<style>:root{color-scheme:light dark;background:light-dark(rgb(255 255 255), rgb(24 24 24))}html,body{margin:0}body{box-sizing:border-box;padding:1rem;background:inherit}iframe{display:block;width:100%;height:calc(100vh - 2rem);margin:0 auto;border:0}</style>
+</head>
+<body>
+<iframe sandbox="allow-scripts" referrerpolicy="no-referrer" title="SayCart — Snacks, Party &amp; Edge Cases" srcdoc="&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot; data-visualize-standalone&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+&lt;meta name=&quot;referrer&quot; content=&quot;no-referrer&quot;&gt;
+&lt;meta http-equiv=&quot;Content-Security-Policy&quot; content=&quot;default-src &#x27;none&#x27;; script-src &#x27;unsafe-inline&#x27; &#x27;unsafe-eval&#x27; &#x27;wasm-unsafe-eval&#x27; blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src &#x27;unsafe-inline&#x27; blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src &#x27;none&#x27;; object-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;&quot;&gt;
+&lt;title&gt;SayCart — Snacks, Party &amp;amp; Edge Cases&lt;/title&gt;
+&lt;style&gt;:root {
+  color-scheme: light dark;
+  background-color: var(
+    --background,
+    var(--color-background-primary, light-dark(rgb(255 255 255), rgb(24 24 24)))
+  ) !important;
+
+  /* Agent-facing contract; keep in sync with SKILL.md. */
+  --background: var(
+    --color-background-primary,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --card: color-mix(in oklab, var(--foreground) 5%, var(--background));
+  --card-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --popover: var(
+    --color-background-secondary,
+    light-dark(rgb(255 255 255), rgb(45 45 45))
+  );
+  --popover-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --primary: var(
+    --color-text-info,
+    light-dark(rgb(51 156 255), rgb(131 195 255))
+  );
+  --primary-foreground: var(
+    --color-text-inverse,
+    light-dark(rgb(255 255 255), rgb(13 13 13))
+  );
+  --secondary: var(
+    --color-background-secondary,
+    light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%))
+  );
+  --secondary-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
+  --muted-foreground: var(
+    --color-text-secondary,
+    light-dark(rgb(26 28 31 / 49.4%), rgb(255 255 255 / 49.8%))
+  );
+  --accent: var(
+    --color-background-info,
+    light-dark(rgb(229 242 255), rgb(13 39 63))
+  );
+  --accent-foreground: var(
+    --color-text-info,
+    light-dark(rgb(51 156 255), rgb(131 195 255))
+  );
+  --destructive: var(
+    --color-text-warning,
+    light-dark(rgb(226 85 7), rgb(255 133 73))
+  );
+  --border: var(
+    --color-border-secondary,
+    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
+  );
+  --input: var(
+    --color-border-primary,
+    light-dark(
+      rgb(26 28 31 / 11.8%),
+      color-mix(in oklab, rgb(0 0 0) 10%, transparent)
+    )
+  );
+  --ring: var(
+    --color-ring-primary,
+    light-dark(rgb(51 156 255), rgb(131 195 255 / 76%))
+  );
+  --font-size-base: var(--font-text-md-size, 14px);
+  --blue: light-dark(rgb(51 156 255), rgb(51 156 255));
+  --orange: light-dark(rgb(226 85 7), rgb(251 106 34));
+  --green: light-dark(rgb(0 162 64), rgb(64 201 119));
+  --red: light-dark(rgb(224 46 42), rgb(255 103 100));
+  --purple: light-dark(rgb(146 79 247), rgb(173 123 249));
+  --yellow: light-dark(rgb(255 195 0), rgb(255 210 64));
+  --viz-series-1: var(--primary);
+  --viz-series-2: light-dark(rgb(243 136 59), rgb(245 154 86));
+  --viz-series-3: light-dark(rgb(93 201 119), rgb(116 213 139));
+  --viz-series-4: light-dark(rgb(235 119 177), rgb(240 143 192));
+  --viz-series-5: light-dark(rgb(155 121 236), rgb(170 145 239));
+  --viz-series-6: light-dark(rgb(58 185 177), rgb(90 203 194));
+
+  /* Internal implementation variables; not part of the agent contract. */
+  --font-sans: -apple-system, system-ui, &quot;Segoe UI&quot;, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;,
+    monospace;
+  --font-size-normal: max(11px, var(--font-size-base));
+  --font-size-tooltip: calc(var(--font-size-base) - 1px);
+  --font-size-small: max(11px, calc(var(--font-size-base) - 2px));
+  --font-size-h1: calc(var(--font-size-normal) * 1.7142857143);
+  --font-size-h2: calc(var(--font-size-normal) * 1.4285714286);
+  --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
+  --font-weight-normal: 430;
+  --font-weight-medium: 500;
+  --icon-size: 16px;
+  --line-height-normal: calc(var(--font-size-normal) * 1.5);
+  --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
+  --line-height-small: calc(var(--font-size-small) + 4px);
+  --corner-shape: round;
+  --radius: var(--border-radius-lg, 10px);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-2xl: calc(var(--radius) * 1.6);
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 8%);
+  --checkmark-image: url(&quot;data:image/svg+xml,%3Csvg xmlns=&#x27;http://www.w3.org/2000/svg&#x27; viewBox=&#x27;0 0 17 17&#x27;%3E%3Cpath d=&#x27;M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z&#x27;/%3E%3C/svg%3E&quot;);
+
+  /* Legacy aliases; not part of the current agent contract. */
+  --viz-bg: transparent;
+  --viz-panel: var(--card);
+  --viz-border: var(--border);
+  --viz-text: var(--foreground);
+  --viz-muted: var(--muted-foreground);
+  --viz-accent: var(--primary);
+  --viz-accent-text: var(--primary-foreground);
+  --viz-accent-bg: var(--accent);
+  --viz-font-size: var(--font-size-base);
+  --viz-warning: var(--destructive);
+}
+
+:root[data-theme=&quot;light&quot;] {
+  color-scheme: light;
+}
+
+:root[data-theme=&quot;dark&quot;] {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html &gt; body {
+  /* Preserve MCP aliases for older inline renderers without creating :root cycles. */
+  --color-background-primary: var(
+    --background,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --color-text-primary: var(
+    --foreground,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --color-border-secondary: var(
+    --border,
+    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
+  );
+
+  margin: 0;
+  padding: var(--visualize-paint-gutter, 0px);
+  color: var(--foreground);
+  background: transparent !important;
+  font-family: var(--font-sans) !important;
+  font-size: var(--font-size-normal);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+}
+
+a {
+  color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
+  cursor: pointer;
+  font-weight: var(--font-weight-medium, 500);
+  text-decoration: none;
+  text-underline-offset: 2px;
+}
+
+a:is(:hover, :focus-visible) {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 0.5px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin-block: 0;
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h3,
+h4,
+h5,
+h6 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+}
+
+b,
+strong,
+th {
+  font-weight: var(--font-weight-medium);
+}
+
+code:not(pre code) {
+  display: inline;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  corner-shape: var(--corner-shape);
+  background: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  word-break: break-word;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--foreground);
+  font: inherit;
+  text-align: start;
+}
+
+.table :is(th, td) {
+  padding-block: 10px;
+  padding-inline: 0 24px;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.table-responsive &gt; .table :is(th, td) {
+  overflow-wrap: break-word;
+}
+
+.table :is(th, td):last-child {
+  padding-inline-end: 0;
+}
+
+.table :is(caption, thead th) {
+  font-weight: 600;
+}
+
+.table thead th {
+  padding-block: 8px;
+  border-bottom-color: color-mix(in srgb, var(--foreground) 16%, transparent);
+}
+
+.table tbody tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+
+.table.table-sm :is(th, td) {
+  padding-block: 6px;
+}
+
+.table.table-sm :is(th, td):not(:last-child) {
+  padding-inline-end: 16px;
+}
+
+.table :is(.text-end, [align=&quot;right&quot;]) {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.table :is(.text-center, [align=&quot;center&quot;]) {
+  text-align: center;
+}
+
+.table .text-nowrap {
+  white-space: nowrap;
+}
+
+#widget {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  background: transparent !important;
+}
+
+.card {
+  min-width: 0;
+  padding: 12px;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  border-radius: var(--radius-2xl);
+  corner-shape: var(--corner-shape);
+  color: var(--card-foreground);
+  background: var(--card);
+}
+
+#widget &gt; :not(.card, .progress) {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: min(
+    20rem,
+    var(--tooltip-available-width, calc(100vw - 10px)),
+    calc(100vw - 10px)
+  );
+  max-height: min(
+    var(--tooltip-available-height, calc(100vh - 10px)),
+    calc(100vh - 10px)
+  );
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  corner-shape: var(--corner-shape);
+  color: var(--popover-foreground);
+  background: var(--popover);
+  box-shadow: none;
+  font-size: var(--font-size-tooltip);
+  line-height: var(--line-height-tooltip);
+  overflow-wrap: break-word;
+  white-space: normal;
+  pointer-events: none;
+  user-select: none;
+}
+
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(180px, 24%), 1fr));
+  gap: 10px;
+}
+
+.viz-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.viz-stat-value {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+.viz-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+hr {
+  width: 100%;
+  height: 1px;
+  margin-block: 6px;
+  border: 0;
+  background: var(--border);
+}
+
+.nav {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.progress {
+  display: flex;
+  height: 8px;
+  margin-block: calc((var(--line-height-normal, 1.5em) - 8px) / 2);
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+}
+
+.progress-bar:only-child {
+  border-radius: var(--radius-full);
+}
+
+.progress-bar {
+  height: 100%;
+  flex-shrink: 0;
+  border: 0;
+  background: var(--viz-series-1);
+}
+
+.viz-badge {
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  color: var(--accent-foreground);
+  background: var(--accent);
+  font-weight: var(--font-weight-medium);
+}
+
+small,
+.text-small,
+.viz-badge {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.text-muted {
+  color: var(--muted-foreground);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.viz-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.viz-controls &gt; .form-label {
+  display: grid;
+  min-width: min(100%, 260px);
+  flex: 1 1 280px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin-bottom: 0;
+}
+
+.viz-controls &gt; .form-label &gt; :is(.form-control, .form-range, .form-select) {
+  grid-column: 1 / -1;
+}
+
+.btn,
+.nav-link,
+.form-check-input,
+.form-control,
+.form-range,
+.form-select {
+  font: inherit;
+}
+
+.btn,
+.nav-link {
+  appearance: button;
+  display: inline-flex;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0 8px;
+  -webkit-app-region: no-drag;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  corner-shape: var(--corner-shape);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: var(--cursor-interaction, pointer);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.btn:is(.btn-block, .viz-tile) {
+  inline-size: 100%;
+}
+
+.btn.viz-tile {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+a.btn {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:not(:disabled):hover,
+.nav-link:not(:disabled):not([aria-disabled=&quot;true&quot;]):hover {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.btn-primary {
+  border-color: transparent;
+  color: var(--primary-foreground);
+  background: var(--foreground);
+  background-clip: padding-box;
+}
+
+.btn-primary .text-muted {
+  color: color-mix(in srgb, var(--primary-foreground) 50%, transparent);
+}
+
+.btn-primary:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 80%, transparent);
+  background-clip: padding-box;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.btn-ghost:not(:disabled):hover {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.nav-pills .nav-link {
+  min-width: 0;
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.nav-justified .nav-link {
+  flex: 1 1 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.nav-pills .nav-link.active {
+  color: var(--foreground);
+  background: var(--muted);
+}
+
+.btn:disabled,
+.nav-link:disabled,
+.nav-link[aria-disabled=&quot;true&quot;] {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+[data-lucide] {
+  stroke-width: 1.6;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--foreground);
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  padding: 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  corner-shape: var(--corner-shape);
+  color: var(--foreground);
+  background: var(--secondary);
+}
+
+.form-control::placeholder {
+  color: var(--muted-foreground);
+}
+
+.form-control[type=&quot;file&quot;] {
+  padding: 0;
+  overflow: hidden;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control[type=&quot;file&quot;]::file-selector-button {
+  min-height: 26px;
+  margin-right: 8px;
+  padding: 0 8px;
+  border: 0;
+  border-right: 1px solid var(--input);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: inherit;
+  font: inherit;
+}
+
+.form-control[type=&quot;file&quot;]:not(:disabled):hover::file-selector-button {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-control-color[type=&quot;color&quot;] {
+  width: 40px;
+  height: 28px;
+  padding: 3px;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control-color[type=&quot;color&quot;]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.form-control-color[type=&quot;color&quot;]::-webkit-color-swatch {
+  border: 0;
+  border-radius: calc(var(--radius-lg) - 4px);
+  corner-shape: var(--corner-shape);
+}
+
+textarea.form-control {
+  height: auto;
+  min-height: 72px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.form-control:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.form-select {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 32px 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  corner-shape: var(--corner-shape);
+  color: var(--foreground);
+  background-color: var(--secondary);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%),
+    linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 10px) 50%;
+  background-repeat: no-repeat;
+  background-size: 4px 4px;
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-select:not(:disabled):hover {
+  background-color: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-select:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-check {
+  display: flex;
+  min-height: 20px;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-check-input {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  margin: 0;
+  border: 1px solid var(--input);
+  color: var(--primary-foreground);
+  background-color: transparent;
+  cursor: var(--cursor-interaction, default);
+  transition:
+    background-color 150ms,
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;] {
+  border-color: var(--input);
+  border-radius: var(--radius-sm);
+  corner-shape: var(--corner-shape);
+  background-color: var(--secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input:not(:disabled):not(:checked):hover {
+  background-color: var(--card);
+}
+
+.form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;]:checked {
+  border-color: var(--primary);
+  background-color: var(--primary);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input[type=&quot;checkbox&quot;]:checked::before {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-foreground);
+  content: &quot;&quot;;
+  mask: var(--checkmark-image) center / 12px 12px no-repeat;
+}
+
+.form-check-input[type=&quot;radio&quot;] {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+}
+
+.form-check-input[type=&quot;radio&quot;]:checked {
+  border: 2px solid var(--primary);
+  background:
+    radial-gradient(circle, var(--primary-foreground) 0 2.5px, transparent 3px),
+    var(--primary);
+}
+
+.form-check:not(.form-switch) .form-check-input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+}
+
+.form-switch .form-check-input:disabled,
+.form-switch .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-check-label {
+  color: var(--foreground);
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-switch .form-check-input {
+  position: relative;
+  width: 32px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  box-shadow: none;
+  transition: background-color 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid light-dark(var(--primary-foreground), var(--foreground));
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+  box-shadow: var(--shadow-sm);
+  content: &quot;&quot;;
+  transform: translate(2px, -50%);
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input:checked {
+  background: var(--primary);
+}
+
+.form-switch .form-check-input:checked::before {
+  transform: translate(14px, -50%);
+}
+
+.form-switch .form-check-input:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.form-range {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 28px;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border: 0;
+  accent-color: var(--primary);
+  background: linear-gradient(
+      color-mix(in srgb, var(--foreground) 7%, transparent),
+      color-mix(in srgb, var(--foreground) 7%, transparent)
+    )
+    center / 100% 2px no-repeat;
+}
+
+.form-range::-webkit-slider-runnable-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-webkit-slider-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range::-moz-range-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-moz-range-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.btn:not(.btn-primary, .viz-tile):is(
+  [aria-pressed=&quot;true&quot;],
+  [aria-selected=&quot;true&quot;],
+  .is-selected
+) {
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+
+.btn.viz-tile:is([aria-pressed=&quot;true&quot;], [aria-selected=&quot;true&quot;], .is-selected) {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.btn:focus-visible,
+.nav-link:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .btn,
+  .nav-link,
+  .form-control,
+  .form-select {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Keep small-screen WebKit from zooming when a text field receives focus. */
+  .form-control,
+  .form-select {
+    font-size: max(16px, var(--font-size-normal));
+  }
+
+  .form-control[type=&quot;file&quot;]::file-selector-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .form-control-color[type=&quot;color&quot;] {
+    width: 44px;
+    height: 44px;
+  }
+
+  .form-control:is(
+    [type=&quot;date&quot;],
+    [type=&quot;datetime-local&quot;],
+    [type=&quot;month&quot;],
+    [type=&quot;time&quot;],
+    [type=&quot;week&quot;]
+  ) {
+    min-width: 0;
+    max-width: 100%;
+    padding-block: 8px;
+  }
+
+  .form-check {
+    min-height: 44px;
+    padding-inline: 15px;
+  }
+
+  .form-check-input {
+    position: relative;
+  }
+
+  .form-check-input::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    content: &quot;&quot;;
+    transform: translate(-50%, -50%);
+  }
+
+  .form-check-label {
+    display: inline-flex;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .form-range {
+    height: 44px;
+    touch-action: pan-y;
+  }
+
+  .form-range::-webkit-slider-runnable-track {
+    height: 44px;
+  }
+
+  .form-range::-moz-range-track {
+    height: 44px;
+  }
+
+  .form-range::-webkit-slider-thumb {
+    margin-top: 12px;
+  }
+}
+
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+#widget &gt; svg {
+  width: 100%;
+}
+
+/* Model-authored chart rules can otherwise stretch icons after these styles load. */
+svg.lucide {
+  display: block;
+  width: var(--icon-size) !important;
+  height: var(--icon-size) !important;
+  flex: none;
+  margin: 0 !important;
+  stroke-width: 1.6;
+}
+
+.text-warning,
+.text-destructive {
+  color: var(--destructive);
+}
+
+html&gt;body{padding:0}&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;saycart-food-architecture&quot;&gt;
+  &lt;style&gt;
+    #saycart-food-architecture { color:var(--foreground); }
+    #saycart-food-architecture [hidden] { display:none !important; }
+    #saycart-food-architecture .sc-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; }
+    #saycart-food-architecture .sc-heading { font-weight:500; }
+    #saycart-food-architecture .sc-panel { padding-top:20px; }
+    #saycart-food-architecture .sc-map { display:flex; flex-direction:column; align-items:center; gap:4px; }
+    #saycart-food-architecture .sc-row { width:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    #saycart-food-architecture .sc-stage { width:min(100%,460px); text-align:center; }
+    #saycart-food-architecture .sc-stage p, #saycart-food-architecture .sc-node p { margin:6px 0 0; }
+    #saycart-food-architecture .sc-node { min-width:0; text-align:center; }
+    #saycart-food-architecture .sc-arrow { color:var(--muted-foreground); text-align:center; }
+    #saycart-food-architecture .sc-routes { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr); gap:20px; width:100%; margin:8px 0; }
+    #saycart-food-architecture .sc-route-label { margin-bottom:10px; text-align:center; font-weight:500; }
+    #saycart-food-architecture .sc-foot { margin-top:16px; padding-top:12px; border-top:1px solid var(--border); }
+    #saycart-food-architecture .sc-detail { margin-top:16px; min-height:3em; }
+    #saycart-food-architecture .sc-question { margin:12px 0; font-weight:500; }
+    #saycart-food-architecture .sc-flow-label { display:flex; flex-wrap:wrap; gap:6px 12px; color:var(--muted-foreground); margin:18px 0; }
+    #saycart-food-architecture .sc-dialogue { display:grid; gap:16px; margin:20px 0; }
+    #saycart-food-architecture .sc-dialogue p { margin:4px 0 0; }
+    #saycart-food-architecture .sc-choice-wrap { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+    #saycart-food-architecture .sc-event { margin-top:20px; padding-top:12px; border-top:1px solid var(--border); }
+    #saycart-food-architecture .sc-routing-note { margin-top:12px; }
+    #saycart-food-architecture .sc-example-controls { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:18px; }
+    #saycart-food-architecture .sc-example-exchange { display:grid; gap:18px; margin:22px 0; }
+    #saycart-food-architecture .sc-example-exchange p { margin:5px 0 0; }
+    #saycart-food-architecture .sc-example-title { font-weight:500; margin-top:20px; }
+    #saycart-food-architecture .sc-example-path { display:flex; flex-wrap:wrap; gap:6px 10px; margin:16px 0; }
+    #saycart-food-architecture .sc-example-path .sc-current { font-weight:500; color:var(--foreground); }
+    #saycart-food-architecture .sc-map-example { color:var(--muted-foreground); }
+    #saycart-food-architecture .sc-party-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:18px; }
+    #saycart-food-architecture .sc-party-fields .form-label { min-width:0; }
+    #saycart-food-architecture .sc-party-summary { margin:18px 0; }
+    #saycart-food-architecture .sc-party-summary p { margin:8px 0; }
+    #saycart-food-architecture .sc-cases { margin-top:18px; }
+    #saycart-food-architecture .sc-cases details { padding:12px 0; border-bottom:1px solid var(--border); }
+    #saycart-food-architecture .sc-cases summary { cursor:pointer; font-weight:500; }
+    #saycart-food-architecture .sc-cases dl { display:grid; grid-template-columns:minmax(90px,1fr) minmax(0,4fr); gap:8px 14px; margin:14px 0 4px; }
+    #saycart-food-architecture .sc-cases dt { color:var(--muted-foreground); }
+    #saycart-food-architecture .sc-cases dd { margin:0; }
+    #saycart-food-architecture .sc-capabilities { display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:12px; }
+    #saycart-food-architecture .sc-screen {
+      --sc-surface:light-dark(#fffaf4,#191918);
+      --sc-surface-raised:light-dark(#ffffff,#252522);
+      --sc-ink:light-dark(#24251f,#f3f0e8);
+      --sc-subtle:light-dark(#64655e,#bdbbb0);
+      --sc-stroke:light-dark(#e5dfd5,#45443b);
+      --sc-orange:light-dark(#b94419,#ffab7b);
+      --sc-orb:light-dark(#f4b582,#885136);
+      color:var(--sc-ink); background:var(--sc-surface); border:1px solid var(--sc-stroke); border-radius:22px; max-width:620px; margin:18px auto 0; overflow:hidden;
+    }
+    #saycart-food-architecture .sc-screen-header { padding:16px 20px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--sc-stroke); }
+    #saycart-food-architecture .sc-screen-label { font-weight:500; }
+    #saycart-food-architecture .sc-screen-meta { color:var(--sc-subtle); }
+    #saycart-food-architecture .sc-mode-control { display:flex; gap:6px; }
+    #saycart-food-architecture .sc-screen button { font:inherit; color:var(--sc-ink); background:var(--sc-surface-raised); border:1px solid var(--sc-stroke); border-radius:12px; padding:9px 12px; cursor:pointer; min-height:44px; }
+    #saycart-food-architecture .sc-screen button[aria-pressed=&quot;true&quot;] { color:var(--sc-surface); background:var(--sc-ink); }
+    #saycart-food-architecture .sc-screen-main { padding:20px; }
+    #saycart-food-architecture .sc-voice { display:flex; flex-direction:column; align-items:center; gap:12px; padding:12px 0 24px; }
+    #saycart-food-architecture .sc-orb { width:100px; height:100px; border-radius:50%; background:radial-gradient(circle at 32% 28%,var(--sc-orb),var(--sc-orange)); }
+    #saycart-food-architecture .sc-voice-status { color:var(--sc-subtle); }
+    #saycart-food-architecture .sc-caption { text-align:center; max-width:420px; margin:0; }
+    #saycart-food-architecture .sc-messages { display:grid; gap:14px; margin-bottom:20px; }
+    #saycart-food-architecture .sc-messages p { margin:3px 0 0; }
+    #saycart-food-architecture .sc-messages strong { font-weight:500; }
+    #saycart-food-architecture .sc-offers { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    #saycart-food-architecture .sc-offer { background:var(--sc-surface-raised); border:1px solid var(--sc-stroke); border-radius:16px; padding:14px; display:grid; gap:8px; min-width:0; }
+    #saycart-food-architecture .sc-offer-illustration { display:flex; align-items:center; gap:8px; color:var(--sc-orange); }
+    #saycart-food-architecture .sc-offer-name { font-weight:500; }
+    #saycart-food-architecture .sc-offer-meta { color:var(--sc-subtle); }
+    #saycart-food-architecture .sc-audio-controls { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:22px; }
+    #saycart-food-architecture .sc-composer { display:flex; gap:8px; margin-top:20px; }
+    #saycart-food-architecture .sc-composer input { min-width:0; flex:1; font:inherit; color:var(--sc-ink); background:var(--sc-surface-raised); border:1px solid var(--sc-stroke); border-radius:12px; padding:10px 12px; }
+    #saycart-food-architecture .sc-preview-label { text-align:center; margin-top:12px; }
+    #saycart-food-architecture .sc-lifecycle { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:18px; }
+    @media(max-width:480px) {
+      #saycart-food-architecture .sc-party-fields { grid-template-columns:minmax(0,1fr); }
+      #saycart-food-architecture .sc-cases dl { grid-template-columns:minmax(0,1fr); gap:5px; }
+      #saycart-food-architecture .sc-cases dd { margin-bottom:8px; }
+      #saycart-food-architecture .sc-routes { grid-template-columns:minmax(0,1fr); gap:18px; }
+      #saycart-food-architecture .sc-routes .sc-row { grid-template-columns:minmax(0,1fr); }
+      #saycart-food-architecture .sc-offers { grid-template-columns:minmax(0,1fr); }
+      #saycart-food-architecture .sc-screen-main, #saycart-food-architecture .sc-screen-header { padding:14px; }
+      #saycart-food-architecture .sc-composer { flex-wrap:wrap; }
+      #saycart-food-architecture .sc-composer input { flex-basis:100%; }
+    }
+  &lt;/style&gt;
+
+  &lt;div class=&quot;sc-head&quot;&gt;
+    &lt;span class=&quot;sc-heading&quot;&gt;SayCart · meals, snacks &amp;amp; party planning&lt;/span&gt;
+    &lt;span class=&quot;viz-badge&quot;&gt;Proposed design&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;nav nav-pills&quot; role=&quot;tablist&quot; aria-label=&quot;Architecture views&quot;&gt;
+    &lt;button class=&quot;nav-link active&quot; id=&quot;sc-examples-tab&quot; role=&quot;tab&quot; aria-controls=&quot;sc-examples-panel&quot; aria-selected=&quot;true&quot; type=&quot;button&quot;&gt;Examples · samjho flow&lt;/button&gt;
+    &lt;button class=&quot;nav-link&quot; id=&quot;sc-party-tab&quot; role=&quot;tab&quot; aria-controls=&quot;sc-party-panel&quot; aria-selected=&quot;false&quot; type=&quot;button&quot;&gt;Party planner&lt;/button&gt;
+    &lt;button class=&quot;nav-link&quot; id=&quot;sc-cases-tab&quot; role=&quot;tab&quot; aria-controls=&quot;sc-cases-panel&quot; aria-selected=&quot;false&quot; type=&quot;button&quot;&gt;Edge cases&lt;/button&gt;
+    &lt;button class=&quot;nav-link&quot; id=&quot;sc-map-tab&quot; role=&quot;tab&quot; aria-controls=&quot;sc-map-panel&quot; aria-selected=&quot;false&quot; type=&quot;button&quot;&gt;System map&lt;/button&gt;
+    &lt;button class=&quot;nav-link&quot; id=&quot;sc-journey-tab&quot; role=&quot;tab&quot; aria-controls=&quot;sc-journey-panel&quot; aria-selected=&quot;false&quot; type=&quot;button&quot;&gt;Conversation flow&lt;/button&gt;
+    &lt;button class=&quot;nav-link&quot; id=&quot;sc-modes-tab&quot; role=&quot;tab&quot; aria-controls=&quot;sc-modes-panel&quot; aria-selected=&quot;false&quot; type=&quot;button&quot;&gt;Text &amp;amp; voice&lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;sc-panel&quot; id=&quot;sc-examples-panel&quot; role=&quot;tabpanel&quot; aria-labelledby=&quot;sc-examples-tab&quot;&gt;
+    &lt;div class=&quot;viz-controls&quot;&gt;&lt;label class=&quot;form-label&quot;&gt;Complete flow choose karo&lt;select class=&quot;form-select&quot; id=&quot;sc-example-picker&quot;&gt;&lt;option value=&quot;snacks&quot;&gt;“Snake” / snacks → clarify → purchase&lt;/option&gt;&lt;option value=&quot;party&quot;&gt;Tonight party → guest groups → menu → delivery&lt;/option&gt;&lt;option value=&quot;lunch&quot;&gt;Lunch → biryani → order&lt;/option&gt;&lt;option value=&quot;chips&quot;&gt;Packaged snacks → Instamart&lt;/option&gt;&lt;option value=&quot;momos&quot;&gt;Prepared snacks → restaurants&lt;/option&gt;&lt;option value=&quot;mixed&quot;&gt;Chips + momos → separate purchases&lt;/option&gt;&lt;option value=&quot;healthy&quot;&gt;“Healthy snacks” → specific preferences&lt;/option&gt;&lt;option value=&quot;birthday&quot;&gt;Birthday → cake + food + supplies&lt;/option&gt;&lt;option value=&quot;night&quot;&gt;Raat ko breakfast → dosa&lt;/option&gt;&lt;option value=&quot;reorder&quot;&gt;Usual order → fresh availability&lt;/option&gt;&lt;option value=&quot;scheduled&quot;&gt;Tomorrow / tonight → plan, not reservation&lt;/option&gt;&lt;option value=&quot;changes&quot;&gt;Guest count / location / budget changes&lt;/option&gt;&lt;option value=&quot;voice&quot;&gt;Voice correction → same task&lt;/option&gt;&lt;option value=&quot;failure&quot;&gt;Provider / stock / checkout failures&lt;/option&gt;&lt;option value=&quot;postorder&quot;&gt;Placed order → tracking / support&lt;/option&gt;&lt;option value=&quot;unsupported&quot;&gt;Unrecognized request → clarify / handoff&lt;/option&gt;&lt;/select&gt;&lt;/label&gt;&lt;/div&gt;
+    &lt;div class=&quot;sc-example-path text-small text-muted&quot; id=&quot;sc-example-path&quot; aria-label=&quot;Example steps&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;sc-example-title&quot; id=&quot;sc-example-step-title&quot;&gt;Snacks flow · loading steps&lt;/div&gt;
+    &lt;div class=&quot;sc-example-exchange&quot; aria-live=&quot;polite&quot; aria-atomic=&quot;true&quot;&gt;
+      &lt;div&gt;&lt;span class=&quot;text-small text-muted&quot;&gt;User bolta hai&lt;/span&gt;&lt;p id=&quot;sc-example-user&quot;&gt;“Bhai, khana order karna hai.”&lt;/p&gt;&lt;/div&gt;
+      &lt;div&gt;&lt;span class=&quot;text-small text-muted&quot;&gt;Agent ka reply&lt;/span&gt;&lt;p id=&quot;sc-example-reply&quot;&gt;“Abhi 1:10 PM hai. Lunch chahiye, kuch light, ya koi dish mind mein hai?”&lt;/p&gt;&lt;/div&gt;
+      &lt;div&gt;&lt;span class=&quot;text-small text-muted&quot;&gt;Background mein kya hota hai&lt;/span&gt;&lt;p id=&quot;sc-example-work&quot;&gt;Local time + saved address dekho. Abhi sirf preference poochho; cart change nahi.&lt;/p&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;sc-example-offers&quot; hidden&gt;
+      &lt;div class=&quot;table-responsive&quot;&gt;&lt;table class=&quot;table table-sm&quot;&gt;&lt;caption&gt;Illustrative menu results · final fees abhi verify nahi hui&lt;/caption&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Service / restaurant&lt;/th&gt;&lt;th&gt;Dish / portion&lt;/th&gt;&lt;th class=&quot;text-end&quot;&gt;Menu price&lt;/th&gt;&lt;th class=&quot;text-end&quot;&gt;ETA&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;Swiggy · Demo A&lt;/td&gt;&lt;td&gt;Chicken dum biryani · 1 person&lt;/td&gt;&lt;td class=&quot;text-end tabular-nums&quot;&gt;₹280&lt;/td&gt;&lt;td class=&quot;text-end tabular-nums&quot;&gt;32 min&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Zomato · Demo B&lt;/td&gt;&lt;td&gt;Chicken biryani · 1 person&lt;/td&gt;&lt;td class=&quot;text-end tabular-nums&quot;&gt;₹300&lt;/td&gt;&lt;td class=&quot;text-end tabular-nums&quot;&gt;25 min&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;sc-example-quote&quot; hidden&gt;
+      &lt;table class=&quot;table table-sm&quot;&gt;&lt;caption&gt;Illustrative final review · Swiggy / Demo A&lt;/caption&gt;&lt;tbody&gt;&lt;tr&gt;&lt;th&gt;Item&lt;/th&gt;&lt;td&gt;1 chicken dum biryani · mild&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;th&gt;Menu subtotal&lt;/th&gt;&lt;td class=&quot;tabular-nums&quot;&gt;₹280&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;th&gt;All fees + taxes&lt;/th&gt;&lt;td class=&quot;tabular-nums&quot;&gt;₹45&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;th&gt;Final payable&lt;/th&gt;&lt;td class=&quot;tabular-nums&quot;&gt;₹325&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;th&gt;Full address&lt;/th&gt;&lt;td&gt;Demo Home · Flat 4, 12 Example Lane, Demo City&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;th&gt;Payment&lt;/th&gt;&lt;td&gt;UPI · user approval required&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;sc-example-controls&quot;&gt;&lt;button class=&quot;btn&quot; id=&quot;sc-example-prev&quot; type=&quot;button&quot; disabled&gt;← Previous&lt;/button&gt;&lt;span class=&quot;text-small&quot; id=&quot;sc-example-position&quot;&gt;Step 1 of 9&lt;/span&gt;&lt;button class=&quot;btn btn-primary&quot; id=&quot;sc-example-next&quot; type=&quot;button&quot;&gt;Next step →&lt;/button&gt;&lt;/div&gt;
+    &lt;div class=&quot;sc-foot text-small&quot;&gt;Proposed flows · illustrative values · no live searches or purchases · unsupported cases → clarify or handoff&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;sc-panel&quot; id=&quot;sc-party-panel&quot; role=&quot;tabpanel&quot; aria-labelledby=&quot;sc-party-tab&quot; hidden&gt;
+    &lt;div class=&quot;sc-heading&quot;&gt;“Raat 8 baje party hai—sab ke liye khana plan karo.”&lt;/div&gt;
+    &lt;div class=&quot;sc-flow-label text-small&quot;&gt;&lt;span&gt;Guests + preferences&lt;/span&gt;&lt;span&gt;→ serving coverage&lt;/span&gt;&lt;span&gt;→ menu + supplies&lt;/span&gt;&lt;span&gt;→ capability / timing checks&lt;/span&gt;&lt;span&gt;→ fresh quotes + approvals&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;table-responsive&quot;&gt;&lt;table class=&quot;table table-sm&quot;&gt;&lt;caption&gt;Fictional guest mix · counts ko change karke plan dekho&lt;/caption&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Guest group&lt;/th&gt;&lt;th&gt;Total&lt;/th&gt;&lt;th&gt;Veg&lt;/th&gt;&lt;th&gt;Remaining&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;
+      &lt;tr&gt;&lt;th&gt;Adults&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;sc-party-adults&quot;&gt;Adults total&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;sc-party-adults&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;200&quot; value=&quot;8&quot;&gt;&lt;/td&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;sc-party-adults-veg&quot;&gt;Vegetarian adults&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;sc-party-adults-veg&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;200&quot; value=&quot;4&quot;&gt;&lt;/td&gt;&lt;td id=&quot;sc-party-adults-nonveg&quot;&gt;4 non-veg&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;th&gt;Teens&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;sc-party-teens&quot;&gt;Teens total&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;sc-party-teens&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;200&quot; value=&quot;0&quot;&gt;&lt;/td&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;sc-party-teens-veg&quot;&gt;Vegetarian teens&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;sc-party-teens-veg&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;200&quot; value=&quot;0&quot;&gt;&lt;/td&gt;&lt;td id=&quot;sc-party-teens-nonveg&quot;&gt;0 non-veg&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;th&gt;Children · example 5–12&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;sc-party-kids&quot;&gt;Children total&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;sc-party-kids&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;200&quot; value=&quot;4&quot;&gt;&lt;/td&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;sc-party-kids-veg&quot;&gt;Vegetarian children&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;sc-party-kids-veg&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;200&quot; value=&quot;4&quot;&gt;&lt;/td&gt;&lt;td id=&quot;sc-party-kids-nonveg&quot;&gt;0 non-veg&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;th&gt;Younger children / infants&lt;/th&gt;&lt;td&gt;&lt;label class=&quot;sr-only&quot; for=&quot;sc-party-young&quot;&gt;Younger children and infants total&lt;/label&gt;&lt;input class=&quot;form-control&quot; id=&quot;sc-party-young&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;200&quot; value=&quot;0&quot;&gt;&lt;/td&gt;&lt;td colspan=&quot;2&quot;&gt;Caregiver chooses individual food; excluded from bulk estimate.&lt;/td&gt;&lt;/tr&gt;
+    &lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
+    &lt;div class=&quot;sc-party-fields&quot;&gt;
+      &lt;label class=&quot;form-label&quot;&gt;Children’s appetite · example assumption&lt;select class=&quot;form-select&quot; id=&quot;sc-party-appetite&quot;&gt;&lt;option value=&quot;0.5&quot;&gt;Small · 0.5 adult serving&lt;/option&gt;&lt;option value=&quot;0.75&quot; selected&gt;Medium · 0.75 adult serving&lt;/option&gt;&lt;option value=&quot;1&quot;&gt;Adult-size · 1 serving&lt;/option&gt;&lt;/select&gt;&lt;/label&gt;
+      &lt;label class=&quot;form-label&quot;&gt;All-in event budget · ₹&lt;input class=&quot;form-control&quot; id=&quot;sc-party-budget&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;500000&quot; value=&quot;4000&quot;&gt;&lt;/label&gt;
+      &lt;label class=&quot;form-label&quot;&gt;Example local serve-by time · Asia/Kolkata&lt;input class=&quot;form-control&quot; id=&quot;sc-party-time&quot; type=&quot;time&quot; value=&quot;20:00&quot;&gt;&lt;/label&gt;
+      &lt;label class=&quot;form-label&quot;&gt;Example event date&lt;input class=&quot;form-control&quot; id=&quot;sc-party-date&quot; type=&quot;date&quot; value=&quot;2026-10-22&quot;&gt;&lt;/label&gt;
+      &lt;label class=&quot;form-label&quot;&gt;Leftover preference&lt;select class=&quot;form-select&quot; id=&quot;sc-party-buffer&quot;&gt;&lt;option value=&quot;0&quot;&gt;Minimum leftovers · no extra buffer&lt;/option&gt;&lt;option value=&quot;0.1&quot;&gt;Small buffer · +10% estimated coverage&lt;/option&gt;&lt;/select&gt;&lt;/label&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;sc-party-summary&quot; aria-live=&quot;polite&quot; aria-atomic=&quot;true&quot;&gt;&lt;p id=&quot;sc-party-error&quot; class=&quot;text-destructive&quot; role=&quot;alert&quot; hidden&gt;&lt;/p&gt;&lt;p class=&quot;sc-heading&quot; id=&quot;sc-party-count&quot;&gt;&lt;/p&gt;&lt;p id=&quot;sc-party-coverage&quot;&gt;&lt;/p&gt;&lt;p id=&quot;sc-party-budget-summary&quot;&gt;&lt;/p&gt;&lt;p id=&quot;sc-party-young-note&quot;&gt;&lt;/p&gt;&lt;/div&gt;
+    &lt;div class=&quot;table-responsive&quot;&gt;&lt;table class=&quot;table table-sm&quot;&gt;&lt;caption&gt;Menu proposal by actual preferences · age alone decides neither diet nor appetite&lt;/caption&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Group&lt;/th&gt;&lt;th&gt;Example options to confirm&lt;/th&gt;&lt;th&gt;Quantity rule&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;
+      &lt;tr&gt;&lt;td&gt;Adults / teens&lt;/td&gt;&lt;td&gt;Veg: paneer + rice/roti; non-veg: chicken + rice/roti. Cuisine, spice and appetite are user choices.&lt;/td&gt;&lt;td&gt;Use the chosen meal’s merchant-listed serving coverage.&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td&gt;Children&lt;/td&gt;&lt;td&gt;Ask familiar foods and spice preference. If requested: mild veg rice, idli, or simple sandwiches; offer the shared menu too.&lt;/td&gt;&lt;td&gt;Use caregiver-confirmed appetite; no automatic child meal stereotype.&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td&gt;Younger children&lt;/td&gt;&lt;td&gt;Caregiver selects suitable familiar foods individually.&lt;/td&gt;&lt;td&gt;Do not infer age-appropriate foods or automatic bulk portions.&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td&gt;Everyone / supplies&lt;/td&gt;&lt;td&gt;Ask about water/drinks, dessert, starters, plates, cups and napkins; subtract supplies already at home.&lt;/td&gt;&lt;td&gt;Extras are opt-in; count total guests once; avoid duplicate sides.&lt;/td&gt;&lt;/tr&gt;
+    &lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
+    &lt;div class=&quot;sc-event&quot;&gt;&lt;span class=&quot;text-small text-muted&quot;&gt;Blocking questions before menu execution&lt;/span&gt;&lt;div&gt;Veg / non-veg split confirmed? Jain / vegan / allergies or cross-contact concerns? Exact event date, address and serve-by time? Dinner only, or starters + dinner? Anything already available?&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;sc-foot text-small&quot;&gt;Portions above are planning assumptions, not pack counts. Shared mains are counted together; merchant servings must be checked before converting to cart quantities.&lt;/div&gt;
+    &lt;div class=&quot;sc-foot text-small&quot;&gt;Execution limits: Swiggy Food’s current guide documents a ₹1,000 Builders Club cart cap and immediate delivery. A larger party plan can require a catering / direct-provider handoff. Never split purchases to evade a cap; no guaranteed synchronized arrivals.&lt;/div&gt;
+    &lt;div class=&quot;sc-capabilities text-small&quot;&gt;&lt;a href=&quot;https://mcp.swiggy.com/builders/docs/build/recipes/order-food/&quot; target=&quot;_blank&quot; rel=&quot;noreferrer&quot;&gt;Official Food limits&lt;/a&gt;&lt;a href=&quot;https://mcp.swiggy.com/builders/docs/build/recipes/combined/&quot; target=&quot;_blank&quot; rel=&quot;noreferrer&quot;&gt;Timing limits&lt;/a&gt;&lt;a href=&quot;https://github.com/Zomato/mcp-server-manifest&quot; target=&quot;_blank&quot; rel=&quot;noreferrer&quot;&gt;Zomato access&lt;/a&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;sc-panel&quot; id=&quot;sc-cases-panel&quot; role=&quot;tabpanel&quot; aria-labelledby=&quot;sc-cases-tab&quot; hidden&gt;
+    &lt;div class=&quot;viz-controls&quot;&gt;&lt;label class=&quot;form-label&quot;&gt;Edge-case category&lt;select class=&quot;form-select&quot; id=&quot;sc-case-category&quot;&gt;&lt;/select&gt;&lt;/label&gt;&lt;/div&gt;
+    &lt;div class=&quot;sc-foot text-small&quot; id=&quot;sc-case-count&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;sc-cases&quot; id=&quot;sc-case-list&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;sc-foot text-small&quot;&gt;Coverage is a design catalogue, not a claim that every real-world situation is known. Unknown input → clarify; unknown capability → stop that action; unknown purchase result → reconcile before retry.&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;sc-panel&quot; id=&quot;sc-map-panel&quot; role=&quot;tabpanel&quot; aria-labelledby=&quot;sc-map-tab&quot; hidden&gt;
+    &lt;div class=&quot;sc-map&quot; aria-label=&quot;Text and voice share a stateful shopping agent; packaged products route to Instamart, prepared food to Swiggy Food and Zomato; results lead to selection, a quote, approval, and order monitoring.&quot;&gt;
+      &lt;div class=&quot;sc-row&quot;&gt;
+        &lt;div class=&quot;sc-node&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;text&quot;&gt;&lt;i data-lucide=&quot;message-circle&quot; aria-hidden=&quot;true&quot;&gt;&lt;/i&gt; Text interface&lt;/button&gt;&lt;p class=&quot;text-small&quot;&gt;Conversation · items · cart&lt;/p&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;“Chicken biryani ₹400 ke andar” type karo&lt;/p&gt;&lt;/div&gt;
+        &lt;div class=&quot;sc-node&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;voice&quot;&gt;&lt;i data-lucide=&quot;audio-lines&quot; aria-hidden=&quot;true&quot;&gt;&lt;/i&gt; Voice interface&lt;/button&gt;&lt;p class=&quot;text-small&quot;&gt;Realtime STT → final turn · streamed TTS&lt;/p&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;“Second wala dikhao” bolo · cards visible&lt;/p&gt;&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;sc-arrow&quot; aria-hidden=&quot;true&quot;&gt;↓&lt;/div&gt;
+      &lt;div class=&quot;sc-stage&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;session&quot;&gt;Shared session + turn controller&lt;/button&gt;&lt;p class=&quot;text-small&quot;&gt;Same task, selections, and cart across modes&lt;/p&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;Voice se Text par aao → chosen biryani yaad rahe&lt;/p&gt;&lt;/div&gt;
+      &lt;div class=&quot;sc-arrow&quot; aria-hidden=&quot;true&quot;&gt;↓&lt;/div&gt;
+      &lt;div class=&quot;sc-stage&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;planner&quot;&gt;Context + dialogue planner&lt;/button&gt;&lt;p class=&quot;text-small&quot;&gt;Local time · address · preferences · missing details&lt;/p&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;1:10 PM → “Lunch, kuch light, ya koi dish?”&lt;/p&gt;&lt;/div&gt;
+      &lt;div class=&quot;sc-arrow&quot; aria-hidden=&quot;true&quot;&gt;↓&lt;/div&gt;
+      &lt;div class=&quot;sc-stage&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;party&quot;&gt;Single request / snacks / event planner&lt;/button&gt;&lt;p class=&quot;text-small&quot;&gt;Guest groups · serving coverage · budget · deadline&lt;/p&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;“8 adults + 4 kids, 8 PM party” → dinner + optional supplies&lt;/p&gt;&lt;/div&gt;
+      &lt;div class=&quot;sc-arrow&quot; aria-hidden=&quot;true&quot;&gt;↓&lt;/div&gt;
+      &lt;div class=&quot;sc-stage&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;loop&quot;&gt;Plan → tools → inspect → replan&lt;/button&gt;&lt;p class=&quot;text-small&quot;&gt;Ask only blocking questions · bounded execution&lt;/p&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;Chicken + 1 person + ₹400 → search → compare → prepare&lt;/p&gt;&lt;/div&gt;
+      &lt;div class=&quot;sc-arrow&quot; aria-hidden=&quot;true&quot;&gt;↓&lt;/div&gt;
+      &lt;div class=&quot;sc-stage&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;router&quot;&gt;Provider + capability router&lt;/button&gt;&lt;/div&gt;
+      &lt;div class=&quot;sc-routes&quot;&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;sc-route-label text-small&quot;&gt;Packaged snacks / groceries&lt;/div&gt;
+          &lt;div class=&quot;sc-node&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;instamart&quot;&gt;Instamart MCP&lt;/button&gt;&lt;p class=&quot;text-small&quot;&gt;Existing integration&lt;/p&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;Chips · biscuits · cold drinks&lt;/p&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;sc-route-label text-small&quot;&gt;Meals / prepared snacks · parallel discovery&lt;/div&gt;
+          &lt;div class=&quot;sc-row&quot;&gt;
+            &lt;div class=&quot;sc-node&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;swiggy&quot;&gt;Swiggy Food MCP&lt;/button&gt;&lt;p class=&quot;text-small&quot;&gt;Adapter to add&lt;/p&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;Biryani · dosa · momos&lt;/p&gt;&lt;/div&gt;
+            &lt;div class=&quot;sc-node&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;zomato&quot;&gt;Zomato MCP&lt;/button&gt;&lt;p class=&quot;text-small&quot;&gt;Custom-app access required&lt;/p&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;Same dish · second service ke options&lt;/p&gt;&lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;sc-arrow&quot; aria-hidden=&quot;true&quot;&gt;↓ results / errors / availability&lt;/div&gt;
+      &lt;div class=&quot;sc-stage&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;compare&quot;&gt;Normalize + rank offers&lt;/button&gt;&lt;p class=&quot;text-small&quot;&gt;Provider · restaurant · portion · menu price · ETA&lt;/p&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;Sample: ₹280 / 32 min vs ₹300 / 25 min · fees pending&lt;/p&gt;&lt;/div&gt;
+      &lt;div class=&quot;sc-arrow&quot; aria-hidden=&quot;true&quot;&gt;↓ item cards + brief spoken / text response&lt;/div&gt;
+      &lt;div class=&quot;sc-stage&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;select&quot;&gt;Selection + required customizations&lt;/button&gt;&lt;p class=&quot;text-small&quot;&gt;One provider per purchase · an event can have separate purchases&lt;/p&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;Dinner + drinks → separate carts, fees, approvals and delivery status&lt;/p&gt;&lt;/div&gt;
+      &lt;div class=&quot;sc-arrow&quot; aria-hidden=&quot;true&quot;&gt;↓&lt;/div&gt;
+      &lt;div class=&quot;sc-stage&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;quote&quot;&gt;Provider cart → fresh complete quote&lt;/button&gt;&lt;p class=&quot;text-small&quot;&gt;Items · fees · address · payment · final total&lt;/p&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;Sample bill: ₹280 item + ₹45 charges = ₹325 payable&lt;/p&gt;&lt;/div&gt;
+      &lt;div class=&quot;sc-arrow&quot; aria-hidden=&quot;true&quot;&gt;↓&lt;/div&gt;
+      &lt;div class=&quot;sc-stage&quot;&gt;&lt;button class=&quot;btn btn-primary btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;approval&quot;&gt;Explicit approval → server checkout gate&lt;/button&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;Order card par “Confirm · ₹325” tap&lt;/p&gt;&lt;/div&gt;
+      &lt;div class=&quot;sc-arrow&quot; aria-hidden=&quot;true&quot;&gt;↓&lt;/div&gt;
+      &lt;div class=&quot;sc-stage&quot;&gt;&lt;button class=&quot;btn btn-block&quot; type=&quot;button&quot; data-sc-node=&quot;monitor&quot;&gt;Submit once → reconcile → monitor&lt;/button&gt;&lt;p class=&quot;text-small&quot;&gt;Payment action · order status · delivery updates&lt;/p&gt;&lt;p class=&quot;text-small sc-map-example&quot;&gt;Payment pending → confirmed → preparing → delivered&lt;/p&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;sc-detail text-small&quot; id=&quot;sc-node-detail&quot; role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;Select a component to inspect its responsibility.&lt;/div&gt;
+    &lt;div class=&quot;sc-foot text-small&quot;&gt;Shared durable state ↔ task / event version · guest groups · constraints · provider capabilities · separate suborders · quotes · attempt receipts&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;sc-panel&quot; id=&quot;sc-journey-panel&quot; role=&quot;tabpanel&quot; aria-labelledby=&quot;sc-journey-tab&quot; hidden&gt;
+    &lt;div class=&quot;viz-controls&quot;&gt;
+      &lt;label class=&quot;form-label&quot;&gt;Example local time · Asia/Kolkata &lt;input class=&quot;form-control&quot; id=&quot;sc-example-time&quot; type=&quot;time&quot; value=&quot;13:10&quot;&gt;&lt;/label&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;sc-flow-label text-small&quot;&gt;&lt;span&gt;Understand&lt;/span&gt;&lt;span&gt;→ clarify missing details&lt;/span&gt;&lt;span&gt;→ discover&lt;/span&gt;&lt;span&gt;→ choose&lt;/span&gt;&lt;span&gt;→ review + approve&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;sc-dialogue&quot; aria-live=&quot;polite&quot; aria-atomic=&quot;true&quot;&gt;
+      &lt;div&gt;&lt;span class=&quot;text-small text-muted&quot;&gt;You&lt;/span&gt;&lt;p id=&quot;sc-user-line&quot;&gt;I want to order food.&lt;/p&gt;&lt;/div&gt;
+      &lt;div&gt;&lt;span class=&quot;text-small text-muted&quot;&gt;SayCart&lt;/span&gt;&lt;p class=&quot;sc-question&quot; id=&quot;sc-assistant-line&quot;&gt;It’s around lunchtime. Want something filling, something light, or do you have a dish in mind?&lt;/p&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;sc-choice-wrap&quot; id=&quot;sc-choices&quot;&gt;
+      &lt;button class=&quot;btn&quot; type=&quot;button&quot; data-sc-choice=&quot;biryani&quot;&gt;Biryani&lt;/button&gt;
+      &lt;button class=&quot;btn&quot; type=&quot;button&quot; data-sc-choice=&quot;light&quot;&gt;Something light&lt;/button&gt;
+      &lt;button class=&quot;btn&quot; type=&quot;button&quot; data-sc-choice=&quot;snacks&quot;&gt;Snacks&lt;/button&gt;
+      &lt;button class=&quot;btn&quot; type=&quot;button&quot; data-sc-choice=&quot;breakfast&quot;&gt;Breakfast instead&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;sc-event&quot; role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;&lt;span class=&quot;text-small text-muted&quot;&gt;Next system action&lt;/span&gt;&lt;div id=&quot;sc-next-action&quot;&gt;Suggest meal context; wait for the user’s preference.&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;sc-routing-note text-small&quot; id=&quot;sc-journey-note&quot;&gt;Time suggests context. The user’s explicit request takes priority.&lt;/div&gt;
+    &lt;div class=&quot;sc-choice-wrap&quot;&gt;
+      &lt;button class=&quot;btn btn-ghost&quot; type=&quot;button&quot; id=&quot;sc-from-start&quot;&gt;Start from “order food”&lt;/button&gt;
+      &lt;button class=&quot;btn btn-ghost&quot; type=&quot;button&quot; id=&quot;sc-direct-dish&quot;&gt;Start from “chicken biryani under ₹400”&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;sc-panel&quot; id=&quot;sc-modes-panel&quot; role=&quot;tabpanel&quot; aria-labelledby=&quot;sc-modes-tab&quot; hidden&gt;
+    &lt;div class=&quot;sc-screen&quot; id=&quot;sc-interface-preview&quot; aria-label=&quot;SayCart interface preview&quot;&gt;
+      &lt;div class=&quot;sc-screen-header&quot;&gt;&lt;div&gt;&lt;div class=&quot;sc-screen-label&quot;&gt;SayCart&lt;/div&gt;&lt;div class=&quot;sc-screen-meta&quot;&gt;One task · same selections&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;sc-mode-control&quot;&gt;&lt;button type=&quot;button&quot; id=&quot;sc-show-text&quot; aria-pressed=&quot;false&quot;&gt;Text&lt;/button&gt;&lt;button type=&quot;button&quot; id=&quot;sc-show-voice&quot; aria-pressed=&quot;true&quot;&gt;Voice&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;sc-screen-main&quot;&gt;
+        &lt;div class=&quot;sc-voice&quot; id=&quot;sc-voice-view&quot;&gt;&lt;div class=&quot;sc-orb&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;&lt;div class=&quot;sc-voice-status&quot; role=&quot;status&quot; aria-live=&quot;polite&quot; id=&quot;sc-audio-status&quot;&gt;Speaking · presenting options&lt;/div&gt;&lt;p class=&quot;sc-caption&quot; id=&quot;sc-optional-caption&quot; hidden&gt;Here are biryani options from your connected services.&lt;/p&gt;&lt;/div&gt;
+        &lt;div class=&quot;sc-messages&quot; id=&quot;sc-text-view&quot; hidden&gt;&lt;div&gt;&lt;strong&gt;You&lt;/strong&gt;&lt;p&gt;Chicken biryani for one, under ₹400.&lt;/p&gt;&lt;/div&gt;&lt;div&gt;&lt;strong&gt;SayCart&lt;/strong&gt;&lt;p&gt;I’ll compare options from your connected services. Which one would you like?&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;
+        &lt;div class=&quot;sc-offers&quot; aria-label=&quot;Illustrative item cards&quot;&gt;
+          &lt;div class=&quot;sc-offer&quot;&gt;&lt;div class=&quot;sc-offer-illustration&quot;&gt;&lt;i data-lucide=&quot;utensils&quot; aria-hidden=&quot;true&quot;&gt;&lt;/i&gt;&lt;span&gt;Swiggy&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;sc-offer-name&quot;&gt;Chicken dum biryani&lt;/div&gt;&lt;div class=&quot;sc-offer-meta&quot;&gt;Example restaurant A · 1 portion&lt;/div&gt;&lt;div class=&quot;sc-offer-meta&quot;&gt;Menu ₹280 · ETA 32 min&lt;/div&gt;&lt;button type=&quot;button&quot; data-sc-offer=&quot;Swiggy&quot;&gt;Choose&lt;/button&gt;&lt;/div&gt;
+          &lt;div class=&quot;sc-offer&quot;&gt;&lt;div class=&quot;sc-offer-illustration&quot;&gt;&lt;i data-lucide=&quot;utensils&quot; aria-hidden=&quot;true&quot;&gt;&lt;/i&gt;&lt;span&gt;Zomato&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;sc-offer-name&quot;&gt;Chicken biryani&lt;/div&gt;&lt;div class=&quot;sc-offer-meta&quot;&gt;Example restaurant B · 1 portion&lt;/div&gt;&lt;div class=&quot;sc-offer-meta&quot;&gt;Menu ₹300 · ETA 25 min&lt;/div&gt;&lt;button type=&quot;button&quot; data-sc-offer=&quot;Zomato&quot;&gt;Choose&lt;/button&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;sc-audio-controls&quot; id=&quot;sc-voice-controls&quot;&gt;&lt;button type=&quot;button&quot; id=&quot;sc-mute&quot;&gt;&lt;i data-lucide=&quot;mic&quot; aria-hidden=&quot;true&quot;&gt;&lt;/i&gt; Mute&lt;/button&gt;&lt;button type=&quot;button&quot; id=&quot;sc-interrupt&quot;&gt;Interrupt&lt;/button&gt;&lt;button type=&quot;button&quot; id=&quot;sc-end-voice&quot;&gt;End voice&lt;/button&gt;&lt;/div&gt;
+        &lt;form class=&quot;sc-composer&quot; id=&quot;sc-text-composer&quot; hidden&gt;&lt;label class=&quot;sr-only&quot; for=&quot;sc-preview-message&quot;&gt;Shopping request&lt;/label&gt;&lt;input id=&quot;sc-preview-message&quot; type=&quot;text&quot; placeholder=&quot;Refine your request…&quot; maxlength=&quot;160&quot;&gt;&lt;button type=&quot;submit&quot;&gt;Send&lt;/button&gt;&lt;/form&gt;
+        &lt;div class=&quot;sc-preview-label sc-screen-meta&quot; id=&quot;sc-ui-selection&quot; aria-live=&quot;polite&quot;&gt;No item selected&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;sc-preview-label text-small text-muted&quot;&gt;Sample items, prices, and ETA · no audio or provider connection&lt;/div&gt;
+    &lt;div class=&quot;sc-lifecycle text-small&quot;&gt;&lt;span&gt;Listen → finalize utterance&lt;/span&gt;&lt;span&gt;→ think / search&lt;/span&gt;&lt;span&gt;→ speak → listen&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;sc-foot text-small&quot;&gt;Interruption stops speech and supersedes stale read work. Dispatched cart or checkout actions still require reconciliation.&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+(() =&gt; {
+  const root = document.getElementById(&#x27;saycart-food-architecture&#x27;);
+  const el = id =&gt; root.querySelector(&#x27;#&#x27; + id);
+  const workedExamples = {
+    snacks: [
+      {title:&#x27;“Snake” ya “snacks”?&#x27;,phase:&#x27;Clarify&#x27;,user:&#x27;“I want snake.”&#x27;,reply:&#x27;“Snacks bol rahe ho—kuch khane ke liye? Packaged ya fresh?”&#x27;,work:&#x27;Unclear voice/text intent ko confirm karo. Guess karke live animal ya wrong shopping action mat start karo.&#x27;},
+      {title:&#x27;Product type samjho&#x27;,phase:&#x27;Type&#x27;,user:&#x27;“Haan snacks—chips aur biscuits.”&#x27;,reply:&#x27;“Packaged snacks ke liye Instamart dekhte hain. Kitne logon ke liye aur total budget?”&#x27;,work:&#x27;Packaged=Instamart. Samosa/momos=restaurant; “dono” ho toh parent task mein separate branches.&#x27;},
+      {title:&#x27;Quantity + budget save karo&#x27;,phase:&#x27;Goal&#x27;,user:&#x27;“4 log, ₹300 total. Salted chips aur cream biscuits.”&#x27;,reply:&#x27;“4 logon ke liye chips aur biscuits, fees mila ke ₹300 tak. Koi brand ya pack preference?”&#x27;,work:&#x27;People count ko pack count mat samjho. Brand optional; exact variant choices actual catalog results se collect hongi.&#x27;},
+      {title:&#x27;Actual products dekho&#x27;,phase:&#x27;Search&#x27;,user:&#x27;“Brand koi bhi, sizes dikhao.”&#x27;,reply:&#x27;“Available packs, prices aur stock dikha raha hoon.”&#x27;,work:&#x27;Address-bound search; pack grams, units, prices, max quantity aur already-owned supplies compare. Low stock ko hide mat karo.&#x27;},
+      {title:&#x27;User packs choose kare&#x27;,phase:&#x27;Choose&#x27;,user:&#x27;“Ye 2 chips packs aur ye biscuit pack add karo.”&#x27;,reply:&#x27;“Selected 2 chips packs aur 1 biscuit pack add kar raha hoon.”&#x27;,work:&#x27;Exact IDs + absolute pack quantities store → current cart read → unrelated lines preserve → update → actual returned cart reconcile.&#x27;},
+      {title:&#x27;Full bill budget mein hai?&#x27;,phase:&#x27;Review&#x27;,user:&#x27;“₹300 ke andar hai?”&#x27;,reply:&#x27;“Final charges verify karunga. Total exceed hua toh cheaper pack ya quantity change suggest karunga.”&#x27;,work:&#x27;Full actual purchase total check, including existing bag lines and all fees. Budget unclear ho toh ask if it covers whole bag or snacks only.&#x27;},
+      {title:&#x27;Explicit order approval&#x27;,phase:&#x27;Approve&#x27;,user:&#x27;Current items, address, payment aur full total dekh kar Confirm tap karta hai.&#x27;,reply:&#x27;“Isi reviewed order ko submit kar raha hoon.”&#x27;,work:&#x27;Exact quote check + durable attempt + single-use approval. Changed bill means fresh review; generic earlier “haan” is insufficient.&#x27;},
+      {title:&#x27;Payment aur delivery follow-up&#x27;,phase:&#x27;Track&#x27;,user:&#x27;“Snacks kab aayenge?”&#x27;,reply:&#x27;“Confirmed order ka current status dikhaunga; pending payment ho toh pehle complete karna hoga.”&#x27;,work:&#x27;Per-order payment/status authoritative. Multi-store partial success, stock cuts, delays or missing items → affected-order recovery; no blind repurchase.&#x27;}
+    ],
+    party: [
+      {title:&#x27;Party ko event task banao&#x27;,phase:&#x27;Event&#x27;,user:&#x27;“Aaj raat 8 baje party hai, food arrange karo.”&#x27;,reply:&#x27;“Kitne adults aur bachche? Kids ki approximate ages, veg/non-veg split, total budget aur delivery location?”&#x27;,work:&#x27;Tonight already supplies dinner context. Exact event date, serve-by time, destination and timezone resolve; meal-time question repeat nahi.&#x27;},
+      {title:&#x27;Guest groups—no double counting&#x27;,phase:&#x27;Guests&#x27;,user:&#x27;“8 adults, 4 kids age 6–10. ₹4,000 total. Home par.”&#x27;,reply:&#x27;“Total 12 guests. Veg/non-veg counts aur koi dietary restriction? Kids ka familiar food/spice preference?”&#x27;,work:&#x27;Disjoint groups: 8 adults + 4 children. Approximate age bands only; guest names/birth dates unnecessary.&#x27;},
+      {title:&#x27;Diet counts aur hard constraints&#x27;,phase:&#x27;Diet&#x27;,user:&#x27;“4 adults veg, 4 non-veg. Saare kids veg aur mild. Koi known allergy nahi.”&#x27;,reply:&#x27;“4 veg adults, 4 non-veg adults, 4 veg kids. Jain/vegan ya koi strict exclusion bhi hai?”&#x27;,work:&#x27;Diet group totals=12; strict requirements separately store. Missing allergen/cross-contact info ko safe certify nahi karna.&#x27;},
+      {title:&#x27;Courses aur supplies choose karo&#x27;,phase:&#x27;Scope&#x27;,user:&#x27;“Adults ko biryani; kids ko pizza pasand hai. Drinks bhi; cake nahi. Plates ghar par hain.”&#x27;,reply:&#x27;“Biryani + familiar mild veg pizza + drinks. Cake aur plates add nahi karunga.”&#x27;,work:&#x27;Requested modules lock; already-owned items subtract. No age-based taste assumption, automatic upsell or duplicate supplies.&#x27;},
+      {title:&#x27;Serving requirement, phir pack counts&#x27;,phase:&#x27;Portions&#x27;,user:&#x27;“Kids medium appetite; leftovers kam chahiye.”&#x27;,reply:&#x27;“Adults ke portions aur kids ki preferred pizza coverage alag calculate karunga; family-pack servings verify karni hongi.”&#x27;,work:&#x27;Restaurant-listed servings / slices → group coverage → pack quantities. No universal family-pack size; buffers need host choice.&#x27;},
+      {title:&#x27;Search complete menu plans&#x27;,phase:&#x27;Discover&#x27;,user:&#x27;“Do suitable plans dikhao.”&#x27;,reply:&#x27;“Ek simpler delivery plan aur ek alternate menu compare karunga, with costs aur arrival estimates.”&#x27;,work:&#x27;Search connected Food providers + Instamart drinks. Rank complete event coverage, restrictions, total fees, number of deliveries and deadline risk.&#x27;},
+      {title:&#x27;Timing aur purchase limits gate&#x27;,phase:&#x27;Limits&#x27;,user:&#x27;“Abhi noon hai, raat 8 baje hi deliver ho.”&#x27;,reply:&#x27;“Scheduled delivery assume nahi kar sakta. Swiggy Food guide mein immediate delivery aur ₹1,000 cart cap hai; bigger meal purchase ke liye supported route ya direct-provider handoff chahiye.”&#x27;,work:&#x27;Capability/cap check before promising execution. Save later plan/reminder; fresh availability + approval near ordering time. Cap evade karne ke liye artificial splits nahi.&#x27;},
+      {title:&#x27;Blocked parts ko honestly hand off&#x27;,phase:&#x27;Handoff&#x27;,user:&#x27;“Restaurant ka bulk order direct kar lunga; drinks ka plan yahin rakho.”&#x27;,reply:&#x27;“Restaurant menu summary aur serving needs ready hain. Drinks branch independently continue kar sakti hai.”&#x27;,work:&#x27;Blocked food suborder stays limit_blocked/handoff. It never runs checkout; remaining supported suborders retain budget and dependencies.&#x27;},
+      {title:&#x27;Allowed carts prepare karo&#x27;,phase:&#x27;Carts&#x27;,user:&#x27;“Allowed plan ke selected items prepare karo.”&#x27;,reply:&#x27;“Har purchase ka current stock, quantity limits aur complete bill verify kar raha hoon.”&#x27;,work:&#x27;One restaurant per Food cart; preserve unrelated groceries. Party candidates local planning state mein; comparing restaurants must not flush an existing remote cart.&#x27;},
+      {title:&#x27;Whole-event budget + separate approvals&#x27;,phase:&#x27;Approve&#x27;,user:&#x27;“Final sab mila ke kitna hai?”&#x27;,reply:&#x27;“App purchases aur direct-order committed spend separately dikhaunga. Har actual provider order ka fresh review confirm karna hoga.”&#x27;,work:&#x27;Aggregate committed + pending event spend. Approvals bind exact provider/cart/address/payment/total; no single atomic cross-provider purchase claim.&#x27;},
+      {title:&#x27;Partial success ko recover karo&#x27;,phase:&#x27;Recover&#x27;,user:&#x27;“Drinks order ho gaya, dessert add karna hai.”&#x27;,reply:&#x27;“Confirmed drinks repeat nahi karunga. Dessert ka naya scoped plan aur quote banega.”&#x27;,work:&#x27;Per-suborder ledger: confirmed, payment_pending, failed, unknown. Only remaining needs replan; successful orders are not rolled back.&#x27;},
+      {title:&#x27;Serve-by deadline tak monitoring&#x27;,phase:&#x27;Monitor&#x27;,user:&#x27;“Party start hone wali hai; kya ready hai?”&#x27;,reply:&#x27;“Har confirmed order ka actual status aur arrival estimate dikhaunga. Late order ho toh available alternatives explain karunga.”&#x27;,work:&#x27;Deadline risk ≠ guaranteed lateness/arrival. Supported tracking + meaningful updates; cancellation/refunds require verified provider/support outcome.&#x27;}
+    ],
+    mixed: [
+      {title:&#x27;Mixed snack task samjho&#x27;,phase:&#x27;Split&#x27;,user:&#x27;“Momos, chips aur cold drinks mangwao.”&#x27;,reply:&#x27;“Momos restaurants se; chips aur drinks Instamart se. Kitne log aur combined budget?”&#x27;,work:&#x27;One parent goal → prepared-food branch + packaged-products branch; separate checkout contracts.&#x27;},
+      {title:&#x27;Combined spend define karo&#x27;,phase:&#x27;Budget&#x27;,user:&#x27;“6 log, ₹1,000 including fees.”&#x27;,reply:&#x27;“Momos ka piece count aur snack packs compare karke total estimate dikhaunga.”&#x27;,work:&#x27;One event cap includes fees of all suborders. Already-bought items and minimum-cart charges count toward the total.&#x27;},
+      {title:&#x27;Separate arrivals visible rakho&#x27;,phase:&#x27;Timing&#x27;,user:&#x27;“Sab saath aayega?”&#x27;,reply:&#x27;“Separate deliveries hongi; arrival estimates dikha sakta hoon, simultaneous arrival guarantee nahi.”&#x27;,work:&#x27;Show per-provider delivery windows, serviceability and uncertain ETAs; host chooses tradeoff.&#x27;},
+      {title:&#x27;Choices aur cart scopes preserve karo&#x27;,phase:&#x27;Select&#x27;,user:&#x27;“Ye momos aur ye chips/drinks.”&#x27;,reply:&#x27;“Selected variants aur required restaurant options verify kar raha hoon.”&#x27;,work:&#x27;Exact IDs and portions; no silent provider switch or cart flush. Each branch has its own revisions and quote.&#x27;}
+    ],
+    healthy: [
+      {title:&#x27;“Healthy” ko concrete preference banao&#x27;,phase:&#x27;Clarify&#x27;,user:&#x27;“Healthy snacks chahiye, kids bhi khayenge.”&#x27;,reply:&#x27;“Roasted, less sweet, fruit, ya kuch aur preference? Koi allergy aur kids ko kya familiar hai?”&#x27;,work:&#x27;No medical/nutritional suitability claim from product name, age or marketing label.&#x27;},
+      {title:&#x27;User-defined choices search karo&#x27;,phase:&#x27;Search&#x27;,user:&#x27;“Roasted aur less sweet, no nuts.”&#x27;,reply:&#x27;“No-nuts ko strict constraint rakhunga; label information missing ho toh verify karna padega.”&#x27;,work:&#x27;Use actual ingredient/allergen labels when available. Unknown cross-contact info → verification_required, not allergy-safe.&#x27;},
+      {title:&#x27;Choice before mutation&#x27;,phase:&#x27;Choose&#x27;,user:&#x27;“Ye verified suitable packs dikhao.”&#x27;,reply:&#x27;“Returned labels aur pack sizes ke saath choices dikha raha hoon.”&#x27;,work:&#x27;No fabricated macros; budget includes fees. Affected uncertain items cannot silently pass into a quote.&#x27;}
+    ],
+    birthday: [
+      {title:&#x27;Occasion + guest groups&#x27;,phase:&#x27;Event&#x27;,user:&#x27;“Birthday party arrange karo.”&#x27;,reply:&#x27;“Date/time, adults/kids, venue, total budget? Food ke saath cake ya supplies bhi chahiye?”&#x27;,work:&#x27;Occasion alone does not authorize cake, decorations, gifts or more purchases.&#x27;},
+      {title:&#x27;Cake details clear karo&#x27;,phase:&#x27;Cake&#x27;,user:&#x27;“12 guests, eggless chocolate cake. Candles bhi.”&#x27;,reply:&#x27;“Cake serving size, writing text aur candle quantity confirm kar lo. Eggless ko vegan assume nahi karunga.”&#x27;,work:&#x27;Custom cake needs supported bakery/provider options; writing text, eggless, allergens and actual servings are separate fields.&#x27;},
+      {title:&#x27;Existing supplies subtract karo&#x27;,phase:&#x27;Supplies&#x27;,user:&#x27;“Plates aur drinks already hain; sirf food, cake, candles.”&#x27;,reply:&#x27;“Already available supplies dobara add nahi karunga.”&#x27;,work:&#x27;Cake may route to bakery/restaurant or catalog depending availability; optional modules have independent limits and fees.&#x27;},
+      {title:&#x27;Birthday deadline feasibility&#x27;,phase:&#x27;Limits&#x27;,user:&#x27;“Cake 7 baje aur dinner 8 baje.”&#x27;,reply:&#x27;“Separate deadlines save karunga; supported delivery options verify hongi. Unsupported scheduling ya customization par handoff chahiye.”&#x27;,work:&#x27;No guaranteed custom cake capacity or simultaneous deliveries. Apply actual cart/value limits before execution.&#x27;}
+    ],
+    reorder: [
+      {title:&#x27;“Usual” ke liye reference chahiye&#x27;,phase:&#x27;History&#x27;,user:&#x27;“Mere usual snacks order kar do.”&#x27;,reply:&#x27;“Saved usual list ya recent order mein se kaunsa? Pehle choices dikha deta hoon.”&#x27;,work:&#x27;Use authorized stored preference/history only. No history available → ask, do not invent brand or prior purchase.&#x27;},
+      {title:&#x27;Fresh IDs aur packs verify karo&#x27;,phase:&#x27;Refresh&#x27;,user:&#x27;“Pichli baar wala, bas quantity double.”&#x27;,reply:&#x27;“Current packs, price aur stock verify karke doubled quantities dikhaunga.”&#x27;,work:&#x27;Previous IDs, offers and approval are stale templates. Quantity caps and current full budget still apply.&#x27;},
+      {title:&#x27;Unavailable old product&#x27;,phase:&#x27;Substitute&#x27;,user:&#x27;“Old brand nahi mila toh?”&#x27;,reply:&#x27;“Same pack/type ke alternatives propose karunga; selected substitute ke baad updated review.”&#x27;,work:&#x27;Preference history is not blanket authority for substitution or checkout.&#x27;}
+    ],
+    scheduled: [
+      {title:&#x27;Future date and time resolve karo&#x27;,phase:&#x27;When&#x27;,user:&#x27;“Kal raat party ke liye food arrange karna.”&#x27;,reply:&#x27;“Kal ki exact date aur local serve-by time confirm karte hain. Venue aur guest details?”&#x27;,work:&#x27;Store destination timezone and explicit event date; crossing-midnight phrases stay unresolved until clear.&#x27;},
+      {title:&#x27;Plan ≠ reserved stock&#x27;,phase:&#x27;Plan&#x27;,user:&#x27;“Aaj hi select karke kal 8 PM bhejna.”&#x27;,reply:&#x27;“Menu plan save ho sakta hai. Scheduled delivery, reserved stock ya fixed tomorrow price tabhi claim hoga jab provider support kare.”&#x27;,work:&#x27;Swiggy Food documented immediate-only; Zomato schedule capability unverified. Unsupported timing → save plan/reminder, no fake scheduled order.&#x27;},
+      {title:&#x27;Later fresh review required&#x27;,phase:&#x27;Resume&#x27;,user:&#x27;“Order karne ke time remind kar dena.”&#x27;,reply:&#x27;“Reminder/background workflow proposed hai. Us waqt availability, quantity, fees aur ETA dobara check karke approval chahiye.”&#x27;,work:&#x27;No purchase from elapsed time or old approval. durable job failure → notify missed task honestly; no surprise late order.&#x27;}
+    ],
+    changes: [
+      {title:&#x27;Headcount correction&#x27;,phase:&#x27;Revise&#x27;,user:&#x27;“Actually 8 nahi, 12 adults hain.”&#x27;,reply:&#x27;“Adult count update karke menu coverage, drinks, cost aur timing recalculate karunga.”&#x27;,work:&#x27;Increment plan version; invalidate dependent estimates, cart drafts and stale approvals. Confirm veg/non-veg counts still reconcile.&#x27;},
+      {title:&#x27;Location change&#x27;,phase:&#x27;Address&#x27;,user:&#x27;“Home ke bajaye office deliver karna.”&#x27;,reply:&#x27;“Office address par serviceability, items, fees aur ETA fresh check karna hoga.”&#x27;,work:&#x27;Address revision invalidates location-bound discovery and quotes. Already submitted order address is a separate support/capability case.&#x27;},
+      {title:&#x27;Already purchased quantities preserve karo&#x27;,phase:&#x27;Delta&#x27;,user:&#x27;“Ek order placed hai, ab 3 log aur aa rahe hain.”&#x27;,reply:&#x27;“Placed order repeat nahi karunga; additional guests ke remaining needs calculate karunga.”&#x27;,work:&#x27;Committed supplies are a receipt-backed ledger. New quantities get new scoped quotes and approval; no fictional rollback.&#x27;}
+    ],
+    postorder: [
+      {title:&#x27;Placed order ka status&#x27;,phase:&#x27;Track&#x27;,user:&#x27;“Mera order kahan hai?”&#x27;,reply:&#x27;“Known order reference ka live status check karunga.”&#x27;,work:&#x27;Supported tracking only; saved local attempt alone is not a live delivery update. Stop status polling at terminal outcome.&#x27;},
+      {title:&#x27;Cancel / refund request&#x27;,phase:&#x27;Support&#x27;,user:&#x27;“Party cancel ho gayi, sab cancel kar do.”&#x27;,reply:&#x27;“Unsubmitted work stop karunga. Placed orders ki cancellation/refund ke liye supported route ya official support chahiye.”&#x27;,work:&#x27;Stop planning ≠ cancelled purchase. Do not promise reversal, eligibility or refund until authoritative result exists.&#x27;},
+      {title:&#x27;Missing / wrong items&#x27;,phase:&#x27;Issue&#x27;,user:&#x27;“Delivered dikha raha hai, par drinks nahi aaye.”&#x27;,reply:&#x27;“Affected order reference aur reported missing items ke saath support path dikhaunga.”&#x27;,work:&#x27;User-reported fulfillment issue persists separately from delivered status. No automatic second purchase or assumed refund.&#x27;}
+    ],
+    unsupported: [
+      {title:&#x27;Literal request confirm karo&#x27;,phase:&#x27;Clarify&#x27;,user:&#x27;“Snake hi bola—snacks nahi.”&#x27;,reply:&#x27;“Aap actual animal ki baat kar rahe ho ya kisi dish/product ka naam?”&#x27;,work:&#x27;Unrecognized intent remains unresolved. Never replace it with the nearest supported shopping task.&#x27;},
+      {title:&#x27;App scope honestly batao&#x27;,phase:&#x27;Handoff&#x27;,user:&#x27;“Actual live animal.”&#x27;,reply:&#x27;“Is food-shopping app mein live animal procurement supported nahi hai.”&#x27;,work:&#x27;Stop this workflow. Do not invent an MCP tool, hidden provider or substitute item.&#x27;},
+      {title:&#x27;Unknown case ka safe fallback&#x27;,phase:&#x27;Unknown&#x27;,user:&#x27;Aisa request jiska flow defined nahi hai.&#x27;,reply:&#x27;“Is request ka relevant detail clear kar do; supported options ke basis par aage badhenge.”&#x27;,work:&#x27;Unknown intent → clarify; unknown capability → stop action; unknown purchase result → reconcile. No guess-based spending.&#x27;}
+    ],
+    lunch: [
+      {title:&#x27;User ki need samjho&#x27;,phase:&#x27;Samjho&#x27;,user:&#x27;“Bhai, khana order karna hai.”&#x27;,reply:&#x27;“Abhi 1:10 PM hai. Lunch chahiye, kuch light, ya koi dish mind mein hai?”&#x27;,work:&#x27;Local time + saved address dekho. Preference poochho; is step par cart change nahi hota.&#x27;},
+      {title:&#x27;Clear shopping goal banao&#x27;,phase:&#x27;Goal&#x27;,user:&#x27;“Chicken biryani, ek person ke liye, fees mila ke ₹400 ke andar.”&#x27;,reply:&#x27;“Theek hai—chicken biryani for one, total budget ₹400. Options dekh raha hoon.”&#x27;,work:&#x27;Task save: dish=chicken biryani, people=1, max final total=₹400. Already-known details dobara nahi poochho.&#x27;},
+      {title:&#x27;Dono connected services par search&#x27;,phase:&#x27;Search&#x27;,user:&#x27;“Options dikhao.”&#x27;,reply:&#x27;“Swiggy aur connected Zomato par available options dekh raha hoon.”&#x27;,work:&#x27;Swiggy Food aur Zomato adapters parallel search karte hain. Zomato access missing ho toh Swiggy results phir bhi aayenge.&#x27;},
+      {title:&#x27;Options samajh ke compare karo&#x27;,phase:&#x27;Compare&#x27;,user:&#x27;“Kaunsa sasta hai aur kaunsa jaldi aayega?”&#x27;,reply:&#x27;“Demo A ka menu price ₹280 hai; Demo B ₹300 aur ETA 7 minutes kam hai. Final fees selection ke baad verify hongi.”&#x27;,work:&#x27;Dish type, portion, service, restaurant, menu price, aur ETA normalize karo. Menu price ko final delivered total mat bolo.&#x27;,offers:true},
+      {title:&#x27;User ka selection + customization&#x27;,phase:&#x27;Select&#x27;,user:&#x27;“Swiggy wala Demo A lo, mild spicy.”&#x27;,reply:&#x27;“Demo A ki one-person biryani, mild option select kar raha hoon.”&#x27;,work:&#x27;Exact provider + restaurant + item ID bind karo. Mild modifier tabhi lagao jab menu support kare; missing option invent nahi karna.&#x27;},
+      {title:&#x27;Poora bill verify karo&#x27;,phase:&#x27;Review&#x27;,user:&#x27;“Final kitna padega?”&#x27;,reply:&#x27;“Example bill ₹325 hai: ₹280 item + ₹45 fees aur taxes. Address aur UPI payment bhi review card par hain.”&#x27;,work:&#x27;Live provider cart read → current stock, complete charges, address, payment verify → exact purchase ka fresh quote. ₹325 budget ke andar hai.&#x27;,quote:true},
+      {title:&#x27;Exact order ki approval lo&#x27;,phase:&#x27;Approve&#x27;,user:&#x27;Order card par “Confirm · ₹325” tap karta hai.&#x27;,reply:&#x27;“Is reviewed order ko submit kar raha hoon.”&#x27;,work:&#x27;Server quote expiry + cart revision check karta hai. Explicit approval consume hoti hai; durable purchase attempt submission se pehle save hota hai.&#x27;,quote:true},
+      {title:&#x27;Payment action user complete kare&#x27;,phase:&#x27;Pay&#x27;,user:&#x27;UPI app mein requested payment approve karta hai.&#x27;,reply:&#x27;“Payment pending hai. Confirmation milte hi order status update karunga.”&#x27;,work:&#x27;Provider-returned payment action dikhao. Known payment reference ka status check karo; payment pending ko order success mat bolo.&#x27;},
+      {title:&#x27;Confirmed order ko track karo&#x27;,phase:&#x27;Track&#x27;,user:&#x27;“Mera order kahan tak aaya?”&#x27;,reply:&#x27;“Example status: restaurant ne order accept kar liya; ab preparing hai.”&#x27;,work:&#x27;Authoritative provider confirmation ke baad hi order placed bolo. Supported live updates: preparing → out for delivery → delivered. Delivered par polling stop.&#x27;}
+    ],
+    chips: [
+      {title:&#x27;“Snacks” ko pehle samjho&#x27;,phase:&#x27;Clarify&#x27;,user:&#x27;“Snacks chahiye.”&#x27;,reply:&#x27;“Chips-biscuits jaise packaged snacks, ya momos-samosa jaise prepared snacks?”&#x27;,work:&#x27;Sirf “snacks” se provider decide nahi hota. Product type clear karo.&#x27;},
+      {title:&#x27;Packaged products route karo&#x27;,phase:&#x27;Route&#x27;,user:&#x27;“Chips aur cold drink.”&#x27;,reply:&#x27;“Theek hai, Instamart par dekhte hain. Koi flavour, brand, ya size preference?”&#x27;,work:&#x27;Route=Instamart. Dono products ko ek shopping task mein rakho; user se ek-ek item dobara type na karvao.&#x27;},
+      {title:&#x27;Exact packs ki choice&#x27;,phase:&#x27;Variants&#x27;,user:&#x27;“Salted chips 100g aur cola 750ml, ek-ek.”&#x27;,reply:&#x27;“In sizes ke available packs dikha raha hoon—jo chahiye select kar lo.”&#x27;,work:&#x27;Search actual catalog → variant IDs, pack sizes, stock verify → consolidated product choices. First result blindly select nahi hota.&#x27;},
+      {title:&#x27;Existing bag preserve karo&#x27;,phase:&#x27;Cart&#x27;,user:&#x27;“Ye dono add kar do. Bag mein jo milk hai woh rehne dena.”&#x27;,reply:&#x27;“Milk ko preserve karke selected chips aur cola add kar raha hoon.”&#x27;,work:&#x27;Fresh cart read → old milk line + requested additions merge → complete replacement submit → returned cart reconcile.&#x27;},
+      {title:&#x27;Full basket ka review&#x27;,phase:&#x27;Review&#x27;,user:&#x27;“Ab total dikhao.”&#x27;,reply:&#x27;“Milk, chips, cola aur complete charges review card par hain. Place order se pehle confirm karo.”&#x27;,work:&#x27;Fresh quote mein existing milk bhi included hai. Approval complete actual purchase ke liye hai; sirf newly added snacks ke liye nahi.&#x27;}
+    ],
+    momos: [
+      {title:&#x27;Prepared snack identify karo&#x27;,phase:&#x27;Samjho&#x27;,user:&#x27;“Snacks chahiye—momos.”&#x27;,reply:&#x27;“Veg ya chicken? Steamed ya fried?”&#x27;,work:&#x27;Momos=prepared food. Instamart automatically choose nahi karna; connected restaurant services use karo.&#x27;},
+      {title:&#x27;Dish preferences save karo&#x27;,phase:&#x27;Goal&#x27;,user:&#x27;“Veg steamed, ek person ke liye, ₹250 tak.”&#x27;,reply:&#x27;“Veg steamed momos for one, total budget ₹250—options dekh raha hoon.”&#x27;,work:&#x27;Task fields: veg, steamed, one serving, max final total ₹250. Dietary labels provider data se verify honge.&#x27;},
+      {title:&#x27;Restaurant offers compare karo&#x27;,phase:&#x27;Search&#x27;,user:&#x27;“Nearby options dikhao.”&#x27;,reply:&#x27;“Swiggy aur connected Zomato ke options saath dikha raha hoon.”&#x27;,work:&#x27;Actual menu mein dish search karo; restaurant name alone par match mat karo. Piece count, price aur ETA show karo.&#x27;},
+      {title:&#x27;Choose → customize → review&#x27;,phase:&#x27;Review&#x27;,user:&#x27;“Second wala. Extra chutney milti hai?”&#x27;,reply:&#x27;“Menu mein extra chutney option available ho toh select karke updated bill dikhaunga.”&#x27;,work:&#x27;Visible second card ko stable item ID se resolve karo. Required modifiers aur extra charges ke baad fresh quote, phir explicit approval.&#x27;}
+    ],
+    night: [
+      {title:&#x27;Time se user ko override mat karo&#x27;,phase:&#x27;Context&#x27;,user:&#x27;Raat 10 baje: “Breakfast jaisa kuch chahiye.”&#x27;,reply:&#x27;“Bilkul—dosa, idli, sandwich, ya kuch aur?”&#x27;,work:&#x27;Meal preference=breakfast-style. Local time dinner suggest kar sakta tha, lekin explicit user choice wins.&#x27;},
+      {title:&#x27;Requested dish samjho&#x27;,phase:&#x27;Dish&#x27;,user:&#x27;“Masala dosa.”&#x27;,reply:&#x27;“Masala dosa dekhte hain. Ek person ke liye?”&#x27;,work:&#x27;Dish masala dosa save karo. Breakfast-only time filter mat lagao; live restaurant availability check karo.&#x27;},
+      {title:&#x27;Available options hi dikhao&#x27;,phase:&#x27;Search&#x27;,user:&#x27;“Haan, ek.”&#x27;,reply:&#x27;“Jo restaurants abhi masala dosa deliver kar rahe hain, unke options dikhaunga.”&#x27;,work:&#x27;Connected providers par address-bound search. Closed restaurant ya unavailable dish ko available mat label karo.&#x27;},
+      {title:&#x27;Availability ka useful fallback&#x27;,phase:&#x27;Fallback&#x27;,user:&#x27;“Dosa nahi mil raha toh?”&#x27;,reply:&#x27;“Available idli ya sandwich options dekh sakta hoon—kaunsa chahiye?”&#x27;,work:&#x27;Alternative propose karo aur preference lo. User ki choice ke bina dish ya provider silently replace mat karo.&#x27;}
+    ],
+    voice: [
+      {title:&#x27;Partial speech se action mat chalao&#x27;,phase:&#x27;Listen&#x27;,user:&#x27;Bolte waqt: “Do biryani… nahi, ek…”&#x27;,reply:&#x27;Listening state; assistant user ko finish karne deta hai.&#x27;,work:&#x27;Partial transcript audio UI/captions tak rehta hai. Cart ya order action final utterance se pehle start nahi hota.&#x27;},
+      {title:&#x27;Final request par task update karo&#x27;,phase:&#x27;Finalize&#x27;,user:&#x27;“Ek chicken biryani, ₹400 ke andar.”&#x27;,reply:&#x27;“One chicken biryani under ₹400—options dekh raha hoon.”&#x27;,work:&#x27;Finalized utterance → turn ID → shared shopping agent. Task quantity=1; visible cards provider results se bante hain.&#x27;},
+      {title:&#x27;User interrupt kare toh suno&#x27;,phase:&#x27;Interrupt&#x27;,user:&#x27;Agent bol raha hai; user kehta hai: “Ruko, veg chahiye.”&#x27;,reply:&#x27;Speech rukti hai; “Theek hai, veg options dekhte hain.”&#x27;,work:&#x27;TTS stop → old read turn supersede → preference veg → fresh search. Already-dispatched mutations ko separately reconcile karo.&#x27;},
+      {title:&#x27;Mode badle, context nahi&#x27;,phase:&#x27;Switch&#x27;,user:&#x27;Text mode kholta hai aur type karta hai: “Second wala.”&#x27;,reply:&#x27;“Second visible veg option select kar raha hoon.”&#x27;,work:&#x27;Same task, visible result ordering, exact item ID, aur selection dono modes mein shared hain. Shopping dobara start nahi hoti.&#x27;},
+      {title:&#x27;Voice mein bhi order card&#x27;,phase:&#x27;Approve&#x27;,user:&#x27;Agent se baat karte hue final order card dekhta hai.&#x27;,reply:&#x27;“Full total aur address review kar lo; ready ho toh Confirm tap karo.”&#x27;,work:&#x27;Voice screen: audio indicator + item cards + final review card. Transcript default hidden; purchase approval server par exact quote se bound.&#x27;}
+    ],
+    failure: [
+      {title:&#x27;Ek provider unavailable ho&#x27;,phase:&#x27;Access&#x27;,user:&#x27;“Dono apps par biryani compare karo.”&#x27;,reply:&#x27;“Zomato abhi connected nahi hai. Swiggy ke available options dikha raha hoon.”&#x27;,work:&#x27;Provider capability/auth status expose karo. Missing Zomato access ko empty catalog mat bolo; working provider ko block nahi karna.&#x27;},
+      {title:&#x27;Selected item out of stock ho&#x27;,phase:&#x27;Stock&#x27;,user:&#x27;“Ye option le lo.”&#x27;,reply:&#x27;“Checkout se pehle ye unavailable ho gaya. Similar options dikhaun?”&#x27;,work:&#x27;Fresh cart/quote stock failure detect → old approval invalidate → alternatives propose. User choice ke bina substitution nahi.&#x27;},
+      {title:&#x27;Checkout response timeout ho&#x27;,phase:&#x27;Recovery&#x27;,user:&#x27;“Order hua ya nahi? Dobara kar du?”&#x27;,reply:&#x27;“Result abhi uncertain hai. Pehle existing order status check karunga.”&#x27;,work:&#x27;Persisted attempt ka gate hold → supported order/payment lookup se reconcile. Blind checkout retry duplicate order create kar sakta hai.&#x27;}
+    ]
+  };
+  const purchaseTail=[
+    {title:&#x27;Complete fresh review&#x27;,phase:&#x27;Quote&#x27;,user:&#x27;“Selected items ka full total dikhao.”&#x27;,reply:&#x27;“Current items, fees, full address aur available payment har purchase ke review mein hain.”&#x27;,work:&#x27;Only supported, resolved branches proceed. Verify final quantities, deadline feasibility and combined budget; quote invalidates on changes.&#x27;},
+    {title:&#x27;Scoped approval + payment&#x27;,phase:&#x27;Approve&#x27;,user:&#x27;Har displayed actual purchase ko explicitly confirm karta hai.&#x27;,reply:&#x27;“Approved purchase submit karunga; required payment action aap complete karoge.”&#x27;,work:&#x27;One attempt per approved purchase; payment pending ≠ success. Unknown outcome holds gate; retry only after reconciliation.&#x27;},
+    {title:&#x27;Track and recover remaining needs&#x27;,phase:&#x27;Outcome&#x27;,user:&#x27;“Kya confirmed hai aur kya pending?”&#x27;,reply:&#x27;“Har order ka actual outcome alag dikhaunga; failed part ke remaining needs hi replan honge.”&#x27;,work:&#x27;Confirmed → track → terminal delivery; partial failure → scoped recovery; missing/wrong items or cancellation → verified provider/support path.&#x27;}
+  ];
+  [&#x27;chips&#x27;,&#x27;momos&#x27;,&#x27;mixed&#x27;,&#x27;healthy&#x27;,&#x27;birthday&#x27;,&#x27;reorder&#x27;,&#x27;changes&#x27;,&#x27;night&#x27;].forEach(key=&gt;workedExamples[key].push(...purchaseTail));
+  let currentExample=&#x27;snacks&#x27;, currentExampleStep=0;
+  function renderWorkedExample(){
+    const steps=workedExamples[currentExample], step=steps[currentExampleStep];
+    el(&#x27;sc-example-step-title&#x27;).textContent=(currentExampleStep+1)+&#x27; / &#x27;+steps.length+&#x27; · &#x27;+step.title;
+    el(&#x27;sc-example-user&#x27;).textContent=step.user;
+    el(&#x27;sc-example-reply&#x27;).textContent=step.reply;
+    el(&#x27;sc-example-work&#x27;).textContent=step.work;
+    el(&#x27;sc-example-position&#x27;).textContent=&#x27;Step &#x27;+(currentExampleStep+1)+&#x27; of &#x27;+steps.length;
+    el(&#x27;sc-example-prev&#x27;).disabled=currentExampleStep===0;
+    el(&#x27;sc-example-next&#x27;).disabled=currentExampleStep===steps.length-1;
+    el(&#x27;sc-example-offers&#x27;).hidden=!step.offers;
+    el(&#x27;sc-example-quote&#x27;).hidden=!step.quote;
+    const path=el(&#x27;sc-example-path&#x27;);path.replaceChildren();
+    steps.forEach((item,index)=&gt;{const label=document.createElement(&#x27;span&#x27;);label.textContent=(index+1)+&#x27;. &#x27;+item.phase+(index&lt;steps.length-1?&#x27; →&#x27;:&#x27;&#x27;);if(index===currentExampleStep){label.className=&#x27;sc-current&#x27;;label.setAttribute(&#x27;aria-current&#x27;,&#x27;step&#x27;);}path.append(label);});
+  }
+  el(&#x27;sc-example-picker&#x27;).addEventListener(&#x27;change&#x27;,event=&gt;{currentExample=event.target.value;currentExampleStep=0;renderWorkedExample();});
+  el(&#x27;sc-example-prev&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{if(currentExampleStep&gt;0){currentExampleStep--;renderWorkedExample();}});
+  el(&#x27;sc-example-next&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{if(currentExampleStep&lt;workedExamples[currentExample].length-1){currentExampleStep++;renderWorkedExample();}});
+  renderWorkedExample();
+  function renderPartyPlan(){
+    const groups=[&#x27;adults&#x27;,&#x27;teens&#x27;,&#x27;kids&#x27;];
+    const values={};
+    let error=&#x27;&#x27;;
+    groups.forEach(group=&gt;{
+      const total=el(&#x27;sc-party-&#x27;+group).valueAsNumber, veg=el(&#x27;sc-party-&#x27;+group+&#x27;-veg&#x27;).valueAsNumber;
+      if(!Number.isInteger(total)||!Number.isInteger(veg)||total&lt;0||veg&lt;0||total&gt;200||veg&gt;total) error=&#x27;Guest counts whole numbers hon; har group mein Veg count Total se zyada nahi ho sakta.&#x27;;
+      values[group]={total,veg,nonveg:total-veg};
+    });
+    const young=el(&#x27;sc-party-young&#x27;).valueAsNumber, budget=el(&#x27;sc-party-budget&#x27;).valueAsNumber;
+    if(!Number.isInteger(young)||young&lt;0||young&gt;200) error=&#x27;Younger guests ka valid whole-number count do.&#x27;;
+    if(!Number.isFinite(budget)||budget&lt;0||budget&gt;500000) error=&#x27;Valid total event budget do: ₹0 se ₹5,00,000.&#x27;;
+    const total=groups.reduce((sum,group)=&gt;sum+values[group].total,0)+young;
+    if(!error&amp;&amp;total===0)error=&#x27;Pehle kam se kam ek guest add karo; zero guests ke liye portions calculate nahi honge.&#x27;;
+    el(&#x27;sc-party-error&#x27;).hidden=!error;el(&#x27;sc-party-error&#x27;).textContent=error;
+    if(error){
+      [&#x27;sc-party-count&#x27;,&#x27;sc-party-coverage&#x27;,&#x27;sc-party-budget-summary&#x27;,&#x27;sc-party-young-note&#x27;].forEach(id=&gt;el(id).textContent=&#x27;&#x27;);
+      groups.forEach(group=&gt;el(&#x27;sc-party-&#x27;+group+&#x27;-nonveg&#x27;).textContent=&#x27;Check counts&#x27;);
+      return;
+    }
+    groups.forEach(group=&gt;el(&#x27;sc-party-&#x27;+group+&#x27;-nonveg&#x27;).textContent=values[group].nonveg+&#x27; non-veg&#x27;);
+    const share=Number(el(&#x27;sc-party-appetite&#x27;).value), buffer=Number(el(&#x27;sc-party-buffer&#x27;).value);
+    const veg=(values.adults.veg+values.teens.veg+values.kids.veg*share)*(1+buffer);
+    const nonveg=(values.adults.nonveg+values.teens.nonveg+values.kids.nonveg*share)*(1+buffer);
+    const vegCoverage=Math.ceil(veg),nonvegCoverage=Math.ceil(nonveg);
+    const date=el(&#x27;sc-party-date&#x27;).value,time=el(&#x27;sc-party-time&#x27;).value;
+    el(&#x27;sc-party-count&#x27;).textContent=total+&#x27; guests = &#x27;+values.adults.total+&#x27; adults + &#x27;+values.teens.total+&#x27; teens + &#x27;+values.kids.total+&#x27; children + &#x27;+young+&#x27; younger guests.&#x27;;
+    el(&#x27;sc-party-coverage&#x27;).textContent=&#x27;Illustrative combined-main coverage: &#x27;+vegCoverage+&#x27; veg + &#x27;+nonvegCoverage+&#x27; non-veg adult-equivalent meal servings. Yeh har dish ki quantity nahi; pack counts merchant servings verify hone ke baad.&#x27;;
+    el(&#x27;sc-party-budget-summary&#x27;).textContent=&#x27;Whole-event ceiling ₹&#x27;+budget.toLocaleString(&#x27;en-IN&#x27;)+&#x27; includes every purchase + fees. Serve-by: &#x27;+(date&amp;&amp;time?date+&#x27; · &#x27;+time+&#x27; Asia/Kolkata&#x27;:&#x27;exact date/time still needed&#x27;)+&#x27;. Live costs/capacity abhi verified nahi.&#x27;;
+    el(&#x27;sc-party-young-note&#x27;).textContent=young?young+&#x27; younger guests ke liye caregiver-selected food abhi unresolved hai; bulk serving estimate unko include nahi karta.&#x27;:&#x27;Example appetite weights host-editable hain; age se diet ya serving size automatically decide nahi hoti.&#x27;;
+  }
+  root.querySelectorAll(&#x27;#sc-party-panel input, #sc-party-panel select&#x27;).forEach(input=&gt;input.addEventListener(&#x27;input&#x27;,renderPartyPlan));
+  renderPartyPlan();
+
+  const edgeCaseGroups=[
+    {name:&#x27;Intent &amp; routing&#x27;,cases:[
+      [&#x27;“I want snake” / unclear speech&#x27;,&#x27;“Snacks bol rahe ho, ya kuch aur?”&#x27;,&#x27;Resolve intent once; no guessed search/cart mutation. A literal unsupported animal request ends in honest handoff.&#x27;,&#x27;intent_uncertain → clarified / unsupported&#x27;],
+      [&#x27;“Snacks chahiye”&#x27;,&#x27;“Packaged, fresh, ya dono?”&#x27;,&#x27;Route chips/biscuits to catalog, fresh momos/samosa to restaurants; both creates separate branches.&#x27;,&#x27;needs_route_choice&#x27;],
+      [&#x27;“Decide tum karo, kuch achha”&#x27;,&#x27;Known preferences se a small varied shortlist; only missing budget/address questions.&#x27;,&#x27;Broad exploration is allowed; proposed recommendations do not authorize a purchase.&#x27;,&#x27;discovering → selection_required&#x27;],
+      [&#x27;Exact product: “blue chips packet, two”&#x27;,&#x27;Only unresolved size/flavour choice poochho.&#x27;,&#x27;Skip meal-time questions. Store pack size separately from count=2.&#x27;,&#x27;product_form_known&#x27;],
+      [&#x27;“Samosa” vs “frozen samosa”&#x27;,&#x27;If unclear: “Freshly prepared ya frozen pack?”&#x27;,&#x27;Use requested form and real availability; snack words alone never choose provider.&#x27;,&#x27;route_resolved&#x27;],
+      [&#x27;Noon: “food for tonight”&#x27;,&#x27;Exact serve-by time/date if missing.&#x27;,&#x27;Event consumption time wins over current lunchtime suggestion.&#x27;,&#x27;event_time_required&#x27;],
+      [&#x27;Dinner time par dosa / breakfast request&#x27;,&#x27;Explicit dish follow karo.&#x27;,&#x27;Check actual availability; no forced heavy dinner menu.&#x27;,&#x27;user_preference_overrides_context&#x27;],
+      [&#x27;Meals + chips + drinks + plates&#x27;,&#x27;Combined budget and which extras are wanted?&#x27;,&#x27;One parent goal; separate grocery/restaurant subplans, fees and approvals.&#x27;,&#x27;multi_branch_draft&#x27;]
+    ]},
+    {name:&#x27;Party guests, diet &amp; portions&#x27;,cases:[
+      [&#x27;“Raat ko party organize karo”&#x27;,&#x27;Guest mix, exact arrival deadline, location, budget, restrictions—only missing fields.&#x27;,&#x27;Create event intent; dinner context already known; no repeated generic meal question.&#x27;,&#x27;party_intake&#x27;],
+      [&#x27;“10 bade, 6 bachche”&#x27;,&#x27;Approximate child ages, appetite and familiar food preferences?&#x27;,&#x27;Create disjoint cohorts; no names, exact birth dates or age-only food assumptions.&#x27;,&#x27;guest_cohorts_draft&#x27;],
+      [&#x27;“8–12 guests, final count unknown”&#x27;,&#x27;Base plan or upper-range coverage? Final count before committing quantities.&#x27;,&#x27;Store range plus optional additions; do not fabricate exact servings.&#x27;,&#x27;headcount_uncertain&#x27;],
+      [&#x27;Diet counts do not add up&#x27;,&#x27;“12 guests hain, diet counts 14 ho rahe—kaunsa count correct?”&#x27;,&#x27;Block quantity calculation until cohorts reconcile; never double-count children.&#x27;,&#x27;invalid_guest_counts&#x27;],
+      [&#x27;Mixed veg / non-veg / Jain / vegan&#x27;,&#x27;Exact exclusions and subgroup counts?&#x27;,&#x27;Store distinct hard requirements per cohort; vegetarian is not automatically Jain or vegan.&#x27;,&#x27;diet_groups_required&#x27;],
+      [&#x27;Kids mild, adults spicy&#x27;,&#x27;Which dishes/modifiers are actually preferred?&#x27;,&#x27;Use returned separate modifiers only; no unsupported kitchen compliance promise.&#x27;,&#x27;customization_required&#x27;],
+      [&#x27;Infants / younger children included&#x27;,&#x27;Caregiver se suitable familiar food and quantity choose karvao.&#x27;,&#x27;Exclude unresolved individual meals from automated bulk assumptions; show remaining coverage.&#x27;,&#x27;caregiver_choice_required&#x27;],
+      [&#x27;Allergy or cross-contact concern&#x27;,&#x27;Available label/menu information show; suitability verify with restaurant/provider.&#x27;,&#x27;Affected dishes remain blocked if required assurance is missing; never certify allergy-safe by name.&#x27;,&#x27;dietary_verification_required&#x27;],
+      [&#x27;“₹500 budget” ambiguous&#x27;,&#x27;“Per person ya poori party ka total?”&#x27;,&#x27;Store amount, scope, currency and all-fee inclusion explicitly.&#x27;,&#x27;budget_scope_required&#x27;],
+      [&#x27;“3 family biryani for 15 people”&#x27;,&#x27;Merchant servings known? If missing, ask accepted planning assumption.&#x27;,&#x27;Family/jumbo labels do not establish coverage; use servings before cart packs.&#x27;,&#x27;serving_coverage_uncertain&#x27;],
+      [&#x27;Full party menu / extra supplies&#x27;,&#x27;Dinner only, or starters/drinks/dessert? What is already available?&#x27;,&#x27;Course roles and opt-in extras; subtract existing supplies; no silent upsells.&#x27;,&#x27;menu_scope_required&#x27;],
+      [&#x27;Leftovers / appetite differs by guest&#x27;,&#x27;Small/regular/large appetite and optional buffer?&#x27;,&#x27;Use explicit adjustable assumptions; no fixed excess percentage without host choice.&#x27;,&#x27;portion_assumptions_pending&#x27;]
+    ]},
+    {name:&#x27;Timing, capacity &amp; provider limits&#x27;,cases:[
+      [&#x27;“Deliver exactly 8:30”&#x27;,&#x27;Present estimated arrival windows and deadline risk.&#x27;,&#x27;Do not guarantee ETA or infer scheduled ordering from a date/time request.&#x27;,&#x27;deadline_estimated&#x27;],
+      [&#x27;Tomorrow / hours-before-party request&#x27;,&#x27;Offer saved plan/reminder where app support exists; fresh review later.&#x27;,&#x27;Swiggy Food documented immediate-only; unverified providers keep canSchedule=unknown.&#x27;,&#x27;planned_for_later ≠ provider_scheduled&#x27;],
+      [&#x27;“Tonight 12:30” / midnight ambiguity&#x27;,&#x27;Read back exact calendar date, time and destination timezone.&#x27;,&#x27;Resolve date before time-sensitive discovery/ordering.&#x27;,&#x27;event_timestamp_unresolved&#x27;],
+      [&#x27;Large party exceeds Food cart cap&#x27;,&#x27;Explain actual account limit and supported handoff.&#x27;,&#x27;Current guide documents ₹1,000 Builders Club Food cap; no artificial splitting to evade limits.&#x27;,&#x27;limit_blocked → supported_handoff&#x27;],
+      [&#x27;Requested packs exceed stock/max quantity&#x27;,&#x27;Show requested versus returned quantities and gap.&#x27;,&#x27;Recompute coverage after provider caps; substitutions need appropriate choice.&#x27;,&#x27;coverage_shortfall&#x27;],
+      [&#x27;Four vendors / distant arrival windows&#x27;,&#x27;Simpler menu vs multiple deliveries—what tradeoff is acceptable?&#x27;,&#x27;Compare total fees and coordination; no atomic or simultaneous delivery promise.&#x27;,&#x27;delivery_coordination_required&#x27;],
+      [&#x27;Restaurant closes / ETA misses deadline&#x27;,&#x27;Offer feasible alternatives or reduced scope.&#x27;,&#x27;Fresh check invalidates earlier feasible plan; pickup/catering only if available and verified.&#x27;,&#x27;deadline_at_risk&#x27;],
+      [&#x27;Reminder/job missed its planned time&#x27;,&#x27;Explain missed execution; ask if ordering still useful.&#x27;,&#x27;Never compensate by silently placing a late order under old approval.&#x27;,&#x27;job_missed → needs_new_decision&#x27;]
+    ]},
+    {name:&#x27;Discovery &amp; provider failures&#x27;,cases:[
+      [&#x27;Zomato disconnected, Swiggy works&#x27;,&#x27;Show Swiggy results and missing Zomato access label.&#x27;,&#x27;Authentication failure is not empty catalog; partial results remain usable.&#x27;,&#x27;provider_partial&#x27;],
+      [&#x27;Both providers fail / offline&#x27;,&#x27;Keep draft; offer retry/reconnect when useful.&#x27;,&#x27;No fake menu or automatic live-to-demo fallback.&#x27;,&#x27;discovery_blocked&#x27;],
+      [&#x27;OAuth expires during planning&#x27;,&#x27;Use supported refresh; reconnect if needed.&#x27;,&#x27;Resume saved read task after auth; never blindly replay purchase mutation.&#x27;,&#x27;reauth_required&#x27;],
+      [&#x27;Rate limit / upstream timeout&#x27;,&#x27;Show waiting/retry status with bounded safe-read retries.&#x27;,&#x27;Honor provider cadence/Retry-After; cap concurrency and execution budget.&#x27;,&#x27;read_retry_bounded&#x27;],
+      [&#x27;No dish fits hard constraints&#x27;,&#x27;Which explicit tradeoff is acceptable?&#x27;,&#x27;Do not relax dietary requirements, deadline or budget silently.&#x27;,&#x27;no_feasible_match&#x27;],
+      [&#x27;Same name, different portion sizes&#x27;,&#x27;Show original portions and any unknown serving data.&#x27;,&#x27;Normalize comparable servings only; cheapest pack is not necessarily cheapest meal.&#x27;,&#x27;offers_not_comparable&#x27;],
+      [&#x27;“No onion” / mild modifier absent&#x27;,&#x27;Explain unsupported option; offer verified alternatives.&#x27;,&#x27;A free-text request is not guaranteed kitchen compliance.&#x27;,&#x27;modifier_unsupported&#x27;],
+      [&#x27;Price / ingredients / nutrition / servings missing&#x27;,&#x27;Mark “not provided”; ask when essential.&#x27;,&#x27;Unknown remains unknown; app estimates are optional and visibly distinguished from provider facts.&#x27;,&#x27;facts_unverified&#x27;],
+      [&#x27;Coupon missing / expired / account-ineligible&#x27;,&#x27;Show actual eligible offers when tools exist.&#x27;,&#x27;Capability detection; recompute actual total without promised discount.&#x27;,&#x27;discount_unavailable&#x27;]
+    ]},
+    {name:&#x27;Carts, edits &amp; collaboration&#x27;,cases:[
+      [&#x27;Existing unrelated provider cart items&#x27;,&#x27;Show affected cart and preserve unrelated items.&#x27;,&#x27;Read/merge/replace/re-read for replacement APIs; no initialization clear.&#x27;,&#x27;baseline_reconciled&#x27;],
+      [&#x27;Switch Food restaurant while comparing&#x27;,&#x27;Warn if chosen purchase would replace existing restaurant cart.&#x27;,&#x27;Keep candidate menus locally; do not mutate cart during browsing.&#x27;,&#x27;cart_switch_requires_decision&#x27;],
+      [&#x27;“Actually 18 adults, not 10”&#x27;,&#x27;Summarize changed guest mix and re-estimate.&#x27;,&#x27;New plan version invalidates affected quantities, fees and approvals.&#x27;,&#x27;plan_revision_changed&#x27;],
+      [&#x27;Headcount grows after one order succeeds&#x27;,&#x27;Plan only remaining uncovered guest needs.&#x27;,&#x27;Receipt-backed committed quantities cannot be replayed or fictionally rolled back.&#x27;,&#x27;incremental_remaining_plan&#x27;],
+      [&#x27;Home changes to office / another city&#x27;,&#x27;Confirm intended destination; recheck serviceability.&#x27;,&#x27;Address-bound search/cart/quotes become stale; placed-order change is separate support flow.&#x27;,&#x27;address_revision_changed&#x27;],
+      [&#x27;Multiple delivery addresses&#x27;,&#x27;Create separate destination plans and deadlines.&#x27;,&#x27;Independent serviceability, fees, carts, approvals and status per location.&#x27;,&#x27;multi_destination_plan&#x27;],
+      [&#x27;Two tabs or collaborators edit same plan&#x27;,&#x27;Resolve conflicts and identify who can approve.&#x27;,&#x27;Revision checks + single purchase authority; no last-write-wins checkout.&#x27;,&#x27;revision_conflict&#x27;],
+      [&#x27;Repeat last birthday / usual order&#x27;,&#x27;Which saved order/list and current guests?&#x27;,&#x27;History is a draft template; fresh IDs, packs, prices, location and approval.&#x27;,&#x27;reorder_revalidation&#x27;],
+      [&#x27;Selected item sold out or quantity reduced&#x27;,&#x27;Propose suitable alternatives; preserve unaffected work.&#x27;,&#x27;Quote stale; recompute group coverage before asking for new approval.&#x27;,&#x27;needs_substitution&#x27;]
+    ]},
+    {name:&#x27;Approval, payment &amp; reconciliation&#x27;,cases:[
+      [&#x27;Final fees break budget&#x27;,&#x27;Show exact shortfall and specific revised menu options.&#x27;,&#x27;Hard cap stays; no silent spending increase or arbitrary item drops.&#x27;,&#x27;budget_infeasible&#x27;],
+      [&#x27;Bill, address, items or payment changes&#x27;,&#x27;Show changed details and fresh review.&#x27;,&#x27;Quote immutable; old approval cannot authorize changed purchase.&#x27;,&#x27;quote_invalidated&#x27;],
+      [&#x27;“Haan” in background / old voice transcript&#x27;,&#x27;Ask dedicated confirmation or use final tap.&#x27;,&#x27;Uncertain speech/model intent cannot create purchase authorization.&#x27;,&#x27;awaiting_explicit_approval&#x27;],
+      [&#x27;Approval then “add ice cream”&#x27;,&#x27;Prepare edit and updated review.&#x27;,&#x27;Consume no stale approval; if already submitted, new item is separate purchase.&#x27;,&#x27;approval_scope_changed&#x27;],
+      [&#x27;Double tap / repeated final ASR / refresh&#x27;,&#x27;Show existing attempt result.&#x27;,&#x27;Single-use approval, durable gate and local idempotency; provider exactly-once not assumed.&#x27;,&#x27;duplicate_suppressed&#x27;],
+      [&#x27;UPI / QR / external payment required&#x27;,&#x27;User completes supported payment action.&#x27;,&#x27;Only offer returned methods; never ask user to speak payment secrets.&#x27;,&#x27;payment_action_required&#x27;],
+      [&#x27;Payment pending / app closed&#x27;,&#x27;Resume known payment status with bounded polling.&#x27;,&#x27;No second checkout to resolve a UI timeout; store terminal flags/references.&#x27;,&#x27;payment_pending&#x27;],
+      [&#x27;Checkout timeout: success unknown&#x27;,&#x27;“Pehle existing order status check karunga.”&#x27;,&#x27;Hold durable gate; reconcile supported order/payment references before any further submission.&#x27;,&#x27;submission_unknown&#x27;],
+      [&#x27;Food succeeds, drinks fail / multi-store partial&#x27;,&#x27;Show exact per-order results; recover only remaining needs.&#x27;,&#x27;No fake atomic checkout, automatic rollback or repeat successful purchases.&#x27;,&#x27;partial_success&#x27;],
+      [&#x27;Quote expires while user reviews&#x27;,&#x27;Fetch fresh cart, bill and approval summary.&#x27;,&#x27;Expiry stops initial dispatch; known pending payment follows its existing attempt.&#x27;,&#x27;quote_expired&#x27;]
+    ]},
+    {name:&#x27;Voice, text &amp; durable continuity&#x27;,cases:[
+      [&#x27;“Do biryani… nahi ek” partial speech&#x27;,&#x27;Wait for finalized utterance.&#x27;,&#x27;Partial ASR can update captions; no cart mutation yet.&#x27;,&#x27;listening → finalized&#x27;],
+      [&#x27;15 guests heard as 50 / noisy product name&#x27;,&#x27;Read back consequential uncertain number/name.&#x27;,&#x27;Keep confidence/ambiguity flag; correction invalidates affected plan work.&#x27;,&#x27;high_impact_input_uncertain&#x27;],
+      [&#x27;Barge-in: “Stop, veg chahiye”&#x27;,&#x27;Stop speech; revise current task.&#x27;,&#x27;Supersede stale read turns; dispatched mutations need reconciliation.&#x27;,&#x27;turn_superseded&#x27;],
+      [&#x27;“Second wala” after sort or new results&#x27;,&#x27;Resolve against the visible stable result snapshot.&#x27;,&#x27;Ambiguous ordinal asks again; never use stale array positions.&#x27;,&#x27;selection_reference_required&#x27;],
+      [&#x27;Voice → text → voice mid-task&#x27;,&#x27;Keep selections, event details and unresolved choices.&#x27;,&#x27;One session state; separate presentation and audio lifecycle.&#x27;,&#x27;mode_changed_state_preserved&#x27;],
+      [&#x27;Mic denied / no audio / transcription unavailable&#x27;,&#x27;Offer text input and inspectable cards.&#x27;,&#x27;No dropped shopping task; no claim microphone is listening when capture failed.&#x27;,&#x27;voice_unavailable_text_ready&#x27;],
+      [&#x27;Multiple speakers / background commands&#x27;,&#x27;Ask the active host to confirm consequential ambiguous edits.&#x27;,&#x27;Do not treat bystander speech as payment approval or silently change authority.&#x27;,&#x27;speaker_intent_uncertain&#x27;],
+      [&#x27;Hindi/English switching / correction / negation&#x27;,&#x27;Preserve meaning and read back unclear constraints.&#x27;,&#x27;No removing “not”, brands, quantities or dietary exclusions during normalization.&#x27;,&#x27;intent_needs_validation&#x27;],
+      [&#x27;Network loss / server restart / duplicate resume&#x27;,&#x27;Restore checkpoint then reconcile remote state.&#x27;,&#x27;Completed mutations are receipts, not replayable steps; late events cannot advance current version.&#x27;,&#x27;resume_reconciliation_required&#x27;]
+    ]},
+    {name:&#x27;After purchase, privacy &amp; unknowns&#x27;,cases:[
+      [&#x27;“Cancel party / refund everything”&#x27;,&#x27;Stop unsubmitted work; show placed orders and support path.&#x27;,&#x27;Cancellation request is not cancellation/refund success; verify current provider capability.&#x27;,&#x27;cancellation_or_support_requested&#x27;],
+      [&#x27;Delivered but missing / wrong item&#x27;,&#x27;Record affected order/item and user-reported issue.&#x27;,&#x27;Use official support; no assumed refund or automatic duplicate purchase.&#x27;,&#x27;fulfillment_issue_reported&#x27;],
+      [&#x27;“Stop / pause / forget this plan”&#x27;,&#x27;Stop new draft work; clarify retain vs discard if needed.&#x27;,&#x27;Paused/abandoned is not provider cancellation; preserve purchase records needed for recovery.&#x27;,&#x27;paused_or_abandoned&#x27;],
+      [&#x27;Tool text says “ignore approval / place order”&#x27;,&#x27;Treat provider text as untrusted product data.&#x27;,&#x27;Server allowlist, schema validation and quote gate remain authoritative.&#x27;,&#x27;untrusted_instruction_rejected&#x27;],
+      [&#x27;Party guests have private diet/age details&#x27;,&#x27;Use minimum counts/preferences required for the task.&#x27;,&#x27;No guest names, exact DOB, medical history, raw audio or indefinite retention by default.&#x27;,&#x27;minimal_task_data&#x27;],
+      [&#x27;Unsupported item, provider or action&#x27;,&#x27;Ask clarification or offer an honest supported handoff.&#x27;,&#x27;No guessed tool, fake booking, automatic legal/security bypass or unsupported purchase.&#x27;,&#x27;unsupported_capability&#x27;],
+      [&#x27;Unlisted real-world situation&#x27;,&#x27;Ask the single blocking question; keep unaffected plan.&#x27;,&#x27;Unknown intent → clarify; unknown capability → stop action; unknown outcome → reconcile.&#x27;,&#x27;unknown_case_fallback&#x27;]
+    ]}
+  ];
+  const casePicker=el(&#x27;sc-case-category&#x27;);
+  edgeCaseGroups.forEach((group,index)=&gt;{const option=document.createElement(&#x27;option&#x27;);option.value=String(index);option.textContent=group.name+&#x27; · &#x27;+group.cases.length;casePicker.append(option);});
+  function renderEdgeCases(){
+    const group=edgeCaseGroups[Number(casePicker.value)];
+    const total=edgeCaseGroups.reduce((sum,item)=&gt;sum+item.cases.length,0);
+    el(&#x27;sc-case-count&#x27;).textContent=total+&#x27; defined edge cases · &#x27;+edgeCaseGroups.length+&#x27; categories · proposed behavior, subject to live provider capabilities&#x27;;
+    const list=el(&#x27;sc-case-list&#x27;);list.replaceChildren();
+    group.cases.forEach(([trigger,reply,action,state],index)=&gt;{
+      const details=document.createElement(&#x27;details&#x27;),summary=document.createElement(&#x27;summary&#x27;);summary.textContent=(index+1)+&#x27;. &#x27;+trigger;details.append(summary);
+      const dl=document.createElement(&#x27;dl&#x27;);
+      [[&#x27;Agent response&#x27;,reply],[&#x27;System action&#x27;,action],[&#x27;State / recovery&#x27;,state]].forEach(([label,value])=&gt;{const dt=document.createElement(&#x27;dt&#x27;),dd=document.createElement(&#x27;dd&#x27;);dt.textContent=label;dd.textContent=value;dl.append(dt,dd);});
+      details.append(dl);list.append(details);
+    });
+  }
+  casePicker.addEventListener(&#x27;change&#x27;,renderEdgeCases);renderEdgeCases();
+  const details = {
+    text:&#x27;Text: conversation, structured choices, item cards, and checkout review share the same server state as voice.&#x27;,
+    voice:&#x27;Voice: realtime speech recognition, streamed spoken replies, audio state, and item cards; finalized utterances alone start actions.&#x27;,
+    session:&#x27;Session: turn IDs and versions prevent stale results; switching interface retains the active shopping task.&#x27;,
+    planner:&#x27;Context: user timezone, selected delivery address, preferences, dish, portions, and budget; ask only what blocks progress.&#x27;,
+    party:&#x27;Event planner: guest cohorts, strict dietary constraints, requested courses, serving coverage, whole-event budget and separate delivery deadlines; age never implies taste or diet.&#x27;,
+    loop:&#x27;Agent: persist a plan, call allowed tools, inspect real results, and continue within time, step, and cost limits.&#x27;,
+    router:&#x27;Routing: packaged products use Instamart; prepared food searches connected restaurant providers concurrently.&#x27;,
+    instamart:&#x27;Instamart: reuse the current account, catalog, cart-preservation, and checkout integration for packaged products.&#x27;,
+    swiggy:&#x27;Swiggy Food: add a separate adapter for restaurants, menus, customizations, provider carts, quotes, and status.&#x27;,
+    zomato:&#x27;Zomato: enable after custom-app access and OAuth callbacks work; unavailable access must not block Swiggy results.&#x27;,
+    compare:&#x27;Offers: retain provider-native IDs, restaurant, portion, customizations, menu price, and retrieval time; fees are verified at quote.&#x27;,
+    select:&#x27;Selection: resolve the dish, portion, and required modifiers; never silently combine provider purchases or omit required choices.&#x27;,
+    quote:&#x27;Quote: fetch current contents, every fee, selected address and available payment; changes invalidate earlier approval.&#x27;,
+    approval:&#x27;Approval: the server consumes explicit approval for the exact fresh purchase; voice starts with a final tap on the order card.&#x27;,
+    monitor:&#x27;Recovery: persist an attempt before submission; reconcile unknown outcomes before retry; track payment and delivery when supported.&#x27;
+  };
+  root.querySelectorAll(&#x27;[data-sc-node]&#x27;).forEach(button =&gt; button.addEventListener(&#x27;click&#x27;, () =&gt; {
+    el(&#x27;sc-node-detail&#x27;).textContent = details[button.dataset.scNode];
+  }));
+
+  const timeInput=el(&#x27;sc-example-time&#x27;);
+  let journey=&#x27;start&#x27;;
+  const contextualPrompt=()=&gt;{
+    const value=timeInput.value;
+    if(!value) return &#x27;Want a meal, a snack, or do you have a dish in mind?&#x27;;
+    const hour=Number(value.split(&#x27;:&#x27;)[0]);
+    if(hour&gt;=5 &amp;&amp; hour&lt;11) return &#x27;It’s around breakfast time. Want breakfast, a snack, or something else?&#x27;;
+    if(hour&gt;=11 &amp;&amp; hour&lt;16) return &#x27;It’s around lunchtime. Want something filling, something light, or do you have a dish in mind?&#x27;;
+    if(hour&gt;=16 &amp;&amp; hour&lt;19) return &#x27;It’s late afternoon. Want a snack, an early dinner, or a particular dish?&#x27;;
+    if(hour&gt;=19 &amp;&amp; hour&lt;23) return &#x27;It’s around dinner time. Want a meal, a snack, or a particular dish?&#x27;;
+    return &#x27;Looking for a late-night meal, a snack, or something specific?&#x27;;
+  };
+  const steps={
+    start:{user:&#x27;I want to order food.&#x27;,assistant:contextualPrompt,choices:[[&#x27;Biryani&#x27;,&#x27;biryani&#x27;],[&#x27;Something light&#x27;,&#x27;light&#x27;],[&#x27;Snacks&#x27;,&#x27;snacks&#x27;],[&#x27;Breakfast instead&#x27;,&#x27;breakfast&#x27;]],action:&#x27;Suggest meal context; wait for the user’s preference.&#x27;,note:&#x27;Time suggests context. The user’s explicit request takes priority.&#x27;},
+    biryani:{user:&#x27;I want biryani.&#x27;,assistant:&#x27;Veg, chicken, or another kind? Any budget or portion preference?&#x27;,choices:[[&#x27;Chicken · 1 portion · under ₹400&#x27;,&#x27;search&#x27;],[&#x27;Veg · 2 portions&#x27;,&#x27;vegsearch&#x27;],[&#x27;Show a mix first&#x27;,&#x27;mixedsearch&#x27;]],action:&#x27;Capture only missing preferences; broad discovery is also available.&#x27;,note:&#x27;A named dish skips breakfast / lunch / dinner questions.&#x27;},
+    search:{user:&#x27;Chicken, for one, under ₹400.&#x27;,assistant:&#x27;I’ll look for chicken biryani for one on your connected services.&#x27;,choices:[[&#x27;Refine the search&#x27;,&#x27;biryani&#x27;]],action:&#x27;Search Swiggy Food + Zomato in parallel → normalize → rank → show item cards.&#x27;,note:&#x27;Zomato requires working access. An unavailable provider leaves the other results usable; final fees are checked before approval.&#x27;},
+    vegsearch:{user:&#x27;Veg biryani, two portions.&#x27;,assistant:&#x27;I’ll look for veg biryani for two on your connected services.&#x27;,choices:[[&#x27;Refine the search&#x27;,&#x27;biryani&#x27;]],action:&#x27;Search connected restaurant providers → compare comparable portions → show cards.&#x27;,note:&#x27;Dietary labels are taken from provider data when supplied.&#x27;},
+    mixedsearch:{user:&#x27;Show me a mix of biryani options first.&#x27;,assistant:&#x27;I’ll show a mix so you can choose the kind and portion you want.&#x27;,choices:[[&#x27;Choose a preference&#x27;,&#x27;biryani&#x27;]],action:&#x27;Discover available biryani options → label type, restaurant, portion, and provider.&#x27;,note:&#x27;Show a useful first page; allow more results and refinements rather than claiming an exhaustive list.&#x27;},
+    snacks:{user:&#x27;I want snacks.&#x27;,assistant:&#x27;Packaged snacks like chips and biscuits, or prepared snacks like samosas and momos?&#x27;,choices:[[&#x27;Packaged snacks&#x27;,&#x27;packaged&#x27;],[&#x27;Prepared snacks&#x27;,&#x27;fresh&#x27;]],action:&#x27;Clarify product type before choosing the shopping service.&#x27;,note:&#x27;Snack is a meal context, not a provider routing rule.&#x27;},
+    packaged:{user:&#x27;Packaged snacks. Maybe chips.&#x27;,assistant:&#x27;Any flavour, brand, or budget preference? I’ll search Instamart.&#x27;,choices:[[&#x27;Something else&#x27;,&#x27;start&#x27;]],action:&#x27;Search Instamart → compare real variants → collect product choices → prepare basket.&#x27;,note:&#x27;Preserve unrelated items already in the Instamart cart.&#x27;},
+    fresh:{user:&#x27;Prepared snacks. Momos.&#x27;,assistant:&#x27;Veg or chicken momos? Steamed or fried?&#x27;,choices:[[&#x27;Veg · steamed&#x27;,&#x27;freshsearch&#x27;],[&#x27;Chicken · fried&#x27;,&#x27;friedsearch&#x27;]],action:&#x27;Capture dish customizations, then search restaurant providers.&#x27;,note:&#x27;Prepared snacks use the same restaurant discovery flow as meals.&#x27;},
+    freshsearch:{user:&#x27;Veg steamed momos.&#x27;,assistant:&#x27;I’ll compare veg steamed momos on your connected services.&#x27;,choices:[[&#x27;Something else&#x27;,&#x27;start&#x27;]],action:&#x27;Search Swiggy Food + Zomato → show provider-labelled item cards.&#x27;,note:&#x27;Searches and meal suggestions never authorize a purchase.&#x27;},
+    friedsearch:{user:&#x27;Chicken fried momos.&#x27;,assistant:&#x27;I’ll compare chicken fried momos on your connected services.&#x27;,choices:[[&#x27;Something else&#x27;,&#x27;start&#x27;]],action:&#x27;Search Swiggy Food + Zomato → show provider-labelled item cards.&#x27;,note:&#x27;Required menu options are resolved before preparing a quote.&#x27;},
+    light:{user:&#x27;Something light.&#x27;,assistant:&#x27;Would you like a salad, soup, sandwich, or another dish?&#x27;,choices:[[&#x27;Sandwich&#x27;,&#x27;sandwich&#x27;],[&#x27;Biryani instead&#x27;,&#x27;biryani&#x27;]],action:&#x27;Narrow the dish using the user’s preference.&#x27;,note:&#x27;Lunch time does not imply the user wants a heavy meal.&#x27;},
+    sandwich:{user:&#x27;A sandwich.&#x27;,assistant:&#x27;Any filling preference or budget? I can also show a mix first.&#x27;,choices:[[&#x27;Show a mix&#x27;,&#x27;sandwichsearch&#x27;]],action:&#x27;Ask only useful missing details; offer broad discovery.&#x27;,note:&#x27;Explicit preferences override time-based suggestions.&#x27;},
+    sandwichsearch:{user:&#x27;Show a mix of sandwiches.&#x27;,assistant:&#x27;I’ll compare sandwiches from your connected services.&#x27;,choices:[[&#x27;Something else&#x27;,&#x27;start&#x27;]],action:&#x27;Search restaurant providers → show available options and required choices.&#x27;,note:&#x27;Menu prices and final payable totals remain distinct.&#x27;},
+    breakfast:{user:&#x27;Breakfast instead.&#x27;,assistant:&#x27;Of course. Dosa, idli, a breakfast sandwich, or something else?&#x27;,choices:[[&#x27;Dosa&#x27;,&#x27;dosa&#x27;],[&#x27;Something else&#x27;,&#x27;start&#x27;]],action:&#x27;Override the inferred meal context; retain the rest of the shopping task.&#x27;,note:&#x27;Breakfast can be requested at any time; availability comes from live providers.&#x27;},
+    dosa:{user:&#x27;Dosa.&#x27;,assistant:&#x27;Any kind you prefer, or should I show available dosa options?&#x27;,choices:[[&#x27;Show available options&#x27;,&#x27;dosasearch&#x27;]],action:&#x27;Use the requested dish, not a fixed time-of-day filter.&#x27;,note:&#x27;Restaurant availability is checked through connected providers.&#x27;},
+    dosasearch:{user:&#x27;Show available dosa options.&#x27;,assistant:&#x27;I’ll look for dosa options available for your address.&#x27;,choices:[[&#x27;Something else&#x27;,&#x27;start&#x27;]],action:&#x27;Search connected restaurant providers → show actual serviceability and options.&#x27;,note:&#x27;An unavailable dish is reported honestly with alternatives.&#x27;}
+  };
+  function showJourney(name){
+    journey=name;
+    const step=steps[name];
+    el(&#x27;sc-user-line&#x27;).textContent=step.user;
+    el(&#x27;sc-assistant-line&#x27;).textContent=typeof step.assistant===&#x27;function&#x27;?step.assistant():step.assistant;
+    el(&#x27;sc-next-action&#x27;).textContent=step.action;
+    el(&#x27;sc-journey-note&#x27;).textContent=step.note;
+    const choices=el(&#x27;sc-choices&#x27;);choices.replaceChildren();
+    step.choices.forEach(([label,next])=&gt;{const button=document.createElement(&#x27;button&#x27;);button.type=&#x27;button&#x27;;button.className=&#x27;btn&#x27;;button.textContent=label;button.addEventListener(&#x27;click&#x27;,()=&gt;showJourney(next));choices.append(button);});
+  }
+  showJourney(&#x27;start&#x27;);
+  timeInput.addEventListener(&#x27;input&#x27;,()=&gt;{if(journey===&#x27;start&#x27;)showJourney(&#x27;start&#x27;);});
+  el(&#x27;sc-from-start&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;showJourney(&#x27;start&#x27;));
+  el(&#x27;sc-direct-dish&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;showJourney(&#x27;search&#x27;));
+
+  const ui={voice:true,captions:false,muted:false,selection:null,compact:false};
+  function renderMode(){
+    el(&#x27;sc-voice-view&#x27;).hidden=!ui.voice;
+    el(&#x27;sc-voice-controls&#x27;).hidden=!ui.voice;
+    el(&#x27;sc-text-view&#x27;).hidden=ui.voice;
+    el(&#x27;sc-text-composer&#x27;).hidden=ui.voice;
+    el(&#x27;sc-optional-caption&#x27;).hidden=!ui.captions;
+    el(&#x27;sc-show-text&#x27;).setAttribute(&#x27;aria-pressed&#x27;,String(!ui.voice));
+    el(&#x27;sc-show-voice&#x27;).setAttribute(&#x27;aria-pressed&#x27;,String(ui.voice));
+    el(&#x27;sc-ui-selection&#x27;).textContent=ui.selection?ui.selection+&#x27; item selected · required choices → fresh order review&#x27;:&#x27;No item selected&#x27;;
+    el(&#x27;sc-mute&#x27;).textContent=ui.muted?&#x27;Unmute&#x27;:&#x27;Mute&#x27;;
+    el(&#x27;sc-interface-preview&#x27;).style.maxWidth=ui.compact?&#x27;420px&#x27;:&#x27;620px&#x27;;
+  }
+  el(&#x27;sc-show-text&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{ui.voice=false;renderMode();});
+  el(&#x27;sc-show-voice&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{ui.voice=true;el(&#x27;sc-audio-status&#x27;).textContent=ui.muted?&#x27;Microphone muted · preview state&#x27;:&#x27;Listening · preview state&#x27;;renderMode();});
+  el(&#x27;sc-mute&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{ui.muted=!ui.muted;el(&#x27;sc-audio-status&#x27;).textContent=ui.muted?&#x27;Microphone muted · preview state&#x27;:&#x27;Listening · preview state&#x27;;renderMode();});
+  el(&#x27;sc-interrupt&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{el(&#x27;sc-audio-status&#x27;).textContent=ui.muted?&#x27;Speech stopped · microphone muted&#x27;:&#x27;Speech stopped · listening&#x27;;});
+  el(&#x27;sc-end-voice&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{ui.voice=false;renderMode();});
+  root.querySelectorAll(&#x27;[data-sc-offer]&#x27;).forEach(button=&gt;button.addEventListener(&#x27;click&#x27;,()=&gt;{ui.selection=button.dataset.scOffer;renderMode();if(ui.voice)el(&#x27;sc-audio-status&#x27;).textContent=&#x27;Selected · resolving required choices&#x27;;}));
+  el(&#x27;sc-text-composer&#x27;).addEventListener(&#x27;submit&#x27;,event=&gt;{event.preventDefault();const input=el(&#x27;sc-preview-message&#x27;);if(input.value.trim()){el(&#x27;sc-ui-selection&#x27;).textContent=&#x27;Preview request: &#x27;+input.value.trim();input.value=&#x27;&#x27;;}});
+  renderMode();
+  if(globalThis.Tweak){
+    const tweak=new Tweak({container:el(&#x27;sc-interface-preview&#x27;),onChange:renderMode});
+    tweak.addToggle(ui,&#x27;captions&#x27;,{label:&#x27;Voice captions&#x27;});
+    tweak.addToggle(ui,&#x27;compact&#x27;,{label:&#x27;Compact width&#x27;});
+  }
+})();
+&lt;/script&gt;
+
+&lt;script src=&quot;https://unpkg.com/@floating-ui/core@1.7.3/dist/floating-ui.core.umd.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://unpkg.com/@floating-ui/dom@1.7.4/dist/floating-ui.dom.umd.min.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+(() =&gt; {
+  if (window.FloatingUIDOM == null) {
+    return;
+  }
+  const { autoUpdate, computePosition, flip, offset, shift, size } =
+    window.FloatingUIDOM;
+  const tooltipPlacements = new Set([&quot;top&quot;, &quot;right&quot;, &quot;bottom&quot;, &quot;left&quot;]);
+  const tooltipId = `codex-visualization-tooltip-${
+    window.crypto?.randomUUID?.() ?? Date.now().toString(36)
+  }`;
+  const tooltipGap = 5;
+  const hoverDelay = 700;
+  const skipDelay = 300;
+  let activeTrigger = null;
+  let pendingTrigger = null;
+  let tooltip = null;
+  let openTimeout = null;
+  let autoUpdateCleanup = null;
+  let positionRequest = 0;
+  let skipDelayUntil = 0;
+  let lastPointerWasTouch = false;
+  let pinnedByTouch = false;
+
+  const getTrigger = (target) =&gt;
+    target?.nodeType === Node.ELEMENT_NODE
+      ? target.closest(&quot;[data-tooltip]&quot;)
+      : null;
+  const containsTarget = (trigger, target) =&gt;
+    target?.nodeType != null &amp;&amp; trigger.contains(target);
+  const getContent = (trigger) =&gt;
+    trigger.getAttribute(&quot;data-tooltip&quot;)?.trim() ?? &quot;&quot;;
+  const getPlacement = (trigger) =&gt; {
+    const placement = trigger.getAttribute(&quot;data-tooltip-placement&quot;);
+    return tooltipPlacements.has(placement) ? placement : &quot;top&quot;;
+  };
+  const getTooltip = () =&gt; {
+    if (tooltip == null) {
+      tooltip = document.createElement(&quot;div&quot;);
+      tooltip.id = tooltipId;
+      tooltip.className = &quot;tooltip&quot;;
+      tooltip.setAttribute(&quot;role&quot;, &quot;tooltip&quot;);
+    }
+    return tooltip;
+  };
+  const setDescribedBy = (trigger, described) =&gt; {
+    const ids = new Set(
+      (trigger.getAttribute(&quot;aria-describedby&quot;) ?? &quot;&quot;)
+        .split(/\s+/)
+        .filter(Boolean),
+    );
+    if (described) {
+      ids.add(tooltipId);
+    } else {
+      ids.delete(tooltipId);
+    }
+    if (ids.size === 0) {
+      trigger.removeAttribute(&quot;aria-describedby&quot;);
+    } else {
+      trigger.setAttribute(&quot;aria-describedby&quot;, [...ids].join(&quot; &quot;));
+    }
+  };
+  const clearOpenTimeout = () =&gt; {
+    if (openTimeout != null) {
+      window.clearTimeout(openTimeout);
+      openTimeout = null;
+    }
+    pendingTrigger = null;
+  };
+  const closeTooltip = (activateSkipDelay = true) =&gt; {
+    clearOpenTimeout();
+    pinnedByTouch = false;
+    positionRequest += 1;
+    autoUpdateCleanup?.();
+    autoUpdateCleanup = null;
+    if (activeTrigger == null) {
+      return;
+    }
+    setDescribedBy(activeTrigger, false);
+    activeTrigger = null;
+    tooltip?.remove();
+    if (activateSkipDelay) {
+      skipDelayUntil = Date.now() + skipDelay;
+    }
+  };
+  const updatePosition = (trigger, floating) =&gt; {
+    const request = ++positionRequest;
+    void computePosition(trigger, floating, {
+      middleware: [
+        offset(tooltipGap),
+        flip({ padding: tooltipGap }),
+        shift({ padding: tooltipGap }),
+        size({
+          padding: tooltipGap,
+          apply({ availableHeight, availableWidth, elements }) {
+            elements.floating.style.setProperty(
+              &quot;--tooltip-available-width&quot;,
+              `${Math.max(0, availableWidth)}px`,
+            );
+            elements.floating.style.setProperty(
+              &quot;--tooltip-available-height&quot;,
+              `${Math.max(0, availableHeight)}px`,
+            );
+          },
+        }),
+      ],
+      placement: getPlacement(trigger),
+      strategy: &quot;fixed&quot;,
+    })
+      .then(({ x, y }) =&gt; {
+        if (activeTrigger !== trigger || request !== positionRequest) {
+          return;
+        }
+        const scale = window.devicePixelRatio || 1;
+        floating.style.transform = `translate(${Math.round(x * scale) / scale}px, ${Math.round(y * scale) / scale}px)`;
+        floating.style.visibility = &quot;visible&quot;;
+      })
+      .catch(() =&gt; {
+        if (activeTrigger === trigger &amp;&amp; request === positionRequest) {
+          closeTooltip(false);
+        }
+      });
+  };
+  const openTooltip = (trigger) =&gt; {
+    const content = getContent(trigger);
+    if (!trigger.isConnected || content.length === 0) {
+      return;
+    }
+    clearOpenTimeout();
+    if (activeTrigger === trigger) {
+      return;
+    }
+    closeTooltip();
+    const floating = getTooltip();
+    floating.textContent = content;
+    floating.style.visibility = &quot;hidden&quot;;
+    floating.style.transform = &quot;translate(0, 0)&quot;;
+    document.body.appendChild(floating);
+    activeTrigger = trigger;
+    setDescribedBy(trigger, true);
+    autoUpdateCleanup = autoUpdate(trigger, floating, () =&gt; {
+      updatePosition(trigger, floating);
+    });
+  };
+  const requestOpen = (trigger, immediate = false) =&gt; {
+    if (
+      getContent(trigger).length === 0 ||
+      activeTrigger === trigger ||
+      pendingTrigger === trigger
+    ) {
+      return;
+    }
+    clearOpenTimeout();
+    pendingTrigger = trigger;
+    const delay =
+      immediate || activeTrigger != null || Date.now() &lt; skipDelayUntil
+        ? 0
+        : hoverDelay;
+    if (delay === 0) {
+      openTooltip(trigger);
+      return;
+    }
+    openTimeout = window.setTimeout(() =&gt; {
+      openTimeout = null;
+      pendingTrigger = null;
+      openTooltip(trigger);
+    }, delay);
+  };
+  const handlePointerOpen = (event) =&gt; {
+    if (event.pointerType === &quot;touch&quot;) {
+      return;
+    }
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    requestOpen(trigger);
+  };
+  const handlePointer = (event) =&gt; {
+    lastPointerWasTouch =
+      event.type === &quot;pointerdown&quot; &amp;&amp; event.pointerType === &quot;touch&quot;;
+  };
+  const handleTouchClick = (event) =&gt; {
+    const isTouch = event.pointerType === &quot;touch&quot; || lastPointerWasTouch;
+    lastPointerWasTouch = false;
+    if (!isTouch || event.detail === 0) {
+      return;
+    }
+    const trigger = getTrigger(event.target);
+    if (
+      trigger == null ||
+      !trigger.isConnected ||
+      getContent(trigger).length === 0 ||
+      (pinnedByTouch &amp;&amp; activeTrigger === trigger)
+    ) {
+      if (pinnedByTouch) {
+        closeTooltip();
+      }
+      return;
+    }
+    openTooltip(trigger);
+    pinnedByTouch = activeTrigger === trigger;
+    window.setTimeout(() =&gt; {
+      if (activeTrigger === trigger &amp;&amp; !trigger.isConnected) {
+        closeTooltip(false);
+      }
+    }, 0);
+  };
+  const handleLeave = (event) =&gt; {
+    if (pinnedByTouch) {
+      return;
+    }
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const handleFocusIn = (event) =&gt; {
+    const trigger = getTrigger(event.target);
+    if (trigger?.matches(&quot;:focus-visible&quot;)) {
+      requestOpen(trigger, true);
+    }
+  };
+  const handleKeyDown = (event) =&gt; {
+    if (event.key === &quot;Escape&quot;) {
+      closeTooltip();
+    }
+  };
+  const handleContextMenu = (event) =&gt; {
+    lastPointerWasTouch = false;
+    const trigger = getTrigger(event.target);
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const destroy = () =&gt; {
+    closeTooltip(false);
+    lastPointerWasTouch = false;
+    document.removeEventListener(&quot;pointerover&quot;, handlePointerOpen);
+    document.removeEventListener(&quot;pointerdown&quot;, handlePointer);
+    document.removeEventListener(&quot;pointercancel&quot;, handlePointer);
+    document.removeEventListener(&quot;click&quot;, handleTouchClick);
+    document.removeEventListener(&quot;pointerout&quot;, handleLeave);
+    document.removeEventListener(&quot;focusin&quot;, handleFocusIn);
+    document.removeEventListener(&quot;focusout&quot;, handleLeave);
+    document.removeEventListener(&quot;keydown&quot;, handleKeyDown);
+    document.removeEventListener(&quot;contextmenu&quot;, handleContextMenu);
+    tooltip = null;
+  };
+
+  document.addEventListener(&quot;pointerover&quot;, handlePointerOpen);
+  document.addEventListener(&quot;pointerdown&quot;, handlePointer);
+  document.addEventListener(&quot;pointercancel&quot;, handlePointer);
+  document.addEventListener(&quot;click&quot;, handleTouchClick);
+  document.addEventListener(&quot;pointerout&quot;, handleLeave);
+  document.addEventListener(&quot;focusin&quot;, handleFocusIn);
+  document.addEventListener(&quot;focusout&quot;, handleLeave);
+  document.addEventListener(&quot;keydown&quot;, handleKeyDown);
+  document.addEventListener(&quot;contextmenu&quot;, handleContextMenu);
+  window.addEventListener(&quot;pagehide&quot;, destroy, { once: true });
+})();
+&lt;/script&gt;
+&lt;script id=&quot;codex-visualization-tabs&quot;&gt;
+(() =&gt; {
+  const selector = &#x27;.nav[role=&quot;tablist&quot;] [role=&quot;tab&quot;]&#x27;;
+  const disabled = &#x27;:disabled,[aria-disabled=&quot;true&quot;]&#x27;;
+  const selectTab = (selected) =&gt; {
+    const panelId = selected.getAttribute(&quot;aria-controls&quot;);
+    for (const tab of selected.closest(&#x27;[role=&quot;tablist&quot;]&#x27;).querySelectorAll(&#x27;[role=&quot;tab&quot;]&#x27;)) {
+      const active = tab === selected;
+      tab.classList.toggle(&quot;active&quot;, active);
+      tab.setAttribute(&quot;aria-selected&quot;, String(active));
+      const id = tab.getAttribute(&quot;aria-controls&quot;);
+      const panel = id &amp;&amp; document.getElementById(id);
+      if (panel != null) {
+        panel.hidden = id !== panelId;
+        if (!panel.hidden &amp;&amp; selected.id) {
+          panel.setAttribute(&quot;aria-labelledby&quot;, selected.id);
+        }
+      }
+    }
+  };
+  const interact = (event) =&gt; {
+    const tab = event.target?.closest?.(selector);
+    if (event.defaultPrevented || tab == null || tab.matches(disabled)) {
+      return;
+    }
+    if (event.type === &quot;click&quot;) {
+      selectTab(tab);
+      return;
+    }
+    const tabs = Array.from(
+      tab.closest(&#x27;[role=&quot;tablist&quot;]&#x27;).querySelectorAll(&#x27;[role=&quot;tab&quot;]&#x27;),
+    ).filter((candidate) =&gt; !candidate.matches(disabled));
+    const current = tabs.indexOf(tab);
+    let next;
+    if (event.key === &quot;ArrowRight&quot; || event.key === &quot;ArrowDown&quot;) {
+      next = (current + 1) % tabs.length;
+    } else if (event.key === &quot;ArrowLeft&quot; || event.key === &quot;ArrowUp&quot;) {
+      next = (current + tabs.length - 1) % tabs.length;
+    } else if (event.key === &quot;Home&quot;) {
+      next = 0;
+    } else if (event.key === &quot;End&quot;) {
+      next = tabs.length - 1;
+    } else {
+      return;
+    }
+    event.preventDefault();
+    tabs[next].focus();
+    selectTab(tabs[next]);
+  };
+
+  for (const list of document.querySelectorAll(&#x27;.nav[role=&quot;tablist&quot;]&#x27;)) {
+    const selected =
+      list.querySelector(&#x27;[role=&quot;tab&quot;][aria-selected=&quot;true&quot;]&#x27;) ??
+      list.querySelector(&#x27;[role=&quot;tab&quot;].active&#x27;) ??
+      list.querySelector(&#x27;[role=&quot;tab&quot;]&#x27;);
+    if (selected != null) {
+      selectTab(selected);
+    }
+  }
+  document.addEventListener(&quot;click&quot;, interact);
+  document.addEventListener(&quot;keydown&quot;, interact);
+  window.addEventListener(&quot;pagehide&quot;, () =&gt; {
+    document.removeEventListener(&quot;click&quot;, interact);
+    document.removeEventListener(&quot;keydown&quot;, interact);
+  }, { once: true });
+})();
+&lt;/script&gt;
+&lt;script id=&quot;codex-visualization-lucide&quot; async src=&quot;https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+(() =&gt; {
+  const initialize = () =&gt; {
+    globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
+  };
+  if (globalThis.lucide != null) {
+    initialize();
+    return;
+  }
+  document
+    .getElementById(&quot;codex-visualization-lucide&quot;)
+    ?.addEventListener(&quot;load&quot;, initialize, { once: true });
+})();
+&lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe>
+</body>
+</html>

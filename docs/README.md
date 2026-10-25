@@ -11,6 +11,8 @@ The product uses the official Swiggy Instamart MCP connection. Synthetic commerc
 
 ## Product and delivery
 
+[Conversation assistant: implementation, examples, API, and remaining work](ASSISTANT.md) describes the new home experience and its verified boundaries.
+
 | Document | Purpose |
 | --- | --- |
 | [Project README](../README.md) | Goal, current status, integration direction, and starting point |
@@ -35,6 +37,7 @@ The product uses the official Swiggy Instamart MCP connection. Synthetic commerc
 | [API contract](API_CONTRACT.md) | Implemented endpoints and separately labeled future contracts |
 | [Data model](DATA_MODEL.md) | Application state, provider references, and checkout records |
 | [Development](DEVELOPMENT.md) | Repository layout, configuration plan, and first implementation steps |
+| [Assistant evaluations](EVALS.md) | Repeatable conversation dataset, executable graders, traces and model checks |
 | [Testing](TESTING.md) | Functional, conversation, integration, and checkout verification |
 | [Decisions](DECISIONS.md) | Design decisions, rationale, and unresolved choices |
 

@@ -97,7 +97,10 @@ export function createFoodCheckoutService(options: {
       const prior = await read<Record>(owner, "food_checkout", "current");
       const restaurantId = lines[0].restaurantId, restaurantName = selected[0].offer!.restaurant ?? undefined;
       let baseline = await provider.getCart({ addressId: address.id, restaurantName, restaurantId });
-      const sameItems = (cart: FoodCart) => cart.restaurant?.id === restaurantId && cart.lines.length === items.length && items.every(i => cart.lines.some(l => l.menuItemId === i.menuItemId && l.quantity === i.quantity));
+      // These selections contain plain menu items: this app cannot select
+      // variants or add-ons. An existing customized dish with the same ID and
+      // quantity is a different cart and requires the usual replacement consent.
+      const sameItems = (cart: FoodCart) => cart.restaurant?.id === restaurantId && cart.lines.length === items.length && items.every(i => cart.lines.some(l => l.menuItemId === i.menuItemId && l.quantity === i.quantity && !l.variants.length && !l.addons.length));
       // A Swiggy cart still holding exactly what this app last put there is ours to change, also for another restaurant.
       const ours = !!prior && prior.remote.fingerprint === baseline.fingerprint;
       if (baseline.lines.length && !sameItems(baseline) && (!ours || baseline.restaurant?.id !== restaurantId)) {

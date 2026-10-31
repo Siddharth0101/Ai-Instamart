@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { AssistantViewSchema, ShoppingTaskSchema, type AssistantView, type MealOffer, type ProviderState, type ShoppingTask, type RestaurantCard, type RestaurantMenu } from "../lib/assistant-contracts";
 import type { Quote, SessionView } from "../lib/contracts";
+import { GROCERY_RAILS } from "../lib/grocery-catalog";
 import { AppError } from "./errors";
 import { opaqueId } from "./crypto";
 import { read, transaction } from "./store";
@@ -34,6 +35,19 @@ const say=(state:{messages:Array<{role:string;text:string}>},text:string)=>{cons
 const clean=(state:StoredAssistant):AssistantView=>AssistantViewSchema.parse(state);
 const stored=(state:StoredAssistant)=>({...clean(state),browseCursors:state.browseCursors??[],restaurantContext:state.restaurantContext??null,rejectedProposalIds:state.rejectedProposalIds??[]});
 const unique=(values:string[])=>[...new Set(values.filter(Boolean))].slice(-12);
+/** A saved cart ID survives new searches, but its stock and price come from the current aisle or home rails. */
+function currentGroceryOffer(state:StoredAssistant,saved:MealOffer):MealOffer{
+  const discovery=state.task.discovery;
+  if(saved.provider!=="instamart"||discovery?.kind!=="snacks"||discovery.stage!=="items")return saved;
+  const itemIds=discovery.itemId?new Set([discovery.itemId]):discovery.categoryId==="home"?new Set(GROCERY_RAILS.flatMap(rail=>{
+    const item=state.task.items.findLast(entry=>entry.route==="instamart"&&entry.status!=="added"&&entry.label===rail.label&&entry.query===rail.query);
+    return item?[item.id]:[];
+  })):null;
+  return itemIds?state.offers.findLast(offer=>itemIds.has(offer.itemId)&&offer.provider===saved.provider&&offer.providerItemId===saved.providerItemId)??saved:saved;
+}
+function refreshGroceryCartOffer(state:StoredAssistant,id:string,current:MealOffer){
+  if(current.provider==="instamart")state.offers=state.offers.map(offer=>offer.id===id?{...current,id:offer.id,itemId:offer.itemId}:offer);
+}
 function syncBrowse(state:StoredAssistant){
   const items=new Set(state.task.items.map(item=>item.id));
   const context=state.restaurantContext;
@@ -285,9 +299,9 @@ export function createAssistantService(deps:AssistantDependencies){
     });
   }
   function selectOfferInto(state:StoredAssistant,input:{offerId:string;quantity?:number}){
-      const offer=state.offers.find(item=>item.id===input.offerId);
-      if(!offer||!offer.available||!offer.selectable)throw new AppError("OFFER_UNAVAILABLE","Choose an available item from your current results.",422);
-      const target=state.task.items.find(item=>item.id===offer.itemId);
+      const selected=state.offers.find(item=>item.id===input.offerId),offer=selected&&currentGroceryOffer(state,selected);
+      if(!selected||!offer||!offer.available||!offer.selectable)throw new AppError("OFFER_UNAVAILABLE","Choose an available item from your current results.",422);
+      const target=state.task.items.find(item=>item.id===selected.itemId);
       if(!target)throw new AppError("PLAN_CHANGED","This item is no longer part of the current plan.",409);
       if(target.status==="added")throw new AppError("ITEM_ALREADY_PREPARED","This item is already in your bag. Manage its quantity there to avoid adding it twice.",409);
       const quantity=input.quantity??target.quantity;
@@ -295,10 +309,14 @@ export function createAssistantService(deps:AssistantDependencies){
       // "Chips and a cold drink" from one search are two cart lines: a second product gets its own line instead of replacing the first.
       // The same product found again in another aisle or search keeps its one cart line.
       const same=(id:string|null)=>{const held=state.offers.find(other=>other.id===id);return held?.provider===offer.provider&&held.providerItemId===offer.providerItemId;};
-      const holder=state.task.items.find(item=>item.selectedOfferId===offer.id)??state.task.items.find(item=>same(item.selectedOfferId));
+      const holder=state.task.items.find(item=>item.selectedOfferId===selected.id)??state.task.items.find(item=>same(item.selectedOfferId));
       if(holder){if(holder.status==="added")throw new AppError("ITEM_ALREADY_PREPARED","This item is already in your bag. Manage its quantity there to avoid adding it twice.",409);holder.quantity=quantity;}
-      else if(target.selectedOfferId&&target.selectedOfferId!==offer.id)state.task.items.push({id:randomUUID(),label:offer.name,query:target.query,quantity,route:target.route,status:"selected",selectedOfferId:offer.id});
-      else{target.quantity=quantity;target.selectedOfferId=offer.id;target.status="selected";}
+      else if(target.selectedOfferId&&target.selectedOfferId!==selected.id){
+        if(state.task.items.length>=30)throw new AppError("PLAN_LIMIT","Your plan has 30 items. Remove an item before adding another.",422);
+        state.task.items.push({id:randomUUID(),label:offer.name,query:target.query,quantity,route:target.route,status:"selected",selectedOfferId:selected.id});
+      }
+      else{target.quantity=quantity;target.selectedOfferId=selected.id;target.status="selected";}
+      refreshGroceryCartOffer(state,holder?.selectedOfferId??selected.id,offer);
       state.proposal=null;
   }
   /** Cart steppers: set a saved dish's quantity from any restaurant; 0 removes it. Never touches a provider cart. */
@@ -308,15 +326,22 @@ export function createAssistantService(deps:AssistantDependencies){
       const item=state.task.items.find(entry=>entry.selectedOfferId===input.offerId),offer=state.offers.find(entry=>entry.id===input.offerId);
       if(!item||!offer)throw new AppError("OFFER_UNAVAILABLE","That item is no longer in your cart.",422);
       if(item.status==="added")throw new AppError("ITEM_ALREADY_PREPARED","This item is already in your provider bag. Manage it in the bag.",409);
-      if(!Number.isInteger(input.quantity)||input.quantity<0||input.quantity>Math.min(99,offer.maxQuantity??99))throw new AppError("QUANTITY_LIMIT","Choose a quantity within the available limit.",422);
+      const current=currentGroceryOffer(state,offer),increasing=input.quantity>item.quantity;
+      if(!Number.isInteger(input.quantity)||input.quantity<0||input.quantity>99)throw new AppError("QUANTITY_LIMIT","Choose a quantity within the available limit.",422);
+      // Reduced stock must never trap an existing grocery in the cart: decreases
+      // and removal stay possible, while increases use the refreshed limits.
+      if(increasing&&current.provider==="instamart"&&(!current.available||!current.selectable))throw new AppError("OFFER_UNAVAILABLE","This item is not currently available. You can reduce or remove it from your cart.",422);
+      if((current.provider!=="instamart"||increasing)&&input.quantity>Math.min(99,current.maxQuantity??99))throw new AppError("QUANTITY_LIMIT","Choose a quantity within the available limit.",422);
       if(input.quantity===0){
         // A dish chosen from a menu is its own plan item; a searched item keeps its slot so it can be chosen again.
         const context=state.restaurantContext;
         if(context?.itemId===item.id){item.selectedOfferId=null;item.status="needs_choice";item.label=context.query==="restaurants"?"Restaurants near you":context.query;}
         else if((item.route==="restaurant"||item.id!==offer.itemId)&&item.label===offer.name)state.task.items=state.task.items.filter(entry=>entry.id!==item.id);
         else{item.selectedOfferId=null;item.status="needs_choice";}
-        if(!state.task.items.some(entry=>entry.selectedOfferId===offer.id))state.offers=state.offers.filter(entry=>entry.id!==offer.id||state.restaurantBrowser?.menu?.sections.some(section=>section.items.some(dish=>dish.id===offer.id)));
-      }else item.quantity=input.quantity;
+        // Removing a cart line must not remove the live product from its search
+        // results: the customer can add that same card again without a search.
+        if(!state.task.items.some(entry=>entry.selectedOfferId===offer.id||entry.id===offer.itemId))state.offers=state.offers.filter(entry=>entry.id!==offer.id||state.restaurantBrowser?.menu?.sections.some(section=>section.items.some(dish=>dish.id===offer.id)));
+      }else{item.quantity=input.quantity;refreshGroceryCartOffer(state,offer.id,current);}
       state.version++;state.status=state.task.items.some(entry=>entry.selectedOfferId)?"selected":state.restaurantBrowser?"needs_choice":"ready";
       state.updatedAt=new Date().toISOString();state.providers=await deps.providers(ownerId);
       await transaction(async tx=>{const current=await tx.get<StoredAssistant>(ownerId,"assistant","current");if(!current||current.version!==input.expectedVersion||current.active)throw new AppError("PLAN_CHANGED","Your cart changed. Refresh before editing again.",409);await tx.put(ownerId,"assistant","current",stored(state));});

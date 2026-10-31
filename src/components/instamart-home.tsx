@@ -13,7 +13,7 @@ function bySize(offers: MealOffer[], view: AssistantView) {
 }
 
 /** The Instamart front: a grid of aisles, then product rails, every product straight from Swiggy's search with ADD. */
-export function InstamartHome({ view, busy, onCategory, onAdd, onQuantity }: { view: AssistantView; busy: boolean; onCategory: (category: GroceryCategory) => void; onAdd: (offer: MealOffer) => void; onQuantity: (offer: MealOffer, quantity: number) => void }) {
+export function InstamartHome({ view, focusedId, busy, onCategory, onAdd, onQuantity }: { view: AssistantView; focusedId?: string | null; busy: boolean; onCategory: (category: GroceryCategory) => void; onAdd: (offer: MealOffer) => void; onQuantity: (offer: MealOffer, quantity: number) => void }) {
   // One rail per home rail, from its latest search. Cart lines kept from earlier visits and aisles stay in the bag and on their product's card, not as rails of their own.
   const rails = GROCERY_RAILS.flatMap(rail => { const item = view.task.items.findLast(entry => entry.route === "instamart" && entry.status !== "added" && entry.label === rail.label); return item ? [{ item, offers: view.offers.filter(offer => offer.itemId === item.id) }] : []; }).filter(rail => rail.offers.length);
   return <section className="sc-instamart" aria-labelledby="sc-instamart-title">
@@ -23,7 +23,7 @@ export function InstamartHome({ view, busy, onCategory, onAdd, onQuantity }: { v
     </section>
     {rails.map(({ item, offers }) => <section key={item.id} className="sc-instamart-rail" aria-label={item.label}>
       <div className="sc-instamart-rail-head"><h3 className="sc-instamart-title">{item.label}</h3>{GROCERY_CATEGORIES.some(category => category.query === item.query) && <button type="button" className="sc-link" disabled={busy} aria-label={`See all ${item.label}`} onClick={() => onCategory(GROCERY_CATEGORIES.find(category => category.query === item.query)!)}>See all</button>}</div>
-      <div className="sc-instamart-row">{bySize(offers, view).slice(0, 12).map(({ offer, sizes }) => <ProductCard key={offer.id} offer={offer} sizes={sizes} view={view} busy={busy} onAdd={onAdd} onQuantity={onQuantity}/>)}</div>
+      <div className="sc-instamart-row">{bySize(offers, view).slice(0, 12).map(({ offer, sizes }) => <ProductCard key={offer.id} offer={offer} sizes={sizes} view={view} focusedId={focusedId} busy={busy} onAdd={onAdd} onQuantity={onQuantity}/>)}</div>
     </section>)}
   </section>;
 }

@@ -31,7 +31,7 @@ test("hints follow the screen: address, menu, cart, checkout and review", () => 
   const base = { addressAsked: false, checkoutOpen: false, reviewReady: false, orderActive: false, savedAddresses: ["Home", "Work"] };
   assert.deepEqual(voiceHints({ ...base, view: null, addressAsked: true }), ["Home", "Deliver to Work"]);
   assert.deepEqual(voiceHints({ ...base, view: view([]) }), ["Add two Chicken Boneless Biryani", "What's popular here?", "Back to restaurants"]);
-  assert.ok(voiceHints({ ...base, view: view([[paneer, 1]]) }).includes("Checkout"));
+  assert.ok(voiceHints({ ...base, view: view([[paneer, 1]]) }).includes("Show my cart"));
   assert.deepEqual(voiceHints({ ...base, view: view([], false) }), ["Open Meghana Foods", "Top rated first", "Show pizza places"]);
   assert.deepEqual(voiceHints({ ...base, view: view([[paneer, 1]]), checkoutOpen: true }), ["Pay with cash", "Use PhonePe"]);
   assert.deepEqual(voiceHints({ ...base, view: view([[paneer, 1]]), checkoutOpen: true, reviewReady: true }), ["Confirm order", "Change payment"]);

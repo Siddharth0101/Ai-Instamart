@@ -39,12 +39,15 @@ function ProductArt({ offer }: { offer: MealOffer }) {
 }
 
 /** One Instamart product: art, name, pack and price, then ADD that becomes a stepper. Shared by the home rails and category pages. */
-export function ProductCard({ offer: shown, view, number, sizes = 1, busy, onAdd, onQuantity }: { offer: MealOffer; view: AssistantView; number?: number; sizes?: number; busy: boolean; onAdd: (offer: MealOffer) => void; onQuantity: (offer: MealOffer, quantity: number) => void }) {
+export function ProductCard({ offer: shown, view, number, sizes = 1, focusedId, busy, onAdd, onQuantity }: { offer: MealOffer; view: AssistantView; number?: number; sizes?: number; focusedId?: string | null; busy: boolean; onAdd: (offer: MealOffer) => void; onQuantity: (offer: MealOffer, quantity: number) => void }) {
   // Each search gives its products new offer ids, so a product already in the cart from another aisle is matched by Swiggy's own id.
-  const offer = view.offers.find(other => other.provider === shown.provider && other.providerItemId === shown.providerItemId && view.task.items.some(entry => entry.selectedOfferId === other.id)) ?? shown;
-  const lines = view.task.items.filter(entry => entry.selectedOfferId === offer.id), quantity = lines.reduce((sum, line) => sum + line.quantity, 0), prepared = lines.some(line => line.status === "added");
+  const saved = view.offers.find(other => other.provider === shown.provider && other.providerItemId === shown.providerItemId && view.task.items.some(entry => entry.selectedOfferId === other.id));
+  // Keep the saved cart identity for edits, while showing the latest provider price and stock.
+  const offer = shown, cartOffer = saved ?? shown;
+  const focused = !!focusedId && (focusedId === offer.id || focusedId === cartOffer.id);
+  const lines = view.task.items.filter(entry => entry.selectedOfferId === cartOffer.id), quantity = lines.reduce((sum, line) => sum + line.quantity, 0), prepared = lines.some(line => line.status === "added");
   const max = offerQuantity(99, offer.maxQuantity) ?? 99;
-  return <article className={`sc-grocery-card ${quantity ? "is-in-cart" : ""} ${offer.available ? "" : "is-unavailable"}`} data-voice-offer={offer.id}>
+  return <article className={`sc-grocery-card ${quantity ? "is-in-cart" : ""} ${offer.available ? "" : "is-unavailable"} ${focused ? "is-voice-target" : ""}`} data-voice-offer={cartOffer.id}>
     <ProductArt offer={offer}/>
     <div className="sc-grocery-copy">
       <h3>{number !== undefined && <span className="voice-item-number">{number}</span>}{offer.name}</h3>
@@ -52,16 +55,16 @@ export function ProductCard({ offer: shown, view, number, sizes = 1, busy, onAdd
     </div>
     <footer>
       <strong>{offer.priceMinor === null ? "Price at checkout" : money(offer.priceMinor)}</strong>
-      {!offer.available ? <span className="sc-grocery-out">Out of stock</span>
-        : prepared ? <span className="sc-grocery-bagged"><Glyph name="check" size={14}/>In bag</span>
-        : quantity ? <div className="sc-rb-quantity sc-rb-quantity-saved" role="group" aria-label={`Quantity for ${offer.name}`}><button type="button" disabled={busy} aria-label={quantity === 1 ? `Remove ${offer.name}` : `Decrease ${offer.name}`} onClick={() => onQuantity(offer, quantity - 1)}>−</button><output aria-live="polite">{quantity}</output><button type="button" disabled={busy || quantity >= max} aria-label={`Increase ${offer.name}`} onClick={() => onQuantity(offer, quantity + 1)}>+</button></div>
+      {prepared ? <span className="sc-grocery-bagged"><Glyph name="check" size={14}/>In bag</span>
+        : quantity ? <div className="sc-rb-quantity sc-rb-quantity-saved" role="group" aria-label={`Quantity for ${offer.name}`}><button type="button" disabled={busy} aria-label={quantity === 1 ? `Remove ${offer.name}` : `Decrease ${offer.name}`} onClick={() => onQuantity(cartOffer, quantity - 1)}>−</button><output aria-live="polite">{quantity}</output><button type="button" disabled={busy || !offer.available || quantity >= max} aria-label={`Increase ${offer.name}`} onClick={() => onQuantity(cartOffer, quantity + 1)}>+</button></div>
+        : !offer.available ? <span className="sc-grocery-out">Out of stock</span>
         : <button type="button" className="sc-rb-add" disabled={busy} aria-label={`Add ${offer.name} to cart`} onClick={() => onAdd(offer)}>ADD<Glyph name="plus" size={14}/></button>}
     </footer>
   </article>;
 }
 
 /** Instamart results as numbered product cards, with every category a tap away, like the store's own aisles. */
-export function GroceryResults({ view, itemId, busy, onAdd, onQuantity, onMore, onCategory, onHome }: { view: AssistantView; itemId: string; busy: boolean; onAdd: (offer: MealOffer) => void; onQuantity: (offer: MealOffer, quantity: number) => void; onMore: (itemId: string) => void; onCategory: (category: GroceryCategory) => void; onHome: () => void }) {
+export function GroceryResults({ view, itemId, focusedId, busy, onAdd, onQuantity, onMore, onCategory, onHome }: { view: AssistantView; itemId: string; focusedId?: string | null; busy: boolean; onAdd: (offer: MealOffer) => void; onQuantity: (offer: MealOffer, quantity: number) => void; onMore: (itemId: string) => void; onCategory: (category: GroceryCategory) => void; onHome: () => void }) {
   const item = view.task.items.find(entry => entry.id === itemId);
   const offers = view.offers.filter(offer => offer.itemId === itemId);
   const page = view.browsePages.find(entry => entry.itemId === itemId);
@@ -70,7 +73,7 @@ export function GroceryResults({ view, itemId, busy, onAdd, onQuantity, onMore, 
     <button type="button" className="sc-rb-back" disabled={busy} onClick={onHome}><span style={{ display: "inline-flex", transform: "rotate(180deg)" }}><Glyph name="arrow" size={16}/></span>Instamart home</button>
     <nav className="sc-grocery-aisles" aria-label="Categories">{GROCERY_CATEGORIES.map(category => <button key={category.id} type="button" aria-current={active?.id === category.id ? "page" : undefined} disabled={busy} onClick={() => onCategory(category)}><span aria-hidden="true"><CategoryArt icon={category.icon}/></span>{category.label}</button>)}</nav>
     <header className="sc-grocery-head"><div><span className="sc-eyebrow">INSTAMART · DELIVERY IN MINUTES</span><h2 id="sc-grocery-title">{active?.label ?? item?.query.replace(/^./, letter => letter.toUpperCase()) ?? "Instamart"}</h2></div>{offers.length > 0 && <span>{offers.length} {offers.length === 1 ? "product" : "products"}</span>}</header>
-    {offers.length ? <div className="sc-grocery-grid">{offers.map((offer, index) => <ProductCard key={offer.id} offer={offer} view={view} number={index + 1} busy={busy} onAdd={onAdd} onQuantity={onQuantity}/>)}</div>
+    {offers.length ? <div className="sc-grocery-grid">{offers.map((offer, index) => <ProductCard key={offer.id} offer={offer} view={view} focusedId={focusedId} number={index + 1} busy={busy} onAdd={onAdd} onQuantity={onQuantity}/>)}</div>
       : <div className="sc-rb-empty"><span className="sc-rb-empty-symbol" aria-hidden="true">🛒</span><h3>No matching products</h3><p>Try another category, or say a product name like “Amul milk” or “Maggi”.</p></div>}
     {page?.hasMore && <div className="sc-more-options"><button className="sc-button sc-button-quiet" disabled={busy} onClick={() => onMore(itemId)}>Show more<Glyph name="plus" size={16}/></button></div>}
   </section>;

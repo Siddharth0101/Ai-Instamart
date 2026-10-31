@@ -20,6 +20,7 @@
   scroll-margin-bottom: calc(var(--voice-dock-height, 72px) + 32px);
 }
 .sc-voice-mode .sc-rb-place.is-voice-target { outline: 2px solid #f6a27f; outline-offset: 6px; border-radius: 22px; }
+.sc-voice-mode .sc-grocery-card.is-voice-target { outline: 2px solid #f6a27f; outline-offset: 3px; }
 .sc-voice-mode .sc-rb-menu-item.is-voice-target {
   border-radius: 14px;
   outline: 2px solid #f6a27f;

@@ -327,6 +327,26 @@ test("a failed automatic reconnect pauses instead of retrying forever", async t 
   assert.equal(h.connections.length, 1);
 });
 
+test("a microphone whose readiness fails is closed before pausing or resuming", async t => {
+  const h = harness(); t.after(h.control.end);
+  h.control.start(); await flush();
+  h.connections[0].ready.reject(new Error("The microphone could not start.")); await flush();
+  assert.equal(h.control.getState().phase, "paused");
+  assert.equal(h.connections[0].closed, 1, "failed startup must release the microphone");
+  await h.listen();
+  assert.equal(h.control.getState().phase, "listening");
+  assert.equal(h.maxLive(), 1, "resume must never retain a failed microphone");
+});
+
+test("a reconnect whose readiness fails releases its microphone before pausing", async t => {
+  const h = harness(); t.after(h.control.end); await h.listen();
+  h.connections[0].handlers.close(); await flush();
+  h.connections[1].ready.reject(new Error("The microphone disconnected during setup.")); await flush();
+  assert.equal(h.control.getState().phase, "paused");
+  assert.equal(h.connections[0].closed, 1);
+  assert.equal(h.connections[1].closed, 1, "failed reconnect must release its microphone too");
+});
+
 test("the reconnect budget resets after a successful utterance and covers losses during playback", async t => {
   const h = harness(); t.after(h.control.end); await h.listen();
   h.connections[0].handlers.close(); h.connections[1].ready.resolve(); await flush();

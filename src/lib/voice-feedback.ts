@@ -61,14 +61,14 @@ export function voiceHints(state: HintState): string[] {
   const menu = view?.restaurantBrowser?.menu;
   if (menu) {
     const dish = menu.sections.flatMap(section => section.items).find(item => item.available);
-    return [dish ? `Add two ${short(dish.name)}` : "What's popular here?", cart ? "Checkout" : "What's popular here?", "Back to restaurants"].filter((hint, index, all) => all.indexOf(hint) === index).slice(0, 3);
+    return [dish ? `Add two ${short(dish.name)}` : "What's popular here?", cart ? "Show my cart" : "What's popular here?", "Back to restaurants"].filter((hint, index, all) => all.indexOf(hint) === index).slice(0, 3);
   }
   if (view?.task.discovery?.kind === "snacks" && !view.task.discovery.itemId) {
     const first = view.offers.find(offer => offer.provider === "instamart" && offer.available);
-    return [first ? `Add two ${short(first.name)}` : "Show chocolates", cart ? "Checkout" : "Show cold drinks", "Show vegetables"];
+    return [first ? `Add two ${short(first.name)}` : "Show chocolates", cart ? "Show my cart" : "Show cold drinks", "Show vegetables"];
   }
   const groceries = view?.task.discovery?.kind === "snacks" ? view.offers.filter(offer => offer.provider === "instamart" && offer.itemId === view.task.discovery?.itemId && offer.available) : [];
-  if (groceries.length) return [`Add two ${short(groceries[0].name)}`, cart ? "Checkout" : "Show cold drinks", cart ? "Show my cart" : "Get some chocolates"];
+  if (groceries.length) return [`Add two ${short(groceries[0].name)}`, cart ? "Show my cart" : "Show cold drinks", "Get some chocolates"];
   const restaurants = view?.restaurantBrowser?.restaurants ?? [];
   if (restaurants.length) return [`Open ${short(restaurants[0].name)}`, "Top rated first", cart ? "Show my cart" : "Show pizza places"];
   if (state.orderActive) return ["Where is my order?", "I want biryani"];

@@ -139,6 +139,9 @@ export function createConversationVoiceController(deps: VoiceDependencies) {
         return connection;
       } catch (error) {
         if (!live() || abort.signal.aborted) return null;
+        // listen() clears the pending entry before handling its error, so release
+        // a capture that opened but failed readiness while it is still reachable.
+        entry.opened?.close(); entry.opened = null;
         throw error instanceof Error ? error : new Error("The microphone could not start. Check browser permission; tapping still works.");
       }
     })();

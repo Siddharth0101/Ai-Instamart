@@ -179,3 +179,83 @@ test("each Instamart home rail keeps up to 18 products",async()=>{
   const view=await f.service.groceryHome(f.ownerId,{rails:[{label:"Daily essentials",query:"milk"},{label:"Munchies",query:"chips"}],expectedVersion:f.initial.version});
   assert.deepEqual(view.task.items.map(item=>view.offers.filter(entry=>entry.itemId===item.id).length),[18,18]);
 });
+
+test("removing groceries keeps their current search cards available for adding again",async()=>{
+  const f=await fixture({search:async(_owner,_task,items)=>({offers:items.flatMap(item=>[0,1].map(index=>MealOfferSchema.parse({id:`${item.id}:${index}`,itemId:item.id,provider:"instamart",providerItemId:`sku:${index}`,name:`Chips ${index}`,unit:"50 g",priceMinor:5000,available:true}))),notices:[]})});
+  let view=await f.service.browse(f.ownerId,{query:"chips",route:"instamart",expectedVersion:0});
+  const [first,second]=view.offers;
+  view=await f.service.select(f.ownerId,{offerId:first.id,expectedVersion:view.version});
+  view=await f.service.select(f.ownerId,{offerId:second.id,expectedVersion:view.version});
+  for(const offer of [first,second]){
+    view=await f.service.setCartLine(f.ownerId,{offerId:offer.id,quantity:0,expectedVersion:view.version});
+    assert.ok(view.offers.some(value=>value.id===offer.id),"An available searched product stays visible after cart removal");
+    assert.equal(view.task.items.some(item=>item.selectedOfferId===offer.id),false);
+    view=await f.service.select(f.ownerId,{offerId:offer.id,expectedVersion:view.version});
+    assert.equal(view.task.items.filter(item=>item.selectedOfferId===offer.id).length,1);
+  }
+  assert.equal(f.calls.prepare,0);
+});
+
+test("grocery selection enforces the plan limit without losing the saved cart",async()=>{
+  const f=await fixture({search:async(_owner,_task,items)=>({offers:Array.from({length:31},(_,index)=>MealOfferSchema.parse({id:`${items[0].id}:${index}`,itemId:items[0].id,provider:"instamart",providerItemId:`sku:${index}`,name:`Chips ${index}`,unit:"50 g",priceMinor:5000,available:true})),pages:[{itemId:items[0].id,query:items[0].query,provider:"instamart",addressId:"fixture",offset:0,nextOffset:null}],notices:[]})});
+  let view=await f.service.browse(f.ownerId,{query:"chips",route:"instamart",expectedVersion:0});
+  view=await f.service.more(f.ownerId,{itemId:view.task.items[0].id,expectedVersion:view.version});
+  for(const offer of view.offers.slice(0,30))view=await f.service.select(f.ownerId,{offerId:offer.id,expectedVersion:view.version});
+  await assert.rejects(f.service.select(f.ownerId,{offerId:view.offers[30].id,expectedVersion:view.version}),{code:"PLAN_LIMIT"});
+  const saved=await f.service.get(f.ownerId);
+  assert.equal(saved.task.items.filter(item=>item.selectedOfferId).length,30);
+  assert.equal(saved.version,view.version);
+});
+
+async function refreshedGrocery(stock:{maxQuantity:number;available?:boolean;selectable?:boolean},home=false,initialQuantity=1){
+  let current={maxQuantity:5,available:true,selectable:true,priceMinor:5000};
+  const f=await fixture({search:async(_owner,_task,items)=>({offers:items.map(item=>MealOfferSchema.parse({id:`${item.id}:chips`,itemId:item.id,provider:"instamart",providerItemId:"same-chips-pack",name:"Chips",unit:"50 g",...current})),notices:[]})});
+  let view=await f.service.browse(f.ownerId,{query:"chips",route:"instamart",expectedVersion:0});
+  const savedId=view.offers[0].id;
+  view=await f.service.select(f.ownerId,{offerId:savedId,quantity:initialQuantity,expectedVersion:view.version});
+  current={...current,...stock,priceMinor:6000};
+  view=home?await f.service.groceryHome(f.ownerId,{rails:[{label:"Munchies",query:"chips"}],expectedVersion:view.version}):await f.service.browse(f.ownerId,{query:"chips",route:"instamart",expectedVersion:view.version});
+  const fresh=view.offers.find(offer=>offer.id!==savedId&&offer.providerItemId==="same-chips-pack")!;
+  return {...f,view,savedId,fresh};
+}
+
+test("grocery steppers and repeat selections use higher refreshed limits while retaining the cart identity",async()=>{
+  for(const operation of ["stepper","saved-selection","fresh-selection"] as const){
+    const f=await refreshedGrocery({maxQuantity:8},operation==="fresh-selection");
+    // The saved pack had a limit of 5; the current search now allows 8.
+    const view=operation==="stepper"?await f.service.setCartLine(f.ownerId,{offerId:f.savedId,quantity:6,expectedVersion:f.view.version}):await f.service.select(f.ownerId,{offerId:operation==="saved-selection"?f.savedId:f.fresh.id,quantity:6,expectedVersion:f.view.version});
+    const lines=view.task.items.filter(item=>item.selectedOfferId);
+    assert.equal(lines.length,1);assert.equal(lines[0].selectedOfferId,f.savedId);assert.equal(lines[0].quantity,6);
+    const saved=view.offers.find(offer=>offer.id===f.savedId)!;
+    assert.equal(saved.maxQuantity,8);assert.equal(saved.priceMinor,6000);
+  }
+});
+
+test("a lower current grocery limit prevents increases through saved and refreshed offer IDs",async()=>{
+  for(const home of [false,true]){
+    const f=await refreshedGrocery({maxQuantity:1},home);
+    await assert.rejects(f.service.setCartLine(f.ownerId,{offerId:f.savedId,quantity:2,expectedVersion:f.view.version}),{code:"QUANTITY_LIMIT"});
+    for(const offerId of [f.savedId,f.fresh.id])await assert.rejects(f.service.select(f.ownerId,{offerId,quantity:2,expectedVersion:f.view.version}),{code:"QUANTITY_LIMIT"});
+    const removed=await f.service.setCartLine(f.ownerId,{offerId:f.savedId,quantity:0,expectedVersion:f.view.version});
+    assert.equal(removed.task.items.some(item=>item.selectedOfferId===f.savedId),false);
+  }
+});
+
+test("unavailable refreshed groceries cannot be increased or selected, but can always be removed",async()=>{
+  for(const home of [false,true]){
+    const f=await refreshedGrocery({maxQuantity:0,available:false,selectable:false},home);
+    await assert.rejects(f.service.setCartLine(f.ownerId,{offerId:f.savedId,quantity:2,expectedVersion:f.view.version}),{code:"OFFER_UNAVAILABLE"});
+    for(const offerId of [f.savedId,f.fresh.id])await assert.rejects(f.service.select(f.ownerId,{offerId,quantity:1,expectedVersion:f.view.version}),{code:"OFFER_UNAVAILABLE"});
+    const removed=await f.service.setCartLine(f.ownerId,{offerId:f.savedId,quantity:0,expectedVersion:f.view.version});
+    assert.equal(removed.task.items.some(item=>item.selectedOfferId===f.savedId),false);
+  }
+});
+
+test("reduced grocery stock still permits gradual reductions of an existing cart quantity",async()=>{
+  const f=await refreshedGrocery({maxQuantity:0,available:false},false,4);
+  let view=await f.service.setCartLine(f.ownerId,{offerId:f.savedId,quantity:3,expectedVersion:f.view.version});
+  assert.equal(view.task.items.find(item=>item.selectedOfferId===f.savedId)?.quantity,3);
+  assert.equal(view.offers.find(offer=>offer.id===f.savedId)?.available,false);
+  view=await f.service.setCartLine(f.ownerId,{offerId:f.savedId,quantity:0,expectedVersion:view.version});
+  assert.equal(view.task.items.some(item=>item.selectedOfferId===f.savedId),false);
+});

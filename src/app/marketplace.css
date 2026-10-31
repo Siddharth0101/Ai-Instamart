@@ -328,6 +328,10 @@
 .sc-marketplace .sc-cart-bill p { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
 .sc-marketplace .sc-cart-actions { display: grid; gap: 10px; }
 .sc-marketplace .sc-cart-actions .sc-button { width: 100%; }
+.sc-marketplace .sc-pay-in-app { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 16px; background: var(--brand-soft); color: var(--ink-2); }
+.sc-marketplace .sc-pay-in-app > span { flex-shrink: 0; width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: var(--surface); color: var(--brand); }
+.sc-marketplace .sc-pay-in-app strong { display: block; font-size: 15px; font-weight: 800; color: var(--ink); }
+.sc-marketplace .sc-pay-in-app p { margin: 2px 0 0; font-size: 13px; }
 .sc-marketplace .sc-cart-note { margin: 2px 0 0; font-size: 13px; color: var(--muted); text-align: center; }
 .sc-marketplace .sc-cart-empty { display: grid; justify-items: center; text-align: center; gap: 8px; padding: 18px 0 6px; color: var(--ink-2); }
 .sc-marketplace .sc-cart-empty > span { width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand); }

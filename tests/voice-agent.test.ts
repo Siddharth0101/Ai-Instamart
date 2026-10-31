@@ -2,10 +2,12 @@ import { after, test } from "node:test";
 import assert from "node:assert/strict";
 import { generateText } from "ai";
 import { MockLanguageModelV4 } from "ai/test";
-import { assistant } from "../src/server/assistant-service";
+import { assistant, foodAddresses, selectFoodAddress } from "../src/server/assistant-service";
+import { getOwner, getView } from "../src/server/service";
+import { GROCERY_RAILS } from "../src/lib/grocery-catalog";
 import { opaqueId } from "../src/server/crypto";
 import { database, read, write } from "../src/server/store";
-import { ModelBusyError, inLanguage, replyLanguage, replyMatches, resilientModel, runVoiceTurn, tidy } from "../src/server/voice-agent";
+import { ModelBusyError, greet, inLanguage, replyLanguage, replyMatches, resilientModel, runVoiceTurn, tidy } from "../src/server/voice-agent";
 import { matchSpoken, resolveAddressAnswer, spokenNumber, spokenQuantityFor } from "../src/lib/spoken-match";
 import { endFixturePayment, seedFixtureFoodCart } from "../src/server/integrations/food-fixture";
 import { foodState, refreshFoodOrder, resetFoodOrder, startFoodCheckout, chooseFoodPayment, syncFoodCart, trackFoodOrder, trackingStage } from "../src/server/food-flow";
@@ -14,6 +16,9 @@ import { activeCheckout, prepareInstamartBag, setActiveCheckout, syncInstamart }
 import { instamartFixture } from "../src/server/integrations/instamart-fixture";
 import { decodeSwiggyVariantId, swiggyCartFingerprint } from "../src/server/integrations/swiggy";
 import { paymentsFor } from "../src/lib/device";
+
+/** Voice checkout and payment are off for now (customers pay in the Swiggy app); these return when it is back. */
+const checkoutPaused = "voice checkout is paused: customers pay in the Swiggy app";
 
 // Real tools, real store, the development Swiggy fixture; only the model's choices are scripted.
 process.env.DATA_DIR = "memory://";
@@ -73,7 +78,29 @@ async function review(say: Awaited<ReturnType<typeof customer>>, said = "checkou
   return result;
 }
 
-test("a spoken order goes address → menu → cart → total → yes, and the cart empties once placed", async () => {
+test("paused voice checkout exposes no payment or order tools and preserves the cart for the Swiggy app", async () => {
+  const say = await readyToCheckout();
+  const before = await assistant.get(say.owner);
+  const model = new MockLanguageModelV4({ doGenerate: async options => {
+    const tools = options.tools?.flatMap(entry => entry.type === "function" ? [entry] : []) ?? [];
+    const names = tools.map(entry => entry.name);
+    for (const paused of ["checkout", "choose_payment", "place_order"]) assert.ok(!names.includes(paused), `${paused} must not be callable`);
+    assert.ok(names.includes("update_cart"), "shopping remains available");
+    const panel = tools.find(entry => entry.name === "show_panel");
+    assert.ok(panel);
+    assert.doesNotMatch(JSON.stringify(panel.inputSchema), /"checkout"|"review"/, "panels cannot reopen the paused checkout");
+    return { content: [{ type: "text", text: "Your items are saved in the Swiggy app. You can pay there." }], finishReason: { unified: "stop", raw: undefined }, usage, warnings: [] };
+  } });
+  const result = await runVoiceTurn(say.owner, { text: "Checkout with cash and place my order", expectedVersion: before.version }, undefined, { model });
+  assert.deepEqual(cartLines(result.view), cartLines(before));
+  assert.equal(result.food.review, null);
+  assert.equal(result.food.attempt, null);
+  assert.equal(await activeCheckout(say.owner), null);
+  assert.deepEqual(result.effects, []);
+  assert.match(result.reply.text, /Swiggy app/);
+});
+
+test("a spoken order goes address → menu → cart → total → yes, and the cart empties once placed", { skip: checkoutPaused }, async () => {
   const say = await readyToCheckout();
   const reviewed = await review(say);
   assert.equal(reviewed.food.attempt, null, "nothing is placed while reviewing");
@@ -85,7 +112,7 @@ test("a spoken order goes address → menu → cart → total → yes, and the c
   assert.ok(placed.effects.some(effect => effect.kind === "panel" && effect.panel === "order"));
 });
 
-test("tapped restaurant checkout switches a previous grocery checkout before a spoken payment choice", async () => {
+test("tapped restaurant checkout switches a previous grocery checkout before a spoken payment choice", { skip: checkoutPaused }, async () => {
   const say = await readyToCheckout();
   await setActiveCheckout(say.owner, "instamart");
   const bill = await startFoodCheckout(say.owner);
@@ -104,7 +131,7 @@ test("tapped restaurant checkout switches a previous grocery checkout before a s
   assert.equal(await activeCheckout(say.owner), "restaurant");
 });
 
-test("the order is not placed in the same breath as the total: the customer must hear it first", async () => {
+test("the order is not placed in the same breath as the total: the customer must hear it first", { skip: checkoutPaused }, async () => {
   const say = await readyToCheckout();
   let refusal: ToolResult | undefined;
   const result = await say("cash se pay karke order kar do", [{ call: "checkout" }, { call: "choose_payment", input: { method: "cash" } }, { call: "place_order" },
@@ -115,7 +142,7 @@ test("the order is not placed in the same breath as the total: the customer must
   assert.ok(result.food.review);
 });
 
-test("a bare yes only answers a reply that stated the total; 'confirm order' stands on its own", async () => {
+test("a bare yes only answers a reply that stated the total; 'confirm order' stands on its own", { skip: checkoutPaused }, async () => {
   const say = await readyToCheckout();
   await review(say);
   await say("aur kya hai menu mein?", [text("Biryani, kebabs aur desserts hain. Aur kuch?")]);
@@ -140,7 +167,7 @@ async function upiPending(mobile = false) {
   return { say, payment, placed, told };
 }
 
-test("UPI on a computer is a QR to scan: never called placed or a phone request, and confirmed once paid", async () => {
+test("UPI on a computer is a QR to scan: never called placed or a phone request, and confirmed once paid", { skip: checkoutPaused }, async () => {
   const { say, payment, placed, told } = await upiPending();
   assert.equal(payment, "Scan UPI QR", "'PhonePe se' on a computer uses the QR option");
   assert.equal(placed.food.attempt?.state, "payment_pending");
@@ -155,14 +182,14 @@ test("UPI on a computer is a QR to scan: never called placed or a phone request,
   assert.equal(paid.attempt?.upiUrl, undefined, "the payment link goes once paid");
 });
 
-test("UPI on a phone opens the UPI app the customer named", async () => {
+test("UPI on a phone opens the UPI app the customer named", { skip: checkoutPaused }, async () => {
   const { payment, placed } = await upiPending(true);
   assert.equal(payment, "PhonePe UPI");
   assert.equal(placed.food.attempt?.state, "payment_pending");
   assert.match(placed.reply.text, /Open UPI app/);
 });
 
-test("an unpaid UPI order is settled when its payment time ends, and a cancelled payment does not stay waiting", async () => {
+test("an unpaid UPI order is settled when its payment time ends, and a cancelled payment does not stay waiting", { skip: checkoutPaused }, async () => {
   const unpaid = await upiPending();
   const id = unpaid.placed.food.attempt!.id, stored = await read<{ createdAt: string }>(unpaid.say.owner, "food_attempt", id);
   await write(unpaid.say.owner, "food_attempt", id, { ...stored!, createdAt: new Date(Date.now() - 10 * 60_000).toISOString() });
@@ -177,7 +204,7 @@ test("an unpaid UPI order is settled when its payment time ends, and a cancelled
   assert.match(ended.attempt?.message ?? "", /cancelled this payment/);
 });
 
-test("an unknown checkout with no order ID can be checked and explicitly reset without losing dishes", async () => {
+test("an unknown checkout with no order ID can be checked and explicitly reset without losing dishes", { skip: checkoutPaused }, async () => {
   const say = await readyToCheckout();
   await review(say);
   const state = await foodState(say.owner), id = "food_attempt_reset";
@@ -200,7 +227,7 @@ test("an unknown checkout with no order ID can be checked and explicitly reset w
   assert.equal((await startFoodCheckout(say.owner)).checkout!.cart.lines.length, 1);
 });
 
-test("a pending payment cannot be reset as an unknown checkout", async () => {
+test("a pending payment cannot be reset as an unknown checkout", { skip: checkoutPaused }, async () => {
   const { say, placed } = await upiPending();
   await assert.rejects(resetFoodOrder(say.owner, placed.food.attempt!.id), { code: "RESET_NOT_ALLOWED" });
   assert.ok(await read(say.owner, "checkout_gate", "swiggy_food"));
@@ -223,7 +250,7 @@ test("UPI choices follow the device: the QR on a computer, the apps on a phone",
   assert.deepEqual(paymentsFor([{ id: "cod" }, { id: "upi_app:phonepe" }], false).map(option => option.id), ["cod", "upi_app:phonepe"], "without a QR option a computer keeps the app; its link still shows as a QR");
 });
 
-test("dishes already in the customer's Swiggy app cart are replaced only after they say so", async () => {
+test("dishes already in the customer's Swiggy app cart are replaced only after they say so", { skip: checkoutPaused }, async () => {
   const say = await readyToCheckout();
   seedFixtureFoodCart(say.owner, 2, "fixture-home", [{ menuItemId: "0-0", quantity: 1 }]);
   let result: ToolResult | undefined;
@@ -287,7 +314,7 @@ test("dishes the customer put in the Swiggy app themselves stay until they agree
   assert.deepEqual((await foodOrdering(say.owner).getCart({ addressId: "fixture-home" })).lines.map(line => `${line.quantity}× ${line.name}`), ["3× Peri Peri Fries"]);
 });
 
-test("a placed order keeps its dishes and live delivery status for the order screen and 'order it again'", async () => {
+test("a placed order keeps its dishes and live delivery status for the order screen and 'order it again'", { skip: checkoutPaused }, async () => {
   const say = await readyToCheckout();
   await review(say);
   await say("haan", [{ call: "place_order" }, text("Order ho gaya.")]);
@@ -296,6 +323,9 @@ test("a placed order keeps its dishes and live delivery status for the order scr
   assert.equal(tracked.food.order?.restaurant, "Meghana Foods");
   assert.equal(tracked.food.tracking?.stage, 0);
   assert.equal(tracked.food.tracking?.status, "Order confirmed");
+});
+
+test("Swiggy's order status words map to delivery stages", () => {
   assert.equal(trackingStage("Preparing", false), 1);
   assert.equal(trackingStage("Out for delivery", false), 2);
   assert.equal(trackingStage("Your delivery partner is on the way", false), 2);
@@ -331,7 +361,7 @@ test("groceries reach the Instamart bag as they are added, changed and removed, 
   assert.deepEqual(bag(removed.session), ["1× Lay's Classic Salted Chips"], "removing it here takes out only SayCart's share");
 });
 
-test("groceries are ordered by voice too: search, add, Instamart bag, payment, the total heard, then yes", async () => {
+test("groceries are ordered by voice too: search, add, Instamart bag, payment, the total heard, then yes", { skip: checkoutPaused }, async () => {
   const say = await customer();
   await say("ghar pe deliver karo", [{ call: "set_delivery_address", input: { address: "ghar" } }, text("Done.")]);
   const both = await say("chips aur cold drink chahiye", [{ call: "find_groceries", input: { query: "chips and cold drink" } }, { call: "update_cart", input: { changes: [{ item: "Lay's India's Magic Masala", action: "add" }, { item: "Coca-Cola", action: "add", quantity: 2 }] } }, text("Dono add ho gaye.")]);
@@ -375,6 +405,90 @@ test("several groceries in one sentence: products off screen are looked up, and 
   assert.deepEqual(added.view.task.items.filter(item => item.selectedOfferId).map(item => `${item.quantity}× ${added.view.offers.find(offer => offer.id === item.selectedOfferId)?.name}`).sort(), ["1× Lay's Classic Salted Chips", "2× Coca-Cola Soft Drink"]);
 });
 
+test("highlighted Instamart products can be added repeatedly and removed without losing their identity", async () => {
+  const say = await customer();
+  await say("ghar", [{ call: "set_delivery_address", input: { address: "ghar" } }, text("Done.")]);
+  const found = await say("show chips", [{ call: "find_groceries", input: { query: "chips" } }, text("Here are the chips.")]);
+  const focused = found.view.offers.find(offer => offer.provider === "instamart" && offer.name === "Pringles Original")!;
+  assert.ok(focused);
+  for (const [action, quantity] of [["add", 1], ["add", 2], ["remove", 0]] as const) {
+    const view = await assistant.get(say.owner);
+    const script = scripted([{ call: "update_cart", input: { changes: [{ item: "highlighted", action, quantity: 1 }] } }, text("Done.")]);
+    const result = await runVoiceTurn(say.owner, { text: `${action} this`, expectedVersion: view.version, focusedId: focused.id }, undefined, { model: script.model });
+    assert.match(JSON.stringify(script.model.doGenerateCalls[0].prompt), /Pringles Original[^]*?← highlighted/, "the agent sees which product is highlighted");
+    assert.ok(result.trace?.every(entry => !entry.includes("✗")), result.trace?.join("; "));
+    assert.deepEqual(result.view.task.items.filter(item => item.selectedOfferId).map(item => `${item.quantity}× ${result.view.offers.find(offer => offer.id === item.selectedOfferId)?.name}`), quantity ? [`${quantity}× Pringles Original`] : []);
+  }
+});
+
+test("grocery voice references follow displayed order and resolve saved cart IDs to refreshed products", async () => {
+  const say = await customer();
+  await say("ghar", [{ call: "set_delivery_address", input: { address: "ghar" } }, text("Done.")]);
+  const selected = await say("show chips and add Pringles", [{ call: "find_groceries", input: { query: "chips" } }, { call: "update_cart", input: { changes: [{ item: "Pringles Original", action: "add" }] } }, text("Added Pringles.")]);
+  const saved = selected.view.offers.find(offer => offer.name === "Pringles Original" && selected.view.task.items.some(item => item.selectedOfferId === offer.id))!;
+  const fresh = await say("show chips again", [{ call: "find_groceries", input: { query: "chips" } }, text("Here are the chips.")]);
+  const active = fresh.view.offers.filter(offer => offer.itemId === fresh.view.task.discovery?.itemId);
+  const refreshed = active.find(offer => offer.providerItemId === saved.providerItemId)!;
+  const other = active.find(offer => offer.name === "Lay's Classic Salted Chips")!;
+  const hidden = active.find(offer => offer.name.startsWith("Lay's India's Magic Masala"))!;
+  assert.ok(refreshed && other && hidden);
+  assert.notEqual(saved.id, refreshed.id, "the displayed card is from a new search");
+  const script = scripted([{ call: "update_cart", input: { changes: [{ item: "highlighted", action: "add" }, { item: "2", action: "add" }] } }, text("Both added.")]);
+  const result = await runVoiceTurn(say.owner, { text: "add this and the second one", expectedVersion: fresh.view.version, visibleOfferIds: ["invented-offer", saved.id, other.id, saved.id], focusedId: saved.id }, undefined, { model: script.model });
+  const screen = JSON.stringify(script.model.doGenerateCalls[0].prompt.findLast(message => message.role === "user")?.content);
+  assert.match(screen, /1\. Pringles Original[^]*?← highlighted/);
+  assert.match(screen, /2\. Lay's Classic Salted Chips/);
+  assert.ok(!screen.includes(hidden.name), "hidden products are excluded from the numbered screen");
+  assert.ok(result.trace?.every(entry => !entry.includes("✗")), result.trace?.join("; "));
+  assert.deepEqual(result.view.task.items.filter(item => item.selectedOfferId).map(item => `${item.quantity}× ${result.view.offers.find(offer => offer.id === item.selectedOfferId)?.name}`).sort(), ["1× Lay's Classic Salted Chips", "2× Pringles Original"]);
+});
+
+test("numbered groceries resolve the displayed product before the cart unless the cart panel is open", async () => {
+  const say = await customer();
+  await say("ghar", [{ call: "set_delivery_address", input: { address: "ghar" } }, text("Done.")]);
+  const added = await say("show chips and add Pringles", [{ call: "find_groceries", input: { query: "chips" } }, { call: "update_cart", input: { changes: [{ item: "Pringles Original", action: "add" }] } }, text("Added Pringles.")]);
+  const first = added.view.offers.find(offer => offer.name === "Lay's Classic Salted Chips")!;
+  const pringles = added.view.offers.find(offer => offer.name === "Pringles Original")!;
+  for (const [item, action, quantity, panel, expected, openCart] of [
+    ["1", "add", 1, null, ["1× Lay's Classic Salted Chips", "1× Pringles Original"], false],
+    ["first", "add", 1, null, ["1× Pringles Original", "2× Lay's Classic Salted Chips"], false],
+    ["1", "set", 3, "selection", ["2× Lay's Classic Salted Chips", "3× Pringles Original"], false],
+    ["1", "set", 4, null, ["2× Lay's Classic Salted Chips", "4× Pringles Original"], true],
+    ["first", "remove", 0, "bag", ["2× Lay's Classic Salted Chips"], false],
+  ] as const) {
+    const view = await assistant.get(say.owner);
+    const script = scripted([...(openCart ? [{ call: "show_panel", input: { panel: "cart" } }] : []), { call: "update_cart", input: { changes: [{ item, action, quantity }] } }, text("Done.")]);
+    const result = await runVoiceTurn(say.owner, { text: `${action} the first one`, expectedVersion: view.version, visibleOfferIds: [first.id, pringles.id], panel }, undefined, { model: script.model });
+    assert.ok(result.trace?.every(entry => !entry.includes("✗")), result.trace?.join("; "));
+    assert.deepEqual(result.view.task.items.filter(entry => entry.selectedOfferId).map(entry => `${entry.quantity}× ${result.view.offers.find(offer => offer.id === entry.selectedOfferId)?.name}`).sort(), expected);
+  }
+});
+
+test("a grocery search during a turn replaces stale visible IDs with the fresh product list", async () => {
+  const say = await customer();
+  await say("ghar", [{ call: "set_delivery_address", input: { address: "ghar" } }, text("Done.")]);
+  const chips = await say("show chips", [{ call: "find_groceries", input: { query: "chips" } }, text("Here are the chips.")]);
+  const script = scripted([{ call: "find_groceries", input: { query: "chocolate" } }, { call: "update_cart", input: { changes: [{ item: "1", action: "add" }] } }, text("Added the first chocolate.")]);
+  const result = await runVoiceTurn(say.owner, { text: "show chocolate and add the first one", expectedVersion: chips.view.version, visibleOfferIds: chips.view.offers.map(offer => offer.id) }, undefined, { model: script.model });
+  assert.ok(result.trace?.every(entry => !entry.includes("✗")), result.trace?.join("; "));
+  assert.deepEqual(result.view.task.items.filter(item => item.selectedOfferId).map(item => result.view.offers.find(offer => offer.id === item.selectedOfferId)?.name), ["Cadbury Dairy Milk Silk"]);
+});
+
+test("home grocery cards with saved IDs describe the current rail offer instead of its old cart price", async () => {
+  const say = await customer();
+  await say("ghar", [{ call: "set_delivery_address", input: { address: "ghar" } }, text("Done.")]);
+  const selected = await say("show chips and add Pringles", [{ call: "find_groceries", input: { query: "chips" } }, { call: "update_cart", input: { changes: [{ item: "Pringles Original", action: "add" }] } }, text("Added Pringles.")]);
+  const savedId = selected.view.task.items.find(item => item.selectedOfferId)?.selectedOfferId!;
+  const home = await say("open Instamart", [{ call: "open_instamart" }, text("Instamart is open.")]);
+  const stored = await read<{ offers: Array<{ id: string; priceMinor: number | null }> }>(say.owner, "assistant", "current");
+  stored!.offers.find(offer => offer.id === savedId)!.priceMinor = 1;
+  await write(say.owner, "assistant", "current", stored);
+  const script = scripted([text("This is Pringles Original.")]);
+  await runVoiceTurn(say.owner, { text: "what is this", expectedVersion: home.view.version, visibleOfferIds: [savedId], focusedId: savedId }, undefined, { model: script.model });
+  const screen = JSON.stringify(script.model.doGenerateCalls[0].prompt.findLast(message => message.role === "user")?.content);
+  assert.match(screen, /1\. Pringles Original 107 g — ₹110 ← highlighted/);
+});
+
 test("list numbers stand only for items the customer named, and a product added twice in one go is flagged", async () => {
   const say = await customer();
   await say("ghar", [{ call: "set_delivery_address", input: { address: "ghar" } }, text("Done.")]);
@@ -407,7 +521,7 @@ test("Hindi in Devanagari: a numbered dish the customer named in Hindi is accept
   assert.equal(spokenQuantityFor("दो चिकन बिरयानी डाल दो", "Chicken Boneless Biryani"), 2, "Devanagari counts and names are read too");
 });
 
-test("with dishes and groceries in the cart, checkout asks which order goes first", async () => {
+test("with dishes and groceries in the cart, checkout asks which order goes first", { skip: checkoutPaused }, async () => {
   const say = await readyToCheckout();
   await say("chips bhi", [{ call: "find_groceries", input: { query: "chips" } }, { call: "update_cart", input: { changes: [{ item: "Pringles Original", action: "add", quantity: 1 }] } }, text("Pringles add ho gaye.")]);
   let result: ToolResult | undefined;
@@ -418,7 +532,7 @@ test("with dishes and groceries in the cart, checkout asks which order goes firs
   assert.equal(food.food.checkout?.restaurant.name, "Meghana Foods");
 });
 
-test("while a total waits for a yes, the reply cannot say the order is placed", async () => {
+test("while a total waits for a yes, the reply cannot say the order is placed", { skip: checkoutPaused }, async () => {
   const say = await readyToCheckout();
   const claimed = await say("pay with cash and place the order", [{ call: "checkout" }, { call: "choose_payment", input: { method: "cash" } }, text("Your order is confirmed for ₹791 with cash on delivery.")]);
   assert.equal(claimed.food.attempt, null);
@@ -493,12 +607,87 @@ test("the agent never picks a delivery address the customer did not name", async
   assert.ok(hindi.view.restaurantBrowser?.restaurants.length, "the customer's own word for home is enough");
 });
 
+test("grocery voice selects the actual Instamart address and returns its session without changing Food", async () => {
+  const say = await customer();
+  const food = await selectFoodAddress(say.owner, "fixture-home", (await assistant.get(say.owner)).version);
+  await assistant.groceryHome(say.owner, { rails: GROCERY_RAILS, expectedVersion: food.version });
+  let chosen: ToolResult | undefined;
+  const result = await say("deliver to Work", [{ call: "set_delivery_address", input: { address: "Work" } }, { say: entries => { chosen = entries[0]; return String(chosen?.outcome ?? chosen?.error); } }]);
+  assert.equal(chosen?.ok, true);
+  assert.equal(result.instamart?.session?.addressId, "im-work");
+  assert.equal(result.view.task.discovery?.kind, "snacks");
+  assert.equal(result.view.restaurantBrowser, null);
+  assert.equal((await foodAddresses(say.owner)).selectedAddressId, "fixture-home", "Food's distinct saved address is unchanged");
+  assert.match(String(chosen?.outcome), /Work/);
+});
+
+test("a named grocery address is selected from Instamart even when the model asks again without a tool", async () => {
+  const say = await customer();
+  await assistant.groceryHome(say.owner, { rails: GROCERY_RAILS, expectedVersion: (await assistant.get(say.owner)).version });
+  const result = await say("deliver to Work", [text("Home or Work?")]);
+  assert.equal(result.instamart?.session?.addressId, "im-work");
+  assert.equal(result.view.restaurantBrowser, null);
+  assert.equal(result.view.task.discovery?.kind, "snacks");
+  assert.ok(result.view.offers.length);
+  assert.equal((await foodAddresses(say.owner)).selectedAddressId, null, "Food consent was never given");
+});
+
+test("grocery voice cannot claim a Work switch while the actual Home bag prevents changing its address", async () => {
+  const say = await customer();
+  const food = await selectFoodAddress(say.owner, "fixture-home", (await assistant.get(say.owner)).version);
+  await assistant.groceryHome(say.owner, { rails: GROCERY_RAILS, expectedVersion: food.version });
+  await say("add Pringles", [{ call: "update_cart", input: { changes: [{ item: "Pringles Original", action: "add" }] } }, text("Added Pringles.")]);
+  assert.equal((await syncInstamart(say.owner)).session?.addressId, "im-home");
+  // Food can have a different selection: its attempted cross-provider mirror must not become grocery consent.
+  await selectFoodAddress(say.owner, "fixture-work", (await assistant.get(say.owner)).version);
+  const view = await assistant.get(say.owner);
+  let refused: ToolResult | undefined;
+  const script = scripted([{ call: "set_delivery_address", input: { address: "Work" } }, { say: entries => { refused = entries[0]; return String(refused?.error ?? refused?.outcome); } }]);
+  const result = await runVoiceTurn(say.owner, { text: "deliver to Work", expectedVersion: view.version }, undefined, { model: script.model });
+  assert.equal(refused?.ok, false);
+  assert.match(String(refused?.error), /bag belongs to another delivery address/);
+  assert.match(result.reply.text, /Empty it before switching addresses/);
+  assert.match(JSON.stringify(script.model.doGenerateCalls[0].prompt), /Delivery address: Home/);
+  const owner = await getOwner(say.owner);
+  const session = await getView(say.owner, owner!.sessionId!);
+  assert.equal(session.addressId, "im-home");
+  assert.equal(session.cart.lines.length, 1);
+});
+
+test("grocery greetings use Instamart's connection and saved addresses when Food is unavailable", async t => {
+  const say = await customer();
+  const home = await assistant.groceryHome(say.owner, { rails: GROCERY_RAILS, expectedVersion: (await assistant.get(say.owner)).version });
+  const originalGet = assistant.get;
+  let instamartConnected = true;
+  t.mock.method(assistant, "get", async (owner: string) => {
+    const view = await originalGet(owner);
+    return { ...view, providers: view.providers.map(provider => provider.id === "swiggy_food" ? { ...provider, status: "disconnected" as const } : provider.id === "instamart" ? { ...provider, status: instamartConnected ? "connected" as const : "disconnected" as const } : provider) };
+  });
+  const asked = await greet(say.owner, home.version);
+  assert.match(asked.reply.text, /Home.*Work/);
+  assert.doesNotMatch(asked.reply.text, /Connect Swiggy/i);
+  instamartConnected = false;
+  const connect = await greet(say.owner, asked.view.version);
+  assert.match(connect.reply.text, /Instamart/);
+  assert.doesNotMatch(connect.reply.text, /Connect Swiggy/i);
+});
+
 test("a missing or unclear address makes the agent ask instead of guessing", async () => {
   const say = await customer();
   let result: ToolResult | undefined;
   await say("Mars pe bhejo", [{ call: "set_delivery_address", input: { address: "Mars" } }, { say: results => { result = results[0]; return "Home ya Work?"; } }]);
   assert.equal(result?.ok, false);
   assert.match(String(result?.error), /Home, Work/);
+});
+
+test("a model failure after a rejected tool cannot report that the action was done", async () => {
+  const owner = opaqueId(`failed-action-${Math.random()}`);
+  await write(owner, "owner", owner, { csrfToken: "test", sessionId: null });
+  const script = scripted([{ call: "set_delivery_address", input: { address: "Mars" } }]);
+  const result = await runVoiceTurn(owner, { text: "Deliver to Mars", expectedVersion: (await assistant.get(owner)).version }, undefined, { model: script.model });
+  assert.ok(result.degraded, "the model failed after the rejected tool");
+  assert.equal(result.view.restaurantBrowser, null, "the address was not selected");
+  assert.doesNotMatch(result.reply.text, /\bdone\b/i, "attempting a tool does not mean its action succeeded");
 });
 
 test("a malformed tool call is sampled again, and a rate-limited model hands the same step to the fallback", async () => {

@@ -25,17 +25,21 @@ const groupName = (offer: MealOffer) => offer.provider === "instamart" ? "Instam
 /** Where the cart's dishes or groceries stand in the customer's Swiggy app: on their way, there, or held back by what is already in it. */
 export type SwiggyCartSync = { state: "syncing" | "synced" | "empty" | "conflict" | "skipped"; message: string | null };
 
-export function CartSummary({ view, busy, swiggy = null, instamart = null, onQuantity, onPrepare, onBrowse, onCheckout, onReplaceSwiggy }: { view: AssistantView; busy: boolean; swiggy?: SwiggyCartSync | null; instamart?: SwiggyCartSync | null; onQuantity: (offer: MealOffer, quantity: number) => void; onPrepare: () => void; onBrowse: () => void; onCheckout: () => void; onReplaceSwiggy?: () => void }) {
+export function CartSummary({ view, busy, swiggy = null, instamart = null, onQuantity, onBrowse, onReplaceSwiggy }: { view: AssistantView; busy: boolean; swiggy?: SwiggyCartSync | null; instamart?: SwiggyCartSync | null; onQuantity: (offer: MealOffer, quantity: number) => void; onBrowse: () => void; onReplaceSwiggy?: () => void }) {
   const lines = cartLines(view), totals = cartTotals(lines);
   // Dishes and groceries both reach the Swiggy app as soon as they are added: the Swiggy Food cart and the Instamart bag.
   const where = (line: Line) => {
     const sync = line.offer.provider === "instamart" ? instamart : swiggy, place = line.offer.provider === "instamart" ? "Instamart bag" : "Swiggy cart";
     return (sync?.state === "synced" || (!sync && line.prepared)) ? ` · in your ${place}` : sync?.state === "syncing" ? ` · adding to your ${place}…` : "";
   };
-  if (!lines.length) return <div className="sc-cart-empty"><span aria-hidden="true"><Glyph name="bag" size={30}/></span><h3>Your cart is empty</h3><p>Just say what you’d like to eat, or open a restaurant and tap ADD.</p><button type="button" className="sc-button sc-button-primary" onClick={onBrowse}>Browse restaurants<Glyph name="arrow" size={16}/></button></div>;
+  if (!lines.length) return <div className="sc-cart-empty"><span aria-hidden="true"><Glyph name="bag" size={30}/></span><h3>Your cart is empty</h3><p>Just say what you’d like, or open an aisle and tap ADD.</p><button type="button" className="sc-button sc-button-primary" onClick={onBrowse}>Browse Instamart<Glyph name="arrow" size={16}/></button></div>;
   const groups = [...new Set(lines.map(line => groupName(line.offer)))];
   const food = lines.filter(line => line.offer.provider !== "instamart"), grocery = lines.filter(line => line.offer.provider === "instamart");
   const restaurants = [...new Set(food.map(line => line.offer.restaurant).filter((name): name is string => !!name))];
+  const synced = restaurants.length <= 1
+    && (!food.length || swiggy?.state === "synced" || (!swiggy && food.every(line => line.prepared)))
+    && (!grocery.length || instamart?.state === "synced" || (!instamart && grocery.every(line => line.prepared)));
+  const syncing = (food.length > 0 && swiggy?.state === "syncing") || (grocery.length > 0 && instamart?.state === "syncing");
   return <div className="sc-cart">
     {groups.map(group => <section className="sc-cart-group" key={group} aria-label={group}>
       <h3>{group}</h3>
@@ -48,16 +52,16 @@ export function CartSummary({ view, busy, swiggy = null, instamart = null, onQua
         </li>;
       })}</ul>
     </section>)}
-    <div className="sc-cart-bill"><div><span>Item total</span><strong>{totals.unknownPrice ? `${money(totals.totalMinor)}+` : money(totals.totalMinor)}</strong></div><p>Delivery fee and taxes are added from Swiggy’s live bill at checkout.</p></div>
+    <div className="sc-cart-bill"><div><span>Item total</span><strong>{totals.unknownPrice ? `${money(totals.totalMinor)}+` : money(totals.totalMinor)}</strong></div><p>Delivery fee and taxes are added in the Swiggy app.</p></div>
     {food.length > 0 && swiggy?.state === "conflict" && <div className="sc-replace-cart" role="alertdialog" aria-label="Replace your Swiggy cart?"><p>{swiggy.message}</p><div><button type="button" className="sc-button sc-button-primary" disabled={busy} onClick={onReplaceSwiggy}>Replace with these dishes</button></div></div>}
     {food.length > 0 && swiggy?.state === "skipped" && swiggy.message && restaurants.length <= 1 && <p className="sc-cart-note">{swiggy.message}</p>}
     {grocery.length > 0 && instamart?.state === "skipped" && instamart.message && <p className="sc-cart-note">{instamart.message}</p>}
-    <div className="sc-cart-actions">
-      {/* Each checkout reads its live Swiggy bill; groceries and dishes are separate orders. */}
-      {grocery.length > 0 && <button type="button" className="sc-button sc-button-primary" disabled={busy} onClick={onPrepare}>{food.length ? "Checkout Instamart" : "Checkout"}<Glyph name="arrow" size={16}/></button>}
-      {food.length > 0 && <button type="button" className={`sc-button ${grocery.length ? "sc-button-quiet" : "sc-button-primary"}`} disabled={busy || restaurants.length > 1} onClick={onCheckout}>{grocery.length ? "Checkout food" : "Checkout"}<Glyph name="arrow" size={16}/></button>}
-      {restaurants.length > 1 ? <p className="sc-cart-note">Swiggy delivers from one restaurant per order. Remove the dishes from the other restaurant to check out.</p> : <p className="sc-cart-note">Or just say “checkout”. Nothing is ordered until you confirm the final total.</p>}
+    {/* Only a completed sync establishes that these selections are in the provider's cart. */}
+    <div className="sc-cart-actions sc-pay-in-app" role="note">
+      <span aria-hidden="true"><Glyph name="bag" size={20}/></span>
+      <div><strong>Pay in your Swiggy app</strong><p>{synced ? `Your items are already in your Swiggy ${grocery.length && food.length ? "cart and Instamart bag" : grocery.length ? "Instamart bag" : "cart"}. Open the Swiggy app to check out and pay.` : syncing ? "Your items are being added to Swiggy. Wait for syncing to finish before checking out and paying in the Swiggy app." : "Check that your items are in the Swiggy app before checking out and paying."}</p></div>
     </div>
+    {restaurants.length > 1 && <p className="sc-cart-note">Swiggy delivers from one restaurant per order. Remove the dishes from the other restaurant before paying in the Swiggy app.</p>}
   </div>;
 }
 
@@ -80,7 +84,7 @@ export function AddressPicker({ addresses, selectedId, loading, busy, onChoose, 
   return <div className="sc-address-picker">
     {loading ? <p className="sc-address-loading" role="status"><span className="sc-spinner"/>Loading your saved addresses…</p>
       : addresses.length ? <div className="sc-address-options">{addresses.map(address => <button type="button" key={address.id} aria-pressed={address.id === selectedId} disabled={busy} onClick={() => onChoose(address)}><Glyph name={address.id === selectedId ? "check" : "pin"} size={17}/><span><strong>{address.label}</strong><small>{address.reviewAddressText}</small></span></button>)}</div>
-      : <p className="sc-address-none">No saved Swiggy Food address yet. Connect Swiggy Food and add an address in the Swiggy app.</p>}
+      : <p className="sc-address-none">No saved address yet. Connect Instamart and add an address in the Swiggy app.</p>}
     <button type="button" className="sc-link" onClick={onConnections}><Glyph name="link" size={14}/>Manage connections</button>
   </div>;
 }

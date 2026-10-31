@@ -16,9 +16,11 @@ import { AttemptSchema, BootstrapSchema, QuoteSchema, SessionViewSchema, type Ad
 import type { FoodCheckout } from "@/lib/food-checkout-contracts";
 import type { RestaurantVoiceContext, ShoppingVoiceContext } from "@/lib/screen-context";
 import { useConversationVoice } from "@/lib/use-conversation-voice";
+import { useGroceryVoiceContext } from "@/lib/use-grocery-voice-context";
 import { createVoiceScroller, scrollCommand, type ScrollDirection } from "@/lib/voice-scroll";
 import { buildVoiceContext } from "@/lib/voice-context";
 import { shouldResumeDiscovery } from "@/lib/discovery-resume";
+import { deliveryContext } from "@/lib/delivery-context";
 import { onPhone } from "@/lib/device";
 import { cartChanges, describeChanges, undoable, voiceHints, type CartChange } from "@/lib/voice-feedback";
 
@@ -92,8 +94,10 @@ export default function Home() {
   const stopAfterReply = useRef(false);
   const lastError = useRef<string | null>(null);
   const menuVoiceContext = useRef<ShoppingVoiceContext>({});
+  const groceryVoiceContext = useRef<ShoppingVoiceContext>({});
   const restaurantVoiceContext = useRef<RestaurantVoiceContext>({ visibleRestaurantIds: [] });
   const onMenuVisible = useCallback((context: ShoppingVoiceContext) => { menuVoiceContext.current = context; }, []);
+  const onGroceriesVisible = useCallback((context: ShoppingVoiceContext) => { groceryVoiceContext.current = context; }, []);
   const onVisibleRestaurants = useCallback((context: RestaurantVoiceContext) => { restaurantVoiceContext.current = context; }, []);
   useEffect(() => { viewRef.current = view; }, [view]);
   useEffect(() => { surfaceRef.current = surface; }, [surface]);
@@ -172,8 +176,8 @@ export default function Home() {
       let saved = parseView(await request("/api/assistant")); commit(saved);
       await loadFood();
       if (first.connected) setSession(SessionViewSchema.parse(await request(first.sessionId ? "/api/session" : "/api/session", first.sessionId ? undefined : { mode: "live" })));
-      // A first visit lists nearby restaurants (or asks for the address) without waiting to be asked.
-      if (current === initializeRef.current && !saved.task.items.length && !saved.restaurantBrowser) { saved = parseView(await request("/api/assistant/browse", { query: "restaurants", route: "restaurant", expectedVersion: saved.version })); commit(saved); }
+      // A first visit opens the Instamart home (or asks for the address) without waiting to be asked.
+      if (current === initializeRef.current && !saved.task.items.length && !saved.restaurantBrowser) { saved = parseView(await request("/api/assistant/grocery-home", { expectedVersion: saved.version })); commit(saved); }
       else if (current === initializeRef.current && shouldResumeDiscovery(saved)) commit(parseView(await request("/api/assistant/search", { expectedVersion: saved.version })));
     } catch (error) { if (current === initializeRef.current) setError(error instanceof Error && error.name !== "ZodError" ? error.message : "We couldn’t open SayCart. Please retry."); }
     finally { if (current === initializeRef.current) setInitializing(false); }
@@ -195,10 +199,12 @@ export default function Home() {
     stopScrolling();
     const before = viewRef.current;
     return act("Thinking", async signal => {
+      const groceryScreen = !viewRef.current?.restaurantBrowser && viewRef.current?.task.discovery?.kind === "snacks";
+      const shopping = groceryScreen ? groceryVoiceContext.current : menuVoiceContext.current;
       const result = await request("/api/assistant/turn", {
         text, expectedVersion: viewRef.current!.version, panel: surfaceRef.current, retryable, mobile: onPhone(),
-        visibleRestaurantIds: restaurantVoiceContext.current.visibleRestaurantIds, visibleOfferIds: menuVoiceContext.current.visibleOfferIds ?? [],
-        focusedId: viewRef.current?.restaurantBrowser?.menu ? menuVoiceContext.current.focusedOfferId ?? null : restaurantVoiceContext.current.focusedRestaurantId ?? null,
+        visibleRestaurantIds: restaurantVoiceContext.current.visibleRestaurantIds, visibleOfferIds: shopping.visibleOfferIds ?? [],
+        focusedId: groceryScreen || viewRef.current?.restaurantBrowser?.menu ? shopping.focusedOfferId ?? null : restaurantVoiceContext.current.focusedRestaurantId ?? null,
       }, signal) as AgentTurn;
       // The model was briefly rate limited before doing anything: nothing changed, and the caller sends the words again.
       if (result.busy) return { view: viewRef.current!, reply: result.reply, busy: result.busy };
@@ -223,7 +229,7 @@ export default function Home() {
     // Read at request time: the token can rotate after bootstrap, and a stale copy is rejected.
     get csrfToken() { return csrf.current; }, sttAvailable: bootstrap?.capabilities.realtimeStt ?? false, ttsAvailable: bootstrap?.capabilities.tts ?? false,
     speakReplies: true,
-    context: () => buildVoiceContext(viewRef.current, restaurantVoiceContext.current, menuVoiceContext.current),
+    context: () => buildVoiceContext(viewRef.current, restaurantVoiceContext.current, !viewRef.current?.restaurantBrowser && viewRef.current?.task.discovery?.kind === "snacks" ? groceryVoiceContext.current : menuVoiceContext.current),
     onFinal: async text => {
       voiceTurnInFlight.current = true;
       try {
@@ -319,7 +325,7 @@ export default function Home() {
   /** Tapped address: saved at once, then the restaurants (or the groceries on screen) for it. */
   async function chooseAddress(address: Address, groceries = false) {
     setSurface(null);
-    const saved = await act("Changing address", async signal => { const next = parseView(await request("/api/assistant/food-address", { addressId: address.id, expectedVersion: viewRef.current!.version }, signal)); commit(next); setFoodAddressId(address.id); return next; });
+    const saved = await act("Changing address", async signal => { const next = parseView(await request("/api/assistant/food-address", { addressId: address.id, expectedVersion: viewRef.current!.version }, signal)); commit(next); setFoodAddressId(address.id); if (next.providers.some(provider => provider.id === "instamart" && provider.status === "connected")) await loadSession(); return next; });
     if (!saved) return;
     if (groceries) { await act("Finding groceries", async signal => { commit(parseView(await request("/api/assistant/search", { expectedVersion: saved.version }, signal))); }); return; }
     if (shouldResumeDiscovery(saved, true)) await act("Finding restaurants", async signal => { commit(parseView(await request("/api/assistant/search", { expectedVersion: saved.version }, signal))); });
@@ -327,7 +333,7 @@ export default function Home() {
   }
   /** Instamart's own saved address, for someone who connected Instamart but not Swiggy Food; saved in SayCart only, then the groceries reload. */
   async function chooseGroceryAddress(address: Address) {
-    await changeSessionOption("address", address.id);
+    if (!await changeSessionOption("address", address.id)) return;
     await act("Finding groceries", async signal => { commit(parseView(await request("/api/assistant/search", { expectedVersion: viewRef.current!.version }, signal))); });
   }
   /** The Instamart bag with its live bill; a failure is shown in the bag sheet itself. */
@@ -349,9 +355,10 @@ export default function Home() {
     else window.location.assign("/api/integrations/swiggy/connect");
   }
   async function changeSessionOption(kind: "address" | "payment", id: string) {
-    await act(`Saving ${kind}`, async () => {
+    return act(`Saving ${kind}`, async () => {
       let current = session; if (!current) current = SessionViewSchema.parse(await request("/api/session", { mode: "live" }));
-      setSession(SessionViewSchema.parse(await request(`/api/${kind}`, { sessionId: current.sessionId, [kind === "address" ? "addressId" : "paymentMethodId"]: id }))); setQuote(null);
+      const next = SessionViewSchema.parse(await request(`/api/${kind}`, { sessionId: current.sessionId, [kind === "address" ? "addressId" : "paymentMethodId"]: id }));
+      setSession(next); setQuote(null); return next;
     });
   }
   async function reviewBag() {
@@ -410,8 +417,11 @@ export default function Home() {
     return () => document.removeEventListener("keydown", key);
   });
 
-  // Without Swiggy Food, the header shows the Instamart address the groceries use.
-  const selectedAddress = foodAddresses.find(address => address.id === foodAddressId) ?? (foodConnected ? null : session?.addresses.find(address => address.id === session.addressId) ?? null);
+  const discovery = view?.task.discovery;
+  const groceries = discovery?.kind === "snacks";
+  // Each storefront shows its actual provider address, even when both accounts are connected.
+  const delivery = deliveryContext(view, session, foodAddresses, foodAddressId);
+  const selectedAddress = delivery.selected;
   const lines = cartLines(view);
   const totals = cartTotals(lines);
   const bagCount = session?.cart.lines.reduce((sum, line) => sum + line.quantity, 0) ?? 0;
@@ -429,30 +439,31 @@ export default function Home() {
     return { sync: result.sync, apply: () => { if (result.session) setSession(SessionViewSchema.parse(result.session)); } };
   }, [request]);
   const swiggyCart = useCartMirror(`${dishes}|${food.attempt?.id ?? ""}:${food.attempt?.state ?? ""}`, foodConnected, sendDishes);
-  const instamartBag = useCartMirror(packs, instamartConnected, sendPacks);
-  const discovery = view?.task.discovery;
-  const groceries = discovery?.kind === "snacks";
+  const instamartBag = useCartMirror(`${session?.sessionId ?? ""}:${session?.addressId ?? ""}|${packs}`, instamartConnected, sendPacks);
   // A newly opened aisle or the Instamart home starts at the top, by tap or by voice, not at the last screen's scroll position.
   const groceryScreen = groceries && !view?.restaurantBrowser ? `${discovery?.categoryId}:${discovery?.itemId}` : null;
+  const groceryFocus = useGroceryVoiceContext(groceryScreen, view?.version, voice.active && !voice.muted, onGroceriesVisible);
   const groceryNeedsAddress = !!groceryScreen && view?.status === "needs_address";
-  // Without Swiggy Food, the Instamart session supplies the addresses (and the header's address).
-  useEffect(() => { if (!foodConnected && instamartConnected && !session) void loadSession().catch(() => {}); }, [foodConnected, instamartConnected, session, loadSession]);
+  // The Instamart session supplies the grocery storefront's actual address.
+  useEffect(() => { if (instamartConnected && !session) void loadSession().catch(() => {}); }, [instamartConnected, session, loadSession]);
   useEffect(() => {
     if (!groceryScreen) return;
     // Again after the next layout: smooth scrolling or content settling above can otherwise leave it a little short of the top.
     window.scrollTo({ top: 0, behavior: "instant" }); const frame = requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "instant" }));
     return () => cancelAnimationFrame(frame);
   }, [groceryScreen]);
-  const connectedCount = view?.providers.filter(provider => provider.status === "connected").length ?? 0;
+  // Only Instamart is offered for now: Swiggy Food and Zomato stay out of the connections sheet.
+  const shownProviders = view?.providers.filter(provider => provider.id === "instamart") ?? [];
+  const connectedCount = shownProviders.filter(provider => provider.status === "connected").length;
   const quoteExpired = quote ? Date.parse(quote.expiresAt) <= now : false;
   const voiceControls = { voice, available: bootstrap?.capabilities.realtimeStt ?? false, busy: initializing || !!busy, scrolling, onStopScroll: stopScrolling, level: voice.level, onStart: startVoice, onPause: pauseVoice, onResume: startVoice, onEnd: stopVoice, onInterrupt: () => void voice.interrupt() };
   const sheetAlert = error && errorCode !== "EXISTING_FOOD_CART" ? <p className="sc-sheet-alert" role="alert"><span>{error}</span>{errorCode === "CHECKOUT_UNRESOLVED" && <button type="button" className="sc-link" onClick={() => { setSurface("order"); void refreshOrder(); }}>Check or reset previous checkout</button>}<button type="button" className="sc-icon" aria-label="Dismiss" onClick={() => setError(null)}><Glyph name="close" size={15}/></button></p> : null;
   const orderLive = food.attempt && food.attempt.state !== "failed";
   const orderDone = food.attempt?.state === "complete" && (food.tracking?.terminal ?? false);
   const reorder = () => { setSurface(null); say("Order my last order again"); };
-  const hints = voiceHints({ view, addressAsked: view?.questions[0]?.id === "food_address", checkoutOpen: surface === "checkout", bagOpen: surface === "bag", reviewReady: (!!food.review && surface === "checkout") || (surface === "review" && !!quote), orderActive: !!orderLive && !orderDone, savedAddresses: foodAddresses.map(address => address.label), disconnected: !!view && !foodConnected });
+  const hints = voiceHints({ view, addressAsked: view?.questions[0]?.id === "food_address", checkoutOpen: surface === "checkout", bagOpen: surface === "bag", reviewReady: (!!food.review && surface === "checkout") || (surface === "review" && !!quote), orderActive: !!orderLive && !orderDone, savedAddresses: foodAddresses.map(address => address.label), disconnected: !!view && !instamartConnected });
   // Inside checkout sheets the next sentence is the useful hint: "Pay with cash", "Confirm order".
-  const sheetHints = surface === "selection" ? (lines.length ? ["Checkout"] : []) : surface === "checkout" || surface === "bag" || surface === "review" ? hints : [];
+  const sheetHints = surface === "checkout" || surface === "review" ? hints : [];
   const sheetVoice = <><VoicePanel inline {...voiceControls} hints={sheetHints} onHint={text => say(text)}/>{busy && busy !== "Thinking" && <p className="sc-browse-status" role="status"><span className="sc-spinner"/>{busy}…</p>}{sheetAlert}{(surface === "selection" || surface === "checkout") && errorCode === "EXISTING_FOOD_CART" && error && <div className="sc-replace-cart" role="alertdialog" aria-label="Replace your Swiggy cart?"><p>{error}</p><div><button type="button" className="sc-button sc-button-primary" disabled={!!busy} onClick={() => void foodAction("Replacing your Swiggy cart", "/api/food/checkout", { replaceExisting: true }, "checkout")}>Replace and continue</button><button type="button" className="sc-button sc-button-quiet" onClick={() => { setError(null); setErrorCode(null); setSurface("selection"); }}>Keep it</button></div></div>}</>;
   // A paused conversation (quiet minute, Escape, hidden tab) offers to resume, not to stop.
   const listening = voice.active && !voice.muted;
@@ -469,7 +480,7 @@ export default function Home() {
       </nav>
     </header>
     <nav className="sc-service-nav" aria-label="Explore services">
-      <button aria-current={discovery?.kind !== "snacks" ? "page" : undefined} disabled={!!busy} onClick={() => void act("Finding restaurants", async signal => { commit(parseView(await request("/api/assistant/browse", { query: "restaurants", route: "restaurant", expectedVersion: viewRef.current!.version }, signal))); })}><Glyph name="bag" size={19}/>Food delivery</button>
+      {/* Food delivery is hidden for now: SayCart opens on Instamart. */}
       <button aria-current={discovery?.kind === "snacks" ? "page" : undefined} disabled={!!busy} onClick={() => void instamartHome()}><Glyph name="spark" size={19}/>Instamart</button>
       <button className="sc-service-connections" onClick={() => openSurface("connections")}><span className={`sc-status-dot ${connectedCount ? "connected" : ""}`}/>{connectedCount} connected</button>
     </nav>
@@ -489,19 +500,19 @@ export default function Home() {
         {busy && busy !== "Thinking" && <div className="sc-browse-status" role="status"><span className="sc-spinner"/>{busy}…</div>}
         {view?.restaurantBrowser && !addressAsked && <RestaurantBrowser onCuisine={label => void browseTo(label, "restaurant")} voiceActive={voice.active && !voice.muted} voiceReply={voice.transcript.findLast(line => line.role === "assistant" && !line.id.startsWith("assistant:navigation:")) ?? null} onMenuVisible={onMenuVisible} voiceCommand={browseCommand} view={view} busy={!!busy} onVisibleChange={onVisibleRestaurants} onRestaurant={restaurantId => void restaurantAction("restaurant", "Opening menu", { restaurantId })} onBack={() => void restaurantAction("restaurants/back", "Showing restaurants")} onMoreRestaurants={() => void restaurantAction("restaurants/more", "Finding more restaurants")} onMoreMenu={() => void restaurantAction("menu/more", "Loading more dishes")} onAdd={(offer, quantity) => void restaurantAction("menu/select", "Updating your cart", { offerId: offer.id, quantity })} onConnect={provider => { if (provider === "swiggy_food") openSurface("connections"); }}/>}
         {/* Instamart searches need a delivery address too; without one the aisles stay empty, so ask right here. */}
-        {view && groceryNeedsAddress && (foodConnected || instamartConnected) && <AddressGate groceries addresses={foodConnected ? foodAddresses : session?.addresses ?? []} loading={foodConnected ? addressesLoading : !session} busy={initializing || !!busy} onChoose={address => void (foodConnected ? chooseAddress(address, true) : chooseGroceryAddress(address))} onRefresh={() => foodConnected ? setAddressRefresh(value => value + 1) : void loadSession().catch(() => {})}/>}
+        {view && groceryNeedsAddress && (foodConnected || instamartConnected) && <AddressGate groceries addresses={instamartConnected ? session?.addresses ?? [] : foodAddresses} loading={instamartConnected ? !session : addressesLoading} busy={initializing || !!busy} onChoose={address => void (instamartConnected ? chooseGroceryAddress(address) : chooseAddress(address, true))} onRefresh={() => instamartConnected ? void loadSession().catch(() => {}) : setAddressRefresh(value => value + 1)}/>}
         {view && discovery?.kind === "snacks" && !view.restaurantBrowser && (discovery.itemId
-          ? <GroceryResults view={view} itemId={discovery.itemId} busy={!!busy} onAdd={offer => void selectOffer(offer, 1)} onQuantity={(offer, quantity) => void cartLine(offer, quantity)} onMore={itemId => void moreOptions(itemId)} onCategory={category => void browseTo(category.query, "instamart")} onHome={() => void instamartHome()}/>
-          : <InstamartHome view={view} busy={!!busy} onCategory={category => void browseTo(category.query, "instamart")} onAdd={offer => void selectOffer(offer, 1)} onQuantity={(offer, quantity) => void cartLine(offer, quantity)}/>)}
-        <footer className="sc-footer"><span><Glyph name="check" size={13}/> Nothing is ordered until you confirm the final total.</span></footer>
+          ? <GroceryResults view={view} itemId={discovery.itemId} focusedId={voice.active && !voice.muted ? groceryFocus : null} busy={!!busy} onAdd={offer => void selectOffer(offer, 1)} onQuantity={(offer, quantity) => void cartLine(offer, quantity)} onMore={itemId => void moreOptions(itemId)} onCategory={category => void browseTo(category.query, "instamart")} onHome={() => void instamartHome()}/>
+          : <InstamartHome view={view} focusedId={voice.active && !voice.muted ? groceryFocus : null} busy={!!busy} onCategory={category => void browseTo(category.query, "instamart")} onAdd={offer => void selectOffer(offer, 1)} onQuantity={(offer, quantity) => void cartLine(offer, quantity)}/>)}
+        <footer className="sc-footer"><span><Glyph name="check" size={13}/> Checkout and payment happen in your Swiggy app.</span></footer>
       </main>
     </div>
-    {surface === "selection" && view && <Sheet accessory={sheetVoice} title="Your cart" subtitle={lines.length ? `${totals.count} ${totals.count === 1 ? "item" : "items"}${selectedAddress ? ` · delivering to ${selectedAddress.label}` : ""}` : undefined} onClose={() => setSurface(null)}><CartSummary view={view} busy={!!busy} swiggy={swiggyCart.status} instamart={instamartBag.status} onQuantity={(offer, quantity) => void cartLine(offer, quantity)} onPrepare={() => void prepareBag()} onBrowse={() => setSurface(null)} onCheckout={() => void foodAction("Getting your bill", "/api/food/checkout", {}, "checkout")} onReplaceSwiggy={swiggyCart.replace}/></Sheet>}
+    {surface === "selection" && view && <Sheet accessory={sheetVoice} title="Your cart" subtitle={lines.length ? `${totals.count} ${totals.count === 1 ? "item" : "items"}${selectedAddress ? ` · delivering to ${selectedAddress.label}` : ""}` : undefined} onClose={() => setSurface(null)}><CartSummary view={view} busy={!!busy} swiggy={swiggyCart.status} instamart={instamartBag.status} onQuantity={(offer, quantity) => void cartLine(offer, quantity)} onBrowse={() => setSurface(null)} onReplaceSwiggy={swiggyCart.replace}/></Sheet>}
     {surface === "checkout" && <Sheet accessory={sheetVoice} title={food.review ? "Confirm your order" : "Checkout"} subtitle={food.checkout ? `From ${food.checkout.restaurant.name}` : undefined} onClose={() => setSurface(null)}><CheckoutPanel checkout={food.checkout} review={food.review} busy={!!busy} onPayment={id => void foodAction("Updating payment", "/api/food/payment", { paymentId: id }, "checkout")} onPlace={quoteId => void foodAction("Placing your order", "/api/food/order", { quoteId }, "order")} onRefresh={() => void foodAction("Refreshing your bill", "/api/food/checkout", {}, "checkout")}/></Sheet>}
     {surface === "order" && <Sheet accessory={sheetVoice} title="Your order" onClose={() => setSurface(null)}><OrderPanel attempt={food.attempt} order={food.order} tracking={food.tracking} busy={!!busy} onRefresh={refreshOrder} onTrack={trackOrder} onReorder={reorder} onReset={() => { if (food.attempt) void foodAction("Resetting unconfirmed checkout", "/api/food/order/reset", { attemptId: food.attempt.id, confirmedNoOrderOrPayment: true }, "selection"); }}/></Sheet>}
-    {surface === "address" && <Sheet accessory={sheetVoice} title="Delivery address" subtitle="Restaurants and delivery times follow this address." onClose={() => setSurface(null)}><AddressPicker addresses={foodAddresses} selectedId={foodAddressId} loading={addressesLoading} busy={!!busy} onChoose={address => void chooseAddress(address)} onConnections={() => setSurface("connections")}/></Sheet>}
-    {surface === "connections" && <Sheet accessory={sheetVoice} title="Your connections" subtitle="Connect Swiggy to order. You approve every order." onClose={() => setSurface(null)}><div className="sc-connection-list">{view?.providers.map(provider => <article key={provider.id}><span className={`sc-provider-monogram ${provider.id}`}>{provider.id === "zomato" ? "z" : "S"}</span><div><h3>{provider.name}</h3><span className={`sc-connection-status ${provider.status === "connected" ? "connected" : ""}`}>{provider.status === "connected" ? "Connected" : provider.status === "access_required" ? "Access required" : provider.status === "unavailable" ? "Unavailable" : "Not connected"}</span><p>{provider.message}</p></div>{provider.status !== "access_required" && provider.status !== "unavailable" && provider.id !== "zomato" && <button className="sc-button sc-button-quiet" disabled={!!busy} onClick={() => void connect(provider.id as "instamart" | "swiggy_food")}>{provider.status === "connected" ? "Refresh" : "Connect"}<Glyph name="arrow" size={14}/></button>}</article>)}</div>{session?.addresses.length ? <label className="sc-field">Instamart delivery address<select value={session.addressId ?? ""} disabled={!!busy} onChange={event => void changeSessionOption("address", event.target.value)}><option value="" disabled>Choose an address</option>{session.addresses.map(address => <option key={address.id} value={address.id}>{address.label} · {address.reviewAddressText}</option>)}</select></label> : null}</Sheet>}
-    {surface === "bag" && <Sheet accessory={sheetVoice} title="Your Instamart bag" subtitle="Live totals from Instamart." onClose={() => setSurface(null)}>{session ? <><div className="sc-bag-lines">{session.cart.lines.map(line => <div key={line.product.id}><span className="sc-bag-count">{line.quantity}×</span><div><strong>{line.product.name}</strong><p>{line.product.unit}</p></div><strong>{money(line.product.priceMinor * line.quantity)}</strong></div>)}</div>{!session.cart.lines.length && <div className="sc-bag-empty"><Glyph name="bag" size={35}/><h3>Your bag is empty.</h3><p>Say “get me chips and a cold drink”.</p></div>}{session.payments.length > 0 && <section className="sc-checkout-pay" aria-label="Payment method"><h3>Pay with</h3><div>{session.payments.map(payment => <button type="button" key={payment.id} aria-pressed={session.paymentMethodId === payment.id} disabled={!!busy} onClick={() => void changeSessionOption("payment", payment.id)}>{session.paymentMethodId === payment.id && <Glyph name="check" size={15}/>}{payment.label}</button>)}</div></section>}{session.cart.lines.length > 0 && <><div className="sc-bill"><div><span>Items</span><span>{money(session.cart.totals.itemsMinor)}</span></div><div><span>Delivery & other fees</span><span>{money(session.cart.totals.feesMinor)}</span></div><div className="sc-bill-total"><strong>Current total</strong><strong>{money(session.cart.totals.totalMinor)}</strong></div></div>{!session.paymentMethodId && <p className="sc-cart-note">Choose how to pay to review the final total.</p>}<button className="sc-button sc-button-primary sc-full-width" disabled={!!busy || !session.addressId || !session.paymentMethodId} onClick={() => void reviewBag()}>Review final order<Glyph name="arrow" size={17}/></button></>}</> : instamartConnected
+    {surface === "address" && <Sheet accessory={sheetVoice} title="Delivery address" subtitle="Products, prices and delivery times follow this address." onClose={() => setSurface(null)}><AddressPicker addresses={delivery.addresses} selectedId={delivery.selectedId} loading={delivery.instamart ? !session : addressesLoading} busy={!!busy} onChoose={address => { setSurface(null); void (delivery.instamart ? chooseGroceryAddress(address) : chooseAddress(address)); }} onConnections={() => setSurface("connections")}/></Sheet>}
+    {surface === "connections" && <Sheet accessory={sheetVoice} title="Your connections" subtitle="Connect Instamart to shop groceries." onClose={() => setSurface(null)}><div className="sc-connection-list">{shownProviders.map(provider => <article key={provider.id}><span className={`sc-provider-monogram ${provider.id}`}>{provider.id === "zomato" ? "z" : "S"}</span><div><h3>{provider.name}</h3><span className={`sc-connection-status ${provider.status === "connected" ? "connected" : ""}`}>{provider.status === "connected" ? "Connected" : provider.status === "access_required" ? "Access required" : provider.status === "unavailable" ? "Unavailable" : "Not connected"}</span><p>{provider.message}</p></div>{provider.status !== "access_required" && provider.status !== "unavailable" && provider.id !== "zomato" && <button className="sc-button sc-button-quiet" disabled={!!busy} onClick={() => void connect(provider.id as "instamart" | "swiggy_food")}>{provider.status === "connected" ? "Refresh" : "Connect"}<Glyph name="arrow" size={14}/></button>}</article>)}</div>{session?.addresses.length ? <label className="sc-field">Instamart delivery address<select value={session.addressId ?? ""} disabled={!!busy} onChange={event => void changeSessionOption("address", event.target.value)}><option value="" disabled>Choose an address</option>{session.addresses.map(address => <option key={address.id} value={address.id}>{address.label} · {address.reviewAddressText}</option>)}</select></label> : null}</Sheet>}
+    {surface === "bag" && <Sheet accessory={sheetVoice} title="Your Instamart bag" subtitle="Live totals from Instamart." onClose={() => setSurface(null)}>{session ? <><div className="sc-bag-lines">{session.cart.lines.map(line => <div key={line.product.id}><span className="sc-bag-count">{line.quantity}×</span><div><strong>{line.product.name}</strong><p>{line.product.unit}</p></div><strong>{money(line.product.priceMinor * line.quantity)}</strong></div>)}</div>{!session.cart.lines.length && <div className="sc-bag-empty"><Glyph name="bag" size={35}/><h3>Your bag is empty.</h3><p>Say “get me chips and a cold drink”.</p></div>}{session.cart.lines.length > 0 && <><div className="sc-bill"><div><span>Items</span><span>{money(session.cart.totals.itemsMinor)}</span></div><div><span>Delivery & other fees</span><span>{money(session.cart.totals.feesMinor)}</span></div><div className="sc-bill-total"><strong>Current total</strong><strong>{money(session.cart.totals.totalMinor)}</strong></div></div><div className="sc-pay-in-app" role="note"><span aria-hidden="true"><Glyph name="bag" size={20}/></span><div><strong>Pay in your Swiggy app</strong><p>This bag is already in your Instamart bag on Swiggy. Open the Swiggy app to check out and pay.</p></div></div></>}</> : instamartConnected
       // Connected but the bag did not load: say why and offer a retry, rather than asking to connect again.
       ? <div className="sc-bag-empty"><Glyph name="bag" size={35}/><h3>{bagError ? "Your bag didn’t load" : "Getting your bag…"}</h3><p>{bagError ?? "Reading your live bag and bill from Instamart."}</p>{bagError && <button className="sc-button sc-button-primary" disabled={!!busy} onClick={() => void openBag()}>Try again<Glyph name="refresh" size={17}/></button>}</div>
       : <div className="sc-bag-empty"><Glyph name="bag" size={35}/><h3>Connect Instamart</h3><p>Connect your account to order groceries.</p><button className="sc-button sc-button-primary" onClick={() => openSurface("connections")}>View connections<Glyph name="arrow" size={17}/></button></div>}</Sheet>}

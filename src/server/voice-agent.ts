@@ -3,16 +3,17 @@ import { ToolLoopAgent, generateText, isStepCount, tool, wrapLanguageModel, type
 import { z } from "zod";
 import type { AssistantView, MealOffer, RestaurantCard } from "../lib/assistant-contracts";
 import { dishMatches, restaurantMatches, sortRestaurants } from "../lib/screen-filter";
-import { matchSpoken, nameSaid, normalizeVoice, resolveAddressAnswer, saidPosition, spokenQuantityFor } from "../lib/spoken-match";
+import { matchSpoken, nameSaid, normalizeVoice, resolveAddressAnswer, saidPosition, spokenNumber, spokenQuantityFor } from "../lib/spoken-match";
 import { shouldResumeDiscovery } from "../lib/discovery-resume";
 import { paymentsFor } from "../lib/device";
 import { assistant, foodAddresses, selectFoodAddress } from "./assistant-service";
+import { getOwner, getView, selectAddress, startSession } from "./service";
 import { AppError } from "./errors";
 import { chooseFoodPayment, clearFoodCheckout, foodState, placeFoodOrder, startFoodCheckout, trackFoodOrder, type FoodState } from "./food-flow";
 import { speakable } from "./speech-text";
 import { GROCERY_RAILS } from "../lib/grocery-catalog";
 import { activeCheckout, chooseInstamartPayment, clearCheckouts, instamartReview as readInstamartReview, instamartState, placeInstamartOrder, prepareInstamartBag, setActiveCheckout, type ActiveCheckout, type InstamartReview } from "./instamart-flow";
-import type { Attempt, SessionView } from "../lib/contracts";
+import type { Address, Attempt, SessionView } from "../lib/contracts";
 
 /** What the page should do besides showing the new state: these are the agent's hands on the UI. */
 export type AgentEffect =
@@ -152,20 +153,41 @@ function dishesOnScreen(view: AssistantView, input: AgentTurnInput): MealOffer[]
   const visible = (input.visibleOfferIds ?? []).map(id => all.find(dish => dish.id === id)).filter((dish): dish is MealOffer => !!dish);
   return visible.length ? visible : all;
 }
-function groceriesOnScreen(view: AssistantView) {
+/** A card can expose its saved cart ID while displaying a refreshed offer for the same native product. */
+function groceryReference(view: AssistantView, choices: MealOffer[], id: string | null | undefined) {
+  const known = view.offers.find(offer => offer.id === id && offer.provider === "instamart");
+  return known ? choices.find(offer => offer.id === known.id) ?? choices.find(offer => offer.providerItemId === known.providerItemId) : undefined;
+}
+function groceriesOnScreen(view: AssistantView, input: Pick<AgentTurnInput, "visibleOfferIds"> = {}) {
   const active = view.task.discovery?.kind === "snacks" ? view.task.discovery.itemId : null;
-  return view.offers.filter(offer => offer.provider === "instamart" && (!active || offer.itemId === active));
+  // Home cards belong to the latest rails; retained cart offers may have older prices.
+  const home = view.task.discovery?.kind === "snacks" && view.task.discovery.categoryId === "home" && !active;
+  const rails = home ? new Set(GROCERY_RAILS.flatMap(rail => {
+    const item = view.task.items.findLast(entry => entry.route === "instamart" && entry.status !== "added" && entry.label === rail.label);
+    return item ? [item.id] : [];
+  })) : null;
+  const all = view.offers.filter(offer => offer.provider === "instamart" && (active ? offer.itemId === active : !rails || rails.has(offer.itemId)));
+  const visible = (input.visibleOfferIds ?? []).map(id => groceryReference(view, all, id)).filter((offer): offer is MealOffer => !!offer);
+  return visible.length ? [...new Map(visible.map(offer => [offer.providerItemId, offer])).values()] : all;
+}
+const groceryScreen = (view: AssistantView) => !view.restaurantBrowser && view.task.discovery?.kind === "snacks";
+/** Read the actual provider's selection; grocery consent must never follow a separate Food address. */
+async function deliveryAddresses(ownerId: string, view: AssistantView): Promise<{ addresses: Address[]; selectedAddressId: string | null; session?: SessionView }> {
+  if (!groceryScreen(view)) return foodAddresses(ownerId);
+  const owner = await getOwner(ownerId);
+  const session = owner?.sessionId ? await getView(ownerId, owner.sessionId) : await startSession(ownerId, "live");
+  return { addresses: session.addresses, selectedAddressId: session.addressId, session };
 }
 
 /** The numbered screen the customer sees, so "the second one" and "isko" mean the same thing to the agent. */
 function describe(view: AssistantView, input: AgentTurnInput, food: FoodState, addressLabel: string | null, savedAddresses: string[], groceries: { review: InstamartReview | null; active: ActiveCheckout | null }): string {
   const lines: string[] = [];
-  const asked = view.questions[0]?.id === "food_address";
+  const grocery = groceryScreen(view), asked = grocery ? !addressLabel && savedAddresses.length > 0 : view.questions[0]?.id === "food_address";
   // The saved names are listed even before anything is searched, so "ghar pe" can be answered on the very first turn.
   const saved = savedAddresses.length ? savedAddresses : asked ? view.questions[0].options : [];
   lines.push(addressLabel ? `Delivery address: ${addressLabel}.` : `Delivery address: not chosen${saved.length ? ` (saved: ${saved.join(", ")})` : ""}.`);
-  const food_ = view.providers.find(provider => provider.id === "swiggy_food");
-  if (food_?.status !== "connected") lines.push("Swiggy Food is NOT connected: nothing can be searched or ordered yet. Ask the customer to tap Connect Swiggy on screen (show_panel connections also shows it).");
+  const provider = view.providers.find(provider => provider.id === (grocery ? "instamart" : "swiggy_food"));
+  if (provider?.status !== "connected") lines.push(grocery ? "Instamart is NOT connected: groceries cannot be searched yet. Ask the customer to connect Instamart in Connections (show_panel connections shows it)." : "Swiggy Food is NOT connected: nothing can be searched or ordered yet. Ask the customer to tap Connect Swiggy on screen (show_panel connections also shows it).");
   const menu = view.restaurantBrowser?.menu;
   if (menu) {
     const inCart = new Map(cart(view).map(({ item, offer }) => [offer.providerItemId, item.quantity]));
@@ -178,9 +200,10 @@ function describe(view: AssistantView, input: AgentTurnInput, food: FoodState, a
     lines.push("SCREEN: restaurant list:");
     restaurantsOnScreen(view, input).slice(0, 20).forEach((card, index) => lines.push(`${index + 1}. ${card.name}${card.cuisines.length ? ` (${card.cuisines.slice(0, 3).join(", ")})` : ""}${card.rating ? ` ★${card.rating}` : ""}${card.etaMinutes ? ` ${card.etaMinutes} min` : ""}${card.isOpen === false ? " — closed" : ""}${card.id === input.focusedId ? " ← highlighted" : ""}`));
     if (view.restaurantBrowser.hasMore) lines.push("More restaurants can be loaded.");
-  } else if (groceriesOnScreen(view).length) {
+  } else if (groceriesOnScreen(view, input).length) {
     lines.push("SCREEN: Instamart products:");
-    groceriesOnScreen(view).slice(0, 20).forEach((offer, index) => lines.push(`${index + 1}. ${offer.name} ${offer.unit} — ${money(offer.priceMinor)}${offer.available ? "" : " (out of stock)"}`));
+    const products = groceriesOnScreen(view, input), focused = groceryReference(view, products, input.focusedId);
+    products.slice(0, 20).forEach((offer, index) => lines.push(`${index + 1}. ${offer.name} ${offer.unit} — ${money(offer.priceMinor)}${offer.available ? "" : " (out of stock)"}${offer.id === focused?.id ? " ← highlighted" : ""}`));
   } else lines.push(asked ? "SCREEN: choose a delivery address." : "SCREEN: home (nothing listed yet).");
   const lines_ = cart(view);
   lines.push(lines_.length ? `CART: ${lines_.map(({ item, offer }) => `${item.quantity}× ${offer.name} (${offer.restaurant ?? "Instamart"}, ${money(offer.priceMinor === null ? null : offer.priceMinor * item.quantity)})${item.status === "added" ? " in Instamart bag" : ""}`).join("; ")}.` : "CART: empty.");
@@ -214,13 +237,11 @@ Acting:
 - Food needs an address: if none, ask "Home or Work?" (saved names) and call set_delivery_address.
 - Use only what tools return; never invent restaurants, dishes, prices, totals or order results. Explain errors simply, with what to do next.
 
-Ordering (real money):
-- "Checkout" / "bill dikhao": call checkout, ask how to pay (name the options), call choose_payment, then say the exact total and ask to confirm. Naming a method ("PhonePe se", "cash") always means choose_payment first; never ask "should I switch".
-- Restaurant food and Instamart groceries are separate orders; if the cart has both, ask which first.
+Paying (for now, only in the Swiggy app):
+- Everything added here goes straight into the customer's Swiggy app: dishes into the Swiggy cart, groceries into the Instamart bag.
+- You cannot check out, take payment or place orders. On "checkout", "bill dikhao", "pay" or "order kar do", say their items are in the Swiggy app and they can pay there; offer to show the cart.
+- A payment method on its own ("cash", "COD", "UPI", "PhonePe se") is chosen in the Swiggy app too; never say which methods are or are not available.
 - A previous order never blocks a new one. "Order it again": open that restaurant and add the same dishes.
-- If the Swiggy app cart already has other dishes, ask to replace; only after a yes, call checkout with replaceSwiggyCart true.
-- place_order only when the customer clearly agrees to THIS total ("confirm", "haan order kar do"); never on your own.
-- UPI is approved in the customer's UPI app; tell them, then you can check the status.
 
 Speaking:
 - Spoken aloud: at most two short sentences; no lists, markdown or emojis. "₹249" is fine.
@@ -233,10 +254,10 @@ Speaking:
  */
 export async function greet(ownerId: string, expectedVersion: number) {
   const view = await assistant.get(ownerId);
-  const food = view.providers.find(provider => provider.id === "swiggy_food");
-  const saved = food?.status === "connected" ? await foodAddresses(ownerId).catch(() => null) : null;
+  const grocery = groceryScreen(view), provider = view.providers.find(provider => provider.id === (grocery ? "instamart" : "swiggy_food"));
+  const saved = provider?.status === "connected" ? await deliveryAddresses(ownerId, view).catch(() => null) : null;
   const names = saved?.addresses.slice(0, 2).map(address => address.label) ?? [];
-  const text = food?.status !== "connected" ? "Namaste! Order karne ke liye pehle apna Swiggy account connect kijiye. Screen par Connect Swiggy dabaiye."
+  const text = provider?.status !== "connected" ? grocery ? "Namaste! Groceries order karne ke liye Connections mein Instamart connect kijiye." : "Namaste! Order karne ke liye pehle apna Swiggy account connect kijiye. Screen par Connect Swiggy dabaiye."
     : saved && !saved.selectedAddressId && names.length ? `Namaste! Kahan deliver karun, ${names.join(" ya ")}?`
     : "Namaste! Boliye, aaj kya order karna hai?";
   return assistant.announce(ownerId, { text, speech: speakable(text), expectedVersion });
@@ -251,8 +272,10 @@ export async function runVoiceTurn(ownerId: string, input: AgentTurnInput, abort
   let active = await activeCheckout(ownerId), instamartReview = await readInstamartReview(ownerId), instamartOut: InstamartTurn | undefined;
   /** A search this turn without any cart change: the reply must not claim something was added. */
   let searched = false, cartTouched = false, orderPlaced = false, awaitingUpi = false;
+  let addressIsGrocery: boolean | null = null;
   const refreshAddress = async () => {
-    const saved = await foodAddresses(ownerId).catch(() => null), chosen = saved?.addresses.find(address => address.id === saved.selectedAddressId);
+    const saved = await deliveryAddresses(ownerId, view).catch(() => null), chosen = saved?.addresses.find(address => address.id === saved.selectedAddressId);
+    addressIsGrocery = groceryScreen(view);
     addressLabel = chosen ? `${chosen.label} (${chosen.reviewAddressText})` : null; savedAddresses = saved?.addresses.map(address => address.label) ?? [];
     return saved;
   };
@@ -260,15 +283,23 @@ export async function runVoiceTurn(ownerId: string, input: AgentTurnInput, abort
   const screen = () => describe(view, input, food, addressLabel, savedAddresses, { review: instamartReview, active });
   const panel = (value: Extract<AgentEffect, { kind: "panel" }>["panel"]) => effects.push({ kind: "panel", panel: value });
   /** Every tool returns the outcome plus the fresh screen; failures become words the agent can explain. */
-  let actions = 0;
+  let actions = 0, completedActions = 0;
   /** Tools that change what is listed return the fresh screen; the rest return only their outcome, to keep each step small. */
   const run = async (work: () => Promise<string | Record<string, unknown>>, withScreen = false) => {
     actions++;
-    try { const outcome = await work(); food = await foodState(ownerId); return withScreen ? { ok: true, outcome, screen: screen() } : { ok: true, outcome, cart: cartSummary() }; }
+    try { const outcome = await work(); completedActions++; food = await foodState(ownerId); if (addressIsGrocery !== groceryScreen(view)) await refreshAddress(); return withScreen ? { ok: true, outcome, screen: screen() } : { ok: true, outcome, cart: cartSummary() }; }
     catch (error) { if (abortSignal?.aborted) throw error; return { ok: false, error: error instanceof Error ? error.message : "That did not work.", screen: screen() }; }
   };
   /** Save the address, then show what delivers there (resuming an earlier search when there was one). */
   const deliverTo = async (id: string) => {
+    if (groceryScreen(view)) {
+      const saved = await deliveryAddresses(ownerId, view);
+      const session = await selectAddress(ownerId, saved.session!.sessionId, id);
+      instamartReview = null; instamartOut = { session, review: null };
+      await refreshAddress();
+      view = shouldResumeDiscovery(view, true) ? await assistant.search(ownerId, view.version) : await assistant.groceryHome(ownerId, { rails: GROCERY_RAILS, expectedVersion: view.version });
+      panel(null); return;
+    }
     view = await selectFoodAddress(ownerId, id, view.version);
     await refreshAddress();
     view = shouldResumeDiscovery(view, true) ? await assistant.search(ownerId, view.version) : await assistant.browse(ownerId, { query: "restaurants", route: "restaurant", expectedVersion: view.version });
@@ -281,7 +312,7 @@ export async function runVoiceTurn(ownerId: string, input: AgentTurnInput, abort
       description: "Choose the delivery address from the customer's saved addresses (e.g. 'Home', 'Work', 'ghar', 'the second one').",
       inputSchema: z.object({ address: z.string().describe("The customer's words for the address") }),
       execute: ({ address }) => run(async () => {
-        const saved = await foodAddresses(ownerId);
+        const saved = await deliveryAddresses(ownerId, view);
         const id = resolveAddressAnswer(address, saved.addresses);
         if (!id) throw new AppError("ADDRESS_UNCLEAR", `Which address? Saved: ${saved.addresses.map(entry => entry.label).join(", ") || "none — add one in the Swiggy app"}.`, 422);
         // Where to deliver is the customer's choice: their own words must name this address, not just the model's.
@@ -338,21 +369,28 @@ export async function runVoiceTurn(ownerId: string, input: AgentTurnInput, abort
       execute: ({ changes }) => run(async () => {
         const done: string[] = [], added = new Set<string>();
         for (const change of changes) {
-          const lines = cart(view), menuDishes = dishesOnScreen(view, input), groceries = groceriesOnScreen(view);
+          const lines = cart(view), menuDishes = dishesOnScreen(view, input), groceries = groceriesOnScreen(view, input);
           const pointing = /^(?:this|highlighted|is|isko|ye|yeh|it)$/i.test(change.item.trim());
+          const latestPanel = effects.findLast(effect => effect.kind === "panel");
+          const currentPanel = latestPanel?.kind === "panel" ? latestPanel.panel : input.panel;
+          const numbered = spokenNumber(change.item) !== null, cartPanel = currentPanel === "selection" || currentPanel === "cart" || currentPanel === "bag";
           // Adding by a list number the customer never said is the model's guess at the screen: it stands only when that item is one they named.
           const position = /^\d{1,2}$/.test(change.item.trim()) ? Number(change.item.trim()) : null;
           if (change.action === "add" && position && !saidPosition(input.text, position)) {
-            const candidate = (view.restaurantBrowser?.menu ? menuDishes : groceries)[position - 1];
+            const candidate = (cartPanel ? lines.map(line => line.offer) : view.restaurantBrowser?.menu ? menuDishes : groceries)[position - 1];
             if (!candidate || !nameSaid(candidate.name, input.text)) throw new AppError("ITEM_BY_NAME", `${candidate ? `"${change.item}" is ${candidate.name}, which the customer did not name. If they asked for ${candidate.name}, use that name; otherwise use` : `"${change.item}" is not on screen. Use`} the item names they said.${done.length ? ` Done so far: ${done.join(", ")}.` : ""}`, 422);
           }
-          const fromMenu = view.restaurantBrowser?.menu ? (pointing ? menuDishes.find(dish => dish.id === input.focusedId) : matchSpoken(change.item, menuDishes)) : null;
-          const fromCart = lines.find(line => line.offer.id === fromMenu?.id || line.offer.providerItemId === fromMenu?.providerItemId) ?? (fromMenu ? undefined : matchSpoken(change.item, lines.map(line => ({ ...line, id: line.offer.id, name: line.offer.name }))) ?? undefined);
-          let grocery = !fromMenu && !fromCart ? matchSpoken(change.item, groceries) : null;
+          const fromMenu = view.restaurantBrowser?.menu && !(cartPanel && numbered) ? (pointing ? menuDishes.find(dish => dish.id === input.focusedId) : matchSpoken(change.item, menuDishes)) : null;
+          const focusedGrocery = pointing && !view.restaurantBrowser?.menu ? groceryReference(view, groceries, input.focusedId) : undefined;
+          // List positions belong to the displayed products; cart positions apply only inside its panel.
+          const numberedGrocery = numbered && !cartPanel && !view.restaurantBrowser?.menu ? matchSpoken(change.item, groceries) : undefined;
+          const focusedOffer = fromMenu ?? focusedGrocery ?? numberedGrocery;
+          const fromCart = lines.find(line => line.offer.id === focusedOffer?.id || line.offer.providerItemId === focusedOffer?.providerItemId) ?? (focusedOffer || (numbered && !cartPanel) ? undefined : matchSpoken(change.item, lines.map(line => ({ ...line, id: line.offer.id, name: line.offer.name }))) ?? undefined);
+          let grocery = !fromMenu && !fromCart && !(numbered && (cartPanel || view.restaurantBrowser?.menu)) ? (pointing ? focusedGrocery : numberedGrocery ?? matchSpoken(change.item, groceries)) : null;
           // A grocery named by voice but not on screen ("do coca cola aur ek Lay's") is looked up on Instamart right here.
-          if (!fromMenu && !fromCart && !grocery && change.action !== "remove" && !view.restaurantBrowser?.menu && view.providers.some(provider => provider.id === "instamart" && provider.status === "connected")) {
+          if (!fromMenu && !fromCart && !grocery && !pointing && !numbered && change.action !== "remove" && !view.restaurantBrowser?.menu && view.providers.some(provider => provider.id === "instamart" && provider.status === "connected")) {
             view = await assistant.browse(ownerId, { query: change.item, route: "instamart", expectedVersion: view.version });
-            grocery = matchSpoken(change.item, groceriesOnScreen(view));
+            grocery = matchSpoken(change.item, groceriesOnScreen(view, input));
           }
           // Two additions landing on the same product in one request means one of them was misread.
           const identity = fromMenu?.providerItemId ?? fromCart?.offer.providerItemId ?? grocery?.providerItemId;
@@ -404,8 +442,8 @@ export async function runVoiceTurn(ownerId: string, input: AgentTurnInput, abort
       execute: ({ direction }) => run(async () => { effects.push({ kind: "scroll", direction }); return direction === "stop" ? "Stopped scrolling." : `Scrolling ${direction}.`; }),
     }),
     show_panel: tool({
-      description: "Open a panel (cart, delivery address, connections, checkout, order status, Instamart bag) or close the open one ('none').",
-      inputSchema: z.object({ panel: z.enum(["cart", "address", "connections", "checkout", "order", "bag", "none"]) }),
+      description: "Open a panel (cart, delivery address, connections, order status, Instamart bag) or close the open one ('none').",
+      inputSchema: z.object({ panel: z.enum(["cart", "address", "connections", "order", "bag", "none"]) }),
       execute: ({ panel: value }) => run(async () => { panel(value === "none" ? null : value); return value === "none" ? "Closed." : `Showing ${value}.`; }),
     }),
     checkout: tool({
@@ -526,12 +564,14 @@ export async function runVoiceTurn(ownerId: string, input: AgentTurnInput, abort
   // No address yet and the customer just named one ("ghar pe deliver karo", "घर पर", "Work"): choose it before the model runs,
   // so the most basic answer never depends on the model noticing it. Their words are the authority, as in set_delivery_address.
   if (!addressLabel && ADDRESS_CUE.test(input.text)) {
-    const saved = await foodAddresses(ownerId).catch(() => null), id = saved ? resolveAddressAnswer(input.text, saved.addresses) : null;
-    if (id) { await deliverTo(id); actions++; }
+    const saved = await deliveryAddresses(ownerId, view).catch(() => null), id = saved ? resolveAddressAnswer(input.text, saved.addresses) : null;
+    if (id) { await deliverTo(id); actions++; completedActions++; }
   }
   const history: ModelMessage[] = view.messages.slice(-4).map(message => ({ role: message.role, content: message.text }));
+  // Checkout and payment are off for now: the customer pays in the Swiggy app, where their cart already is.
+  const { checkout: _checkout, choose_payment: _choosePayment, place_order: _placeOrder, ...shoppingTools } = tools;
   const agent = new ToolLoopAgent({
-    model: options.model ?? groqModel(), instructions: INSTRUCTIONS, tools, stopWhen: isStepCount(8), temperature: 0.3, maxOutputTokens: 700, maxRetries: 1,
+    model: options.model ?? groqModel(), instructions: INSTRUCTIONS, tools: shoppingTools, stopWhen: isStepCount(8), temperature: 0.3, maxOutputTokens: 700, maxRetries: 1,
     providerOptions: { groq: { reasoningEffort: "low", parallelToolCalls: false } },
   });
   // A voice turn never hangs: past the deadline the customer hears a short fallback instead of silence.
@@ -550,7 +590,7 @@ export async function runVoiceTurn(ownerId: string, input: AgentTurnInput, abort
     const busy = error instanceof ModelBusyError ? error.retryInMs : null;
     // A short limit with nothing done yet: say nothing, record nothing; the page waits and sends the same words again.
     if (busy !== null && actions === 0 && input.retryable && busy <= 30_000) return { view, reply: { id: "", text: "" }, effects: [], food, busy: { retryInMs: busy }, degraded };
-    text = fallback(input.text, actions > 0, busy);
+    text = fallback(input.text, completedActions > 0, busy);
   }
   // Scripted test models answer exactly as written; the live agent's language is checked and fixed.
   if (searched && !cartTouched && CLAIMS_ADDED.test(text)) text = foundNotAdded(input.text);
@@ -559,7 +599,7 @@ export async function runVoiceTurn(ownerId: string, input: AgentTurnInput, abort
   if (waiting && CLAIMS_ORDERED.test(text)) text = confirmTotal(input.text, waiting.quote);
   // An unpaid UPI order is not placed, and no request reaches the phone: such claims are replaced with how to pay.
   if (awaitingUpi && (CLAIMS_ORDERED.test(text) || CLAIMS_PHONE_REQUEST.test(text))) text = payToPlace(input.text, !!input.mobile);
-  const cleaned = tidy(text) || fallback(input.text, actions > 0);
+  const cleaned = tidy(text) || fallback(input.text, completedActions > 0);
   const reply = degraded || options.model ? cleaned : await inLanguage(cleaned, replyLanguage(input.text));
   const recorded = await assistant.recordTurn(ownerId, { baseCount, user: input.text, reply, speech: speakable(reply), expectedVersion: view.version });
   return { view: recorded.view, reply: recorded.reply, effects, food: await foodState(ownerId), ...(instamartOut ? { instamart: instamartOut } : {}), trace, ...(degraded ? { degraded } : {}) };
